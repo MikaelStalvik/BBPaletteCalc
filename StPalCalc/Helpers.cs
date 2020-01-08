@@ -7,6 +7,19 @@ namespace StPalCalc
 {
     public static class Helpers
     {
+        public static Color FromStString(string source)
+        {
+            var asHex = Convert.ToInt32(source, 16);
+            var bits = GetBits((ushort)asHex);
+            var r = GetRValue(bits);
+            var g = GetGValue(bits);
+            var b = GetBValue(bits);
+            r = RemapFrom12BitToRgb(r);
+            g = RemapFrom12BitToRgb(g);
+            b = RemapFrom12BitToRgb(b);
+
+            return Color.FromRgb(r, g, b);
+        }
         public static List<byte> GetBits(ushort v)
         {
             var data = new List<byte>();
@@ -33,7 +46,7 @@ namespace StPalCalc
             return sb.ToString();
         }
 
-        public static byte RemapStColor(byte b)
+        private static byte RemapStColor(byte b)
         {
             switch (b)
             {
@@ -58,7 +71,7 @@ namespace StPalCalc
             }
         }
 
-        public static byte RemapToStColor(byte b)
+        private static byte RemapToStColor(byte b)
         {
             switch (b)
             {
@@ -115,7 +128,7 @@ namespace StPalCalc
             var b = RemapToStColor((byte)(color.B / 16));
             return $"${r:X}{g:X}{b:X}";
         }
-        public static byte RemapFrom12bitToRgb(byte source)
+        public static byte RemapFrom12BitToRgb(byte source)
         {
             return (byte)(source * 16);
         }
@@ -126,12 +139,11 @@ namespace StPalCalc
 
         public static IEnumerable<Color> GetGradients(Color start, Color end, int steps)
         {
-            int stepA = ((end.A - start.A) / (steps - 1));
-            int stepR = ((end.R - start.R) / (steps - 1));
-            int stepG = ((end.G - start.G) / (steps - 1));
-            int stepB = ((end.B - start.B) / (steps - 1));
+            var stepR = ((end.R - start.R) / (steps - 1));
+            var stepG = ((end.G - start.G) / (steps - 1));
+            var stepB = ((end.B - start.B) / (steps - 1));
 
-            for (int i = 0; i < steps; i++)
+            for (var i = 0; i < steps; i++)
             {
                 yield return Color.FromRgb(
                     (byte)(start.R + (stepR * i)),

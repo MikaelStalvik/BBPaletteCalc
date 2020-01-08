@@ -18,28 +18,45 @@ namespace StPalCalc
             DataContext = _vm;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
-            _vm.UpdateUi += () =>
+            _vm.UpdateUiAction += () =>
             {
-                ColorsStackPanel.Children.Clear();
+                ColorsStackPanel1.Children.Clear();
+                ColorsStackPanel2.Children.Clear();
                 for (var i = 0; i < 16; i++)
                 {
-                    var color = _vm.GetRgb(i);
-                    var r = new Rectangle {Fill = new SolidColorBrush(color), Width = 24, Height = 24};
-                    r.ToolTip = _vm.Get12BitRgb(i);
-                    ColorsStackPanel.Children.Add(r);
+                    var color = _vm.GetRgbFromPalette1(i);
+                    var r = new Rectangle
+                    {
+                        Fill = new SolidColorBrush(color), Width = 24, Height = 24, ToolTip = _vm.Get12BitRgbFromPalette1(i)
+                    };
+                    ColorsStackPanel1.Children.Add(r);
+                    color = _vm.GetRgbFromPalette2(i);
+                    r = new Rectangle
+                    {
+                        Fill = new SolidColorBrush(color),
+                        Width = 24,
+                        Height = 24,
+                        ToolTip = _vm.Get12BitRgbFromPalette2(i)
+                    };
+                    ColorsStackPanel2.Children.Add(r);
                 }
             };
-            _vm.UpdateGradient += colors =>
+            _vm.UpdateGradientAction += colors =>
             {
                 GeneratedColorsStackPanel.Children.Clear();
                 foreach (var color in colors)
                 {
-                    var r = new Rectangle { Fill = new SolidColorBrush(color), Width = 24, Height = 24 };
-                    r.ToolTip = Helpers.ConvertFromRgbTo12Bit(color);
+                    var r = new Rectangle
+                    {
+                        Fill = new SolidColorBrush(color),
+                        Width = 24,
+                        Height = 24,
+                        ToolTip = Helpers.ConvertFromRgbTo12Bit(color)
+                    };
                     GeneratedColorsStackPanel.Children.Add(r);
                 }
             };
-            _vm.UpdatePreviewFade += colors =>
+            _vm.UpdatePreviewFadeAction += colors =>
             {
                 PreviewPanel.Children.Clear();
                 for (var y = 0; y < 16; y++)
@@ -48,8 +65,6 @@ namespace StPalCalc
                     {
                         var ofs = x + y * 16;
                         var r = new Rectangle {Fill = new SolidColorBrush(colors[ofs]), Width = 24, Height = 24};
-                        
-                        //r.ToolTip = _vm.Get12BitRgb(i);
                         PreviewPanel.Children.Add(r);
                     }
                 }

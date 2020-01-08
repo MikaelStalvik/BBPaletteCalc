@@ -6,6 +6,9 @@
         xmlns:local="clr-namespace:StPalCalc"
         mc:Ignorable="d"
         Title="Bitbendaz Atari STe Palette Tool" Height="450" Width="800">
+    <Window.Resources>
+        <local:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
+    </Window.Resources>
     <Grid>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -13,16 +16,24 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0">
-                <StackPanel Orientation="Horizontal">
-                </StackPanel>
+
                 <DockPanel>
                     <TextBlock Text="Picture 1" FontWeight="Bold"/>
-                    <Button Width="80" Command="{Binding OpenPi1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
-                    <TextBlock Text="{Binding ActiveFilename}"/>
+                    <Button Width="80" Command="{Binding OpenPic1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
                 </DockPanel>
-                <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel" Height="24"/>
+                <TextBlock Text="{Binding ActiveFilename}"/>
+                <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
                 <TextBox Text="{Binding RawPalette}"/>
 
+                <DockPanel>
+                    <TextBlock Text="Picture 2" FontWeight="Bold"/>
+                    <Button Width="80" Command="{Binding OpenPic2Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                </DockPanel>
+                <TextBlock Text="{Binding ActiveFilename2}"/>
+                <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel2" Height="24"/>
+                <TextBox Text="{Binding RawPalette2}"/>
+
+                <TextBlock Text="Generate gradient"/>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                     <TextBlock Text="StartColor"/>
                     <TextBox Text="{Binding StartColor}" MinWidth="64"/>
@@ -34,6 +45,10 @@
                 <TextBox Text="{Binding GeneratedPalette}"/>
 
                 <DockPanel LastChildFill="False">
+                    <RadioButton x:Name="UsePicture1" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=0}" Content="Use picture 1"/>
+                    <RadioButton x:Name="UsePicture2" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=1}"  Content="Use picture 2" Margin="8,0,0,0"/>
+                </DockPanel>
+                <DockPanel LastChildFill="False" Margin="0,8,0,0">
                     <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black"/>
                     <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="8,0,0,0"/>
                 </DockPanel>
