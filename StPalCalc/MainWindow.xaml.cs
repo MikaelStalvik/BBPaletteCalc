@@ -1,8 +1,9 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Linq;
 
 namespace StPalCalc
 {
@@ -11,7 +12,7 @@ namespace StPalCalc
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainViewModel _vm = new MainViewModel();
+        private readonly MainViewModel _vm = new MainViewModel();
         public MainWindow()
         {
             InitializeComponent();
@@ -69,6 +70,42 @@ namespace StPalCalc
                     }
                 }
             };
+            _vm.UpdateGradientPreviewAction += () =>
+            {
+                GradientPreviewPanel.Children.Clear();
+                foreach (var item in _vm.GradientItems)
+                {
+                    var r = new Rectangle {Fill = new SolidColorBrush(item.Color), Width = 24, Height = 2};
+                    GradientPreviewPanel.Children.Add(r);
+                }
+            };
+            _vm.RebindAction += () => { GradientListBox.ItemsSource = _vm.GradientItems; };
+        }
+
+        private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var lb = (ListBox) sender;
+            var item = (GradientItem) lb.SelectedItem;
+            _vm.SelectedGradientItem = item;
+            ColorCanvas.SelectedColor = item.Color;
+            GradientText.Text = Helpers.ConvertFromRgbTo12Bit(item.Color, true);
+            var selectedItems = lb.SelectedItems.Cast<GradientItem>().ToList();
+            var min = selectedItems.Min(x => x.Index);
+            var max = selectedItems.Max(x => x.Index);
+            _vm.StartGradientIndex = min;
+            _vm.EndGradientIndex = max;
+            _vm.SelectedGradientItems = selectedItems;
+        }
+
+        private void ColorCanvas_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            _vm.UpdateSelectedGradientColor(ColorCanvas.SelectedColor.Value);
+            _vm.UpdateGradientPreviewAction?.Invoke();
+        }
+
+        private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            _vm.SetNewSelectedGradientColor(((TextBox) sender).Text);
         }
     }
 }

@@ -4,69 +4,118 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StPalCalc"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Bitbendaz Atari STe Palette Tool" Height="450" Width="800">
+        Title="Bitbendaz Atari STe palette and raster toolkit" Height="450" Width="800">
     <Window.Resources>
         <local:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
+        <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+        <local:ColorToStColorConverter x:Key="ColorToStColorConverter"/>
     </Window.Resources>
-    <Grid>
-        <Grid Margin="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0">
+    <Grid x:Name="Root">
+        <TabControl>
+            <TabItem Header="Palettes">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0">
 
-                <DockPanel>
-                    <TextBlock Text="Picture 1" FontWeight="Bold"/>
-                    <Button Width="80" Command="{Binding OpenPic1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
-                </DockPanel>
-                <TextBlock Text="{Binding ActiveFilename}"/>
-                <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
-                <TextBox Text="{Binding RawPalette}"/>
+                        <DockPanel>
+                            <TextBlock Text="Picture 1" FontWeight="Bold"/>
+                            <Button Width="80" Command="{Binding OpenPic1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ActiveFilename}"/>
+                        <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
+                        <TextBox Text="{Binding RawPalette}"/>
 
-                <DockPanel>
-                    <TextBlock Text="Picture 2" FontWeight="Bold"/>
-                    <Button Width="80" Command="{Binding OpenPic2Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
-                </DockPanel>
-                <TextBlock Text="{Binding ActiveFilename2}"/>
-                <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel2" Height="24"/>
-                <TextBox Text="{Binding RawPalette2}"/>
+                        <DockPanel>
+                            <TextBlock Text="Picture 2" FontWeight="Bold"/>
+                            <Button Width="80" Command="{Binding OpenPic2Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ActiveFilename2}"/>
+                        <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel2" Height="24"/>
+                        <TextBox Text="{Binding RawPalette2}"/>
 
-                <TextBlock Text="Generate gradient"/>
-                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBlock Text="StartColor"/>
-                    <TextBox Text="{Binding StartColor}" MinWidth="64"/>
-                    <TextBlock Text="EndColor"/>
-                    <TextBox Text="{Binding EndColor}" MinWidth="64"/>
-                    <Button Command="{Binding GenerateCommand}" Content="Generate"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" x:Name="GeneratedColorsStackPanel" Height="24"/>
-                <TextBox Text="{Binding GeneratedPalette}"/>
+                        <TextBlock Text="Generate gradient"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="StartColor"/>
+                            <TextBox Text="{Binding StartColor}" MinWidth="64"/>
+                            <TextBlock Text="EndColor"/>
+                            <TextBox Text="{Binding EndColor}" MinWidth="64"/>
+                            <Button Command="{Binding GenerateCommand}" Content="Generate"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" x:Name="GeneratedColorsStackPanel" Height="24"/>
+                        <TextBox Text="{Binding GeneratedPalette}"/>
 
-                <DockPanel LastChildFill="False">
-                    <RadioButton x:Name="UsePicture1" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=0}" Content="Use picture 1"/>
-                    <RadioButton x:Name="UsePicture2" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=1}"  Content="Use picture 2" Margin="8,0,0,0"/>
-                </DockPanel>
-                <DockPanel LastChildFill="False" Margin="0,8,0,0">
-                    <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black"/>
-                    <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="8,0,0,0"/>
-                </DockPanel>
+                        <DockPanel LastChildFill="False">
+                            <RadioButton x:Name="UsePicture1" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=0}" Content="Use picture 1"/>
+                            <RadioButton x:Name="UsePicture2" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=1}"  Content="Use picture 2" Margin="8,0,0,0"/>
+                        </DockPanel>
+                        <DockPanel LastChildFill="False" Margin="0,8,0,0">
+                            <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black"/>
+                            <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="8,0,0,0"/>
+                        </DockPanel>
 
-                <TextBlock Text="Preview" Margin="0,8,0,0"/>
-            </StackPanel>
+                        <TextBlock Text="Preview" Margin="0,8,0,0"/>
+                    </StackPanel>
 
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="384"/>
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" TextWrapping="Wrap" Text="{Binding PreviewText}" FontFamily="Courier New"/>
-                <WrapPanel Grid.Column="1" x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
-            </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="384"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" TextWrapping="Wrap" Text="{Binding PreviewText}" FontFamily="Courier New"/>
+                        <WrapPanel Grid.Column="1" x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
+                    </Grid>
 
-        </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Gradients">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="144"/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256"/>
+                        <DockPanel LastChildFill="False" Margin="0,8,0,0">
+                            <Button Command="{Binding CopyPreviousCommand}">Copy previous</Button>
+                            <Button Command="{Binding CopyNextCommand}">Copy next</Button>
+                            <Button Command="{Binding GenerateGradientCommand}">Gradient</Button>
+                            <TextBox x:Name="GradientText"  Width="64" TextChanged="TextBoxBase_OnTextChanged"/>
+                            <Button Command="{Binding LoadGradientCommand}">Load</Button>
+                            <Button Command="{Binding SaveGradientCommand}">Save</Button>
+                            <Button Command="{Binding ParseAsmGradientCommand}">Paste ASM</Button>
+                        </DockPanel>
 
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding GradientItems}" Grid.Column="1" SelectionChanged="Selector_OnSelectionChanged" SelectionMode="Extended" x:Name="GradientListBox">
+                        <ListBox.InputBindings>
+                            <KeyBinding Key="C" Modifiers="Control" Command="{Binding DataContext.CopyItemCommand,ElementName=GradientListBox}"/>
+                            <KeyBinding Key="V" Modifiers="Control" Command="{Binding DataContext.PasteItemCommand,ElementName=GradientListBox}"/>
+                        </ListBox.InputBindings>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Index}" FontSize="10" Width="16"/>
+                                    <!--<Button Command="{Binding ElementName=Root,Path=DataContext.ChangeGradientColorCommand}" CommandParameter="{Binding Index}" Width="88">-->
+                                    <StackPanel Orientation="Horizontal">
+                                        <Rectangle Fill="{Binding Color,Converter={StaticResource ColorToBrushConverter}}" Width="24" Height="10"/>
+                                        <TextBlock Text="{Binding Color,Converter={StaticResource ColorToStColorConverter}}" FontSize="10"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel x:Name="GradientPreviewPanel" Width="80" Grid.Column="2">
+
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
 
     </Grid>
 </Window>

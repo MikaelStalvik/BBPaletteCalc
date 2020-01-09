@@ -20,6 +20,19 @@ namespace StPalCalc
 
             return Color.FromRgb(r, g, b);
         }
+        public static Color StColorFromInt(int source)
+        {
+            var bits = GetBits((ushort)source);
+            var r = GetRValue(bits);
+            var g = GetGValue(bits);
+            var b = GetBValue(bits);
+            r = RemapFrom12BitToRgb(r);
+            g = RemapFrom12BitToRgb(g);
+            b = RemapFrom12BitToRgb(b);
+
+            return Color.FromRgb(r, g, b);
+        }
+
         public static List<byte> GetBits(ushort v)
         {
             var data = new List<byte>();
@@ -121,11 +134,13 @@ namespace StPalCalc
             return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
         }
 
-        public static string ConvertFromRgbTo12Bit(Color color)
+        public static string ConvertFromRgbTo12Bit(Color color, bool skipDollar = false)
         {
             var r = RemapToStColor((byte)(color.R / 16));
             var g = RemapToStColor((byte)(color.G / 16));
             var b = RemapToStColor((byte)(color.B / 16));
+            if (skipDollar)
+                return $"{r:X}{g:X}{b:X}";
             return $"${r:X}{g:X}{b:X}";
         }
         public static byte RemapFrom12BitToRgb(byte source)
@@ -134,10 +149,10 @@ namespace StPalCalc
         }
         public static Color ToColor(byte r, byte g, byte b)
         {
-            return Color. FromRgb((byte)(r * 16), (byte)(g * 16), (byte)(b * 16));
+            return Color.FromRgb((byte)(r * 16), (byte)(g * 16), (byte)(b * 16));
         }
 
-        public static IEnumerable<Color> GetGradients(Color start, Color end, int steps)
+        public static IEnumerable<Color> GetGradients(Color start, Color end, int steps, int adder = 0)
         {
             var stepR = ((end.R - start.R) / (steps - 1));
             var stepG = ((end.G - start.G) / (steps - 1));
@@ -146,9 +161,9 @@ namespace StPalCalc
             for (var i = 0; i < steps; i++)
             {
                 yield return Color.FromRgb(
-                    (byte)(start.R + (stepR * i)),
-                    (byte)(start.G + (stepG * i)),
-                    (byte)(start.B + (stepB * i))
+                    (byte)(start.R + (stepR * i) + adder),
+                    (byte)(start.G + (stepG * i) + adder),
+                    (byte)(start.B + (stepB * i) + adder)
                 );
             }
         }

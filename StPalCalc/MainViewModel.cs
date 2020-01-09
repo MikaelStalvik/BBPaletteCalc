@@ -1,21 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Media;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace StPalCalc
 {
+    public class GradientItem : BaseViewModel
+    {
+        public int Index { get; set; }
+
+        private Color _color;
+
+        public Color Color
+        {
+            get => _color;
+            set
+            {
+                _color = value;
+                OnPropertyChanged();
+            }
+        }
+    }
     public class MainViewModel : BaseViewModel
     {
         public Action UpdateUiAction { get; set; }
         public Action<List<Color>> UpdateGradientAction { get; set; }
         public Action<Color[]> UpdatePreviewFadeAction { get; set; }
+        public Action UpdateGradientPreviewAction { get; set; }
+        public Action RebindAction { get; set; }
 
+        private GradientItem ClipboardItem { get; set; }
+        public int StartGradientIndex { get; set; }
+        public int EndGradientIndex { get; set; }
+        private GradientItem _selectedGradientItem;
+        public GradientItem SelectedGradientItem
+        {
+            get => _selectedGradientItem;
+            set
+            {
+                _selectedGradientItem = value;
+                OnPropertyChanged();
+                if (_selectedGradientItem != null)
+                {
+                    SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
+                }
+                else
+                {
+                    SelectedGradientColor = string.Empty;
+                }
+            }
+        }
+        public List<GradientItem> SelectedGradientItems { get; set; }
+
+        public void UpdateSelectedGradientColor(Color color)
+        {
+            SelectedGradientItem.Color = color;
+            SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
+        }
+
+        public void SetNewSelectedGradientColor(string data)
+        {
+            if (SelectedGradientItem == null) return;
+            var inp = data.Replace("$", string.Empty);
+            UpdateSelectedGradientColor(Helpers.FromStString(inp));
+        }
+
+        public ObservableCollection<GradientItem> GradientItems { get; set; }
+
+        private string _selectedGradientColor;
+        public string SelectedGradientColor
+        {
+            get => _selectedGradientColor;
+            set
+            {
+                _selectedGradientColor = value;
+                OnPropertyChanged();
+            }
+        }
         private int _usePicture;
-
         public int UsePicture
         {
             get => _usePicture;
@@ -115,34 +184,98 @@ namespace StPalCalc
         public DelegateCommand<string> GenerateCommand { get; set; }
         public DelegateCommand<string> FadeToBlackCommand { get; set; }
         public DelegateCommand<string> FadeToWhiteCommand { get; set; }
-
-
-        public string Get12BitRgbFromPalette1(int index)
-        {
-            return $"${_rawPalette1[index]:X2}";
-        }
-        public string Get12BitRgbFromPalette2(int index)
-        {
-            return $"${_rawPalette2[index]:X2}";
-        }
-        public Color GetRgbFromPalette1(int index)
-        {
-            var data = Helpers.GetBits(_rawPalette1[index]);
-            return Helpers.ToColor(Helpers.GetRValue(data), Helpers.GetGValue(data), Helpers.GetBValue(data));
-        }
-        public Color GetRgbFromPalette2(int index)
-        {
-            var data = Helpers.GetBits(_rawPalette2[index]);
-            return Helpers.ToColor(Helpers.GetRValue(data), Helpers.GetGValue(data), Helpers.GetBValue(data));
-        }
-
-
+        public DelegateCommand<string> ChangeGradientColorCommand { get; set; }
+        public DelegateCommand<string> CopyPreviousCommand { get; set; }
+        public DelegateCommand<string> CopyNextCommand { get; set; }
+        public DelegateCommand<string> GenerateGradientCommand { get; set; }
+        public DelegateCommand<string> LoadGradientCommand { get; set; }
+        public DelegateCommand<string> SaveGradientCommand { get; set; }
+        public DelegateCommand<string> CopyItemCommand { get; set; }
+        public DelegateCommand<string> PasteItemCommand { get; set; }
+        public DelegateCommand<string> ParseAsmGradientCommand { get; set; }
 
         public MainViewModel()
         {
-            OpenPic1Command = new DelegateCommand<string>(_activeFilename =>
+            GradientItems = new ObservableCollection<GradientItem>();
+            for (var i = 0; i < 200; i++)
             {
-                var dlg = new OpenFileDialog {DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;"};
+                GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
+            }
+            CopyItemCommand = new DelegateCommand<string>(_ =>
+            {
+                ClipboardItem = new GradientItem { Color = SelectedGradientItem.Color };
+            });
+            PasteItemCommand = new DelegateCommand<string>(_ =>
+            {
+                SelectedGradientItem.Color = ClipboardItem.Color;
+                if (SelectedGradientItems.Count == 1)
+                {
+                    GradientItems[SelectedGradientItem.Index].Color = ClipboardItem.Color;
+                }
+                else
+                {
+                    foreach (var item in SelectedGradientItems)
+                    {
+                        GradientItems[item.Index].Color = ClipboardItem.Color;
+                    }
+                }
+                UpdateGradientPreviewAction?.Invoke();
+                RebindAction?.Invoke();
+            });
+            LoadGradientCommand = new DelegateCommand<string>(_ =>
+            {
+                var dlg = new OpenFileDialog { DefaultExt = ".grd", Filter = "Gradient files|*.grd;" };
+                dlg.ShowDialog();
+                if (!string.IsNullOrEmpty(dlg.FileName))
+                {
+                    var json = File.ReadAllText(dlg.FileName);
+                    var data = JsonConvert.DeserializeObject<List<GradientItem>>(json);
+                    GradientItems = new ObservableCollection<GradientItem>();
+                    var i = 0;
+                    foreach (var item in data)
+                    {
+                        GradientItems.Add(new GradientItem { Color = item.Color, Index = i });
+                        i++;
+                    }
+                    UpdateGradientPreviewAction?.Invoke();
+                    RebindAction?.Invoke();
+                }
+            });
+            SaveGradientCommand = new DelegateCommand<string>(s =>
+            {
+                var dlg = new SaveFileDialog { DefaultExt = ".grd", Filter = "Gradient files|*.grd;" };
+                dlg.ShowDialog();
+                if (!string.IsNullOrEmpty(dlg.FileName))
+                {
+                    var json = JsonConvert.SerializeObject(GradientItems.ToList());
+                    File.WriteAllText(dlg.FileName, json);
+                }
+            });
+            GenerateGradientCommand = new DelegateCommand<string>(s =>
+            {
+                var startColor = GradientItems[StartGradientIndex].Color;
+                var endColor = GradientItems[EndGradientIndex].Color;
+                var data = Helpers.GetGradients(startColor, endColor, EndGradientIndex-StartGradientIndex).ToList();
+                var j = 0;
+                for (var i = StartGradientIndex; i < EndGradientIndex; i++)
+                {
+                    GradientItems[i].Color = data[j];
+                    j++;
+                }
+                UpdateGradientPreviewAction?.Invoke();
+            });
+            CopyPreviousCommand = new DelegateCommand<string>(s =>
+            {
+                if (SelectedGradientItem == null) return;
+                if (SelectedGradientItem.Index == 0) return;
+                var previous = GradientItems[SelectedGradientItem.Index - 1];
+                SelectedGradientItem.Color = previous.Color;
+                UpdateGradientPreviewAction?.Invoke();
+            });
+
+            OpenPic1Command = new DelegateCommand<string>(_ =>
+            {
+                var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;" };
                 dlg.ShowDialog();
                 if (!string.IsNullOrEmpty(dlg.FileName))
                 {
@@ -151,9 +284,9 @@ namespace StPalCalc
                     UpdateUiAction?.Invoke();
                 }
             });
-            OpenPic2Command = new DelegateCommand<string>(_activeFilename =>
+            OpenPic2Command = new DelegateCommand<string>(_ =>
             {
-                var dlg = new OpenFileDialog {DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;"};
+                var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;" };
                 dlg.ShowDialog();
                 if (!string.IsNullOrEmpty(dlg.FileName))
                 {
@@ -220,8 +353,8 @@ namespace StPalCalc
                 {
                     var c = UsePicture == 0 ? _rawPalette1[i].ToString("X2") : _rawPalette2[i].ToString("X2");
                     var startColor = Helpers.FromStString(c);
-                    var endColor = Helpers.FromStString("777");
-                    var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+                    var endColor = Helpers.FromStString("FFF");
+                    var data = Helpers.GetGradients(startColor, endColor, 16, 4).ToList();
 
                     for (var j = 0; j < 16; j++)
                     {
@@ -247,7 +380,76 @@ namespace StPalCalc
                 PreviewText = sb.ToString();
                 UpdatePreviewFadeAction?.Invoke(generatedColors);
             });
+            ChangeGradientColorCommand = new DelegateCommand<string>(s =>
+            {
+                UpdateGradientPreviewAction?.Invoke();
+            });
+            ParseAsmGradientCommand = new DelegateCommand<string>(s =>
+            {
+
+                if (Clipboard.ContainsText())
+                {
+                    var errors = false;
+                    var colorData = new List<Color>();
+                    var ctext = Clipboard.GetText();
+                    var lines = ctext.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var line in lines)
+                    {
+                        var line2 = line.Replace("dc.w", string.Empty, StringComparison.CurrentCultureIgnoreCase).Trim();
+                        var lineData = line2.Split(",", StringSplitOptions.None);
+                        foreach (var item in lineData)
+                        {
+                            var cleanedItem = item.Replace("$", "");
+                            try
+                            {
+                                var converted = Convert.ToInt32(cleanedItem, 16);
+                                colorData.Add(Helpers.StColorFromInt(converted));
+                            }
+                            catch
+                            {
+                                Debug.WriteLine($"Could not parse: {cleanedItem}");
+                                errors = true;
+                            }
+                        }
+                    }
+
+                    for (var i = 0; i < colorData.Count; i++)
+                    {
+                        if (i == 200) break;
+                        GradientItems[i].Color = colorData[i];
+                    }
+                    UpdateGradientPreviewAction?.Invoke();
+                    RebindAction?.Invoke();
+                    if (errors) MessageBox.Show("Some data could not be parsed");
+                }
+                else
+                {
+                    MessageBox.Show("Clipboard does not contain any text");
+                }
+            });
         }
+
+        public string Get12BitRgbFromPalette1(int index)
+        {
+            return $"${_rawPalette1[index]:X2}";
+        }
+        public string Get12BitRgbFromPalette2(int index)
+        {
+            return $"${_rawPalette2[index]:X2}";
+        }
+        public Color GetRgbFromPalette1(int index)
+        {
+            var data = Helpers.GetBits(_rawPalette1[index]);
+            return Helpers.ToColor(Helpers.GetRValue(data), Helpers.GetGValue(data), Helpers.GetBValue(data));
+        }
+        public Color GetRgbFromPalette2(int index)
+        {
+            var data = Helpers.GetBits(_rawPalette2[index]);
+            return Helpers.ToColor(Helpers.GetRValue(data), Helpers.GetGValue(data), Helpers.GetBValue(data));
+        }
+
+
+
 
         private string ReadPalette(string filename, ref ushort[] target)
         {
