@@ -143,7 +143,7 @@ namespace StPalCalc
                 return $"{r:X}{g:X}{b:X}";
             return $"${r:X}{g:X}{b:X}";
         }
-        public static byte RemapFrom12BitToRgb(byte source)
+        private static byte RemapFrom12BitToRgb(byte source)
         {
             return (byte)(source * 16);
         }
@@ -152,20 +152,36 @@ namespace StPalCalc
             return Color.FromRgb((byte)(r * 16), (byte)(g * 16), (byte)(b * 16));
         }
 
-        public static IEnumerable<Color> GetGradients(Color start, Color end, int steps, int adder = 0)
+        private static void GetScaledRgbPartsFromColor(Color color, out byte r, out byte g, out byte b)
         {
-            var stepR = ((end.R - start.R) / (steps - 1));
-            var stepG = ((end.G - start.G) / (steps - 1));
-            var stepB = ((end.B - start.B) / (steps - 1));
+            r = (byte)(color.R / 16);
+            g = (byte)(color.G / 16);
+            b = (byte)(color.B / 16);
+        }
+        public static IEnumerable<Color> GetGradients(Color start, Color end, int steps)
+        {
+            GetScaledRgbPartsFromColor(start, out var r, out var g, out var b);
+            var sr = (double)r;
+            var sg = (double)g;
+            var sb = (double)b;
+            GetScaledRgbPartsFromColor(end, out var r1, out var g1, out var b1);
+            var er = (double)r1;
+            var eg = (double)g1;
+            var eb = (double)b1;
+
+            var stepR = (er - sr) / (steps - 1);
+            var stepG = (eg - sg) / (steps - 1);
+            var stepB = (eb - sb) / (steps - 1);
 
             for (var i = 0; i < steps; i++)
             {
                 yield return Color.FromRgb(
-                    (byte)(start.R + (stepR * i) + adder),
-                    (byte)(start.G + (stepG * i) + adder),
-                    (byte)(start.B + (stepB * i) + adder)
+                    (byte)((sr + stepR * i) * 16),
+                    (byte)((sg + stepG * i) * 16),
+                    (byte)((sb + stepB * i) * 16)
                 );
             }
+
         }
     }
 }

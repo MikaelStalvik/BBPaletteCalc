@@ -299,6 +299,7 @@ namespace StPalCalc
             {
                 var startColor = Helpers.FromStString(_startColor);
                 var endColor = Helpers.FromStString(_endColor);
+                //var data = Helpers.GetGradients(startColor, endColor, 16);
                 var data = Helpers.GetGradients(startColor, endColor, 16);
 
                 var sb = new StringBuilder();
@@ -320,6 +321,7 @@ namespace StPalCalc
                     var c = UsePicture == 0 ? _rawPalette1[i].ToString("X2") : _rawPalette2[i].ToString("X2");
                     var startColor = Helpers.FromStString(c);
                     var endColor = Helpers.FromStString("0");
+                    //var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
                     var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
 
                     for (var j = 0; j < 16; j++)
@@ -354,7 +356,7 @@ namespace StPalCalc
                     var c = UsePicture == 0 ? _rawPalette1[i].ToString("X2") : _rawPalette2[i].ToString("X2");
                     var startColor = Helpers.FromStString(c);
                     var endColor = Helpers.FromStString("FFF");
-                    var data = Helpers.GetGradients(startColor, endColor, 16, 4).ToList();
+                    var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
 
                     for (var j = 0; j < 16; j++)
                     {
