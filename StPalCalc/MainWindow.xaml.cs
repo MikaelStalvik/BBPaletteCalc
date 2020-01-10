@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -17,6 +16,7 @@ namespace StPalCalc
         {
             InitializeComponent();
             DataContext = _vm;
+            DataTypesCombo.ItemsSource = _vm.DataTypes;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
             _vm.UpdateUiAction += () =>
@@ -28,7 +28,10 @@ namespace StPalCalc
                     var color = _vm.GetRgbFromPalette1(i);
                     var r = new Rectangle
                     {
-                        Fill = new SolidColorBrush(color), Width = 24, Height = 24, ToolTip = _vm.Get12BitRgbFromPalette1(i)
+                        Fill = new SolidColorBrush(color),
+                        Width = 24,
+                        Height = 24,
+                        ToolTip = _vm.Get12BitRgbFromPalette1(i)
                     };
                     ColorsStackPanel1.Children.Add(r);
                     color = _vm.GetRgbFromPalette2(i);
@@ -65,7 +68,7 @@ namespace StPalCalc
                     for (var x = 0; x < 16; x++)
                     {
                         var ofs = x + y * 16;
-                        var r = new Rectangle {Fill = new SolidColorBrush(colors[ofs]), Width = 24, Height = 24};
+                        var r = new Rectangle { Fill = new SolidColorBrush(colors[ofs]), Width = 24, Height = 24 };
                         PreviewPanel.Children.Add(r);
                     }
                 }
@@ -75,17 +78,22 @@ namespace StPalCalc
                 GradientPreviewPanel.Children.Clear();
                 foreach (var item in _vm.GradientItems)
                 {
-                    var r = new Rectangle {Fill = new SolidColorBrush(item.Color), Width = 24, Height = 2};
+                    var r = new Rectangle { Fill = new SolidColorBrush(item.Color), Width = 24, Height = 2 };
                     GradientPreviewPanel.Children.Add(r);
                 }
             };
             _vm.RebindAction += () => { GradientListBox.ItemsSource = _vm.GradientItems; };
+            _vm.UpdatePictureAction += index =>
+            {
+                if (index == 0) _vm.RenderPi1(_vm.ActiveFilename, Image1, true);
+                if (index == 1) _vm.RenderPi1(_vm.ActiveFilename2, Image2, false);
+            };
         }
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var lb = (ListBox) sender;
-            var item = (GradientItem) lb.SelectedItem;
+            var lb = (ListBox)sender;
+            var item = (GradientItem)lb.SelectedItem;
             _vm.SelectedGradientItem = item;
             ColorCanvas.SelectedColor = item.Color;
             GradientText.Text = Helpers.ConvertFromRgbTo12Bit(item.Color, true);
@@ -105,7 +113,12 @@ namespace StPalCalc
 
         private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            _vm.SetNewSelectedGradientColor(((TextBox) sender).Text);
+            _vm.SetNewSelectedGradientColor(((TextBox)sender).Text);
+        }
+
+        private void DataTypesCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _vm.SelectedDataType = ((ComboBox) sender).SelectedIndex;
         }
     }
 }

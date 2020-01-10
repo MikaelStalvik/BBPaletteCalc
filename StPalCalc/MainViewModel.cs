@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
@@ -35,6 +37,7 @@ namespace StPalCalc
         public Action<Color[]> UpdatePreviewFadeAction { get; set; }
         public Action UpdateGradientPreviewAction { get; set; }
         public Action RebindAction { get; set; }
+        public Action<int> UpdatePictureAction { get; set; }
 
         private GradientItem ClipboardItem { get; set; }
         public int StartGradientIndex { get; set; }
@@ -61,8 +64,11 @@ namespace StPalCalc
 
         public void UpdateSelectedGradientColor(Color color)
         {
-            SelectedGradientItem.Color = color;
-            SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
+            if (SelectedGradientItem == null)
+            {
+                SelectedGradientItem.Color = color;
+                SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
+            }
         }
 
         public void SetNewSelectedGradientColor(string data)
@@ -84,6 +90,25 @@ namespace StPalCalc
                 OnPropertyChanged();
             }
         }
+
+        public ObservableCollection<string> DataTypes = new ObservableCollection<string>
+        {
+            "Byte (dc.b)",
+            "Word (dc.w)",
+            "Long (dc.l)"
+        };
+
+        private int _selectedDataType;
+        public int SelectedDataType
+        {
+            get => _selectedDataType;
+            set
+            {
+                _selectedDataType = value;
+                OnPropertyChanged();
+            }
+        }
+
         private int _usePicture;
         public int UsePicture
         {
@@ -282,6 +307,7 @@ namespace StPalCalc
                     ActiveFilename = dlg.FileName;
                     RawPalette = ReadPalette(ActiveFilename, ref _rawPalette1);
                     UpdateUiAction?.Invoke();
+                    UpdatePictureAction?.Invoke(0);
                 }
             });
             OpenPic2Command = new DelegateCommand<string>(_ =>
@@ -293,13 +319,13 @@ namespace StPalCalc
                     ActiveFilename2 = dlg.FileName;
                     RawPalette2 = ReadPalette(ActiveFilename2, ref _rawPalette2);
                     UpdateUiAction?.Invoke();
+                    UpdatePictureAction?.Invoke(1);
                 }
             });
             GenerateCommand = new DelegateCommand<string>(s =>
             {
                 var startColor = Helpers.FromStString(_startColor);
                 var endColor = Helpers.FromStString(_endColor);
-                //var data = Helpers.GetGradients(startColor, endColor, 16);
                 var data = Helpers.GetGradients(startColor, endColor, 16);
 
                 var sb = new StringBuilder();
@@ -314,73 +340,11 @@ namespace StPalCalc
             });
             FadeToBlackCommand = new DelegateCommand<string>(b =>
             {
-                var generatedColors = new Color[16 * 16];
-                var stColors = new string[16 * 16];
-                for (var i = 0; i < 16; i++)
-                {
-                    var c = UsePicture == 0 ? _rawPalette1[i].ToString("X2") : _rawPalette2[i].ToString("X2");
-                    var startColor = Helpers.FromStString(c);
-                    var endColor = Helpers.FromStString("0");
-                    //var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
-                    var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
-
-                    for (var j = 0; j < 16; j++)
-                    {
-                        var ofs = i + j * 16;
-                        generatedColors[ofs] = data[j];
-                        stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
-                    }
-                }
-                var sb = new StringBuilder();
-                for (var y = 0; y < 16; y++)
-                {
-                    sb.Append("dc.l ");
-                    for (var x = 0; x < 16; x++)
-                    {
-                        var ofs = x + y * 16;
-                        sb.Append(stColors[ofs]);
-                        if (x < 15) sb.Append(",");
-                    }
-                    sb.AppendLine("");
-                }
-
-                PreviewText = sb.ToString();
-                UpdatePreviewFadeAction?.Invoke(generatedColors);
+                GenerateFade(UsePicture == 0 ? _rawPalette1 : _rawPalette2, "0");
             });
             FadeToWhiteCommand = new DelegateCommand<string>(b =>
             {
-                var generatedColors = new Color[16 * 16];
-                var stColors = new string[16 * 16];
-                for (var i = 0; i < 16; i++)
-                {
-                    var c = UsePicture == 0 ? _rawPalette1[i].ToString("X2") : _rawPalette2[i].ToString("X2");
-                    var startColor = Helpers.FromStString(c);
-                    var endColor = Helpers.FromStString("FFF");
-                    var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
-
-                    for (var j = 0; j < 16; j++)
-                    {
-                        var ofs = i + j * 16;
-                        generatedColors[ofs] = data[j];
-                        stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
-                    }
-                }
-                var sb = new StringBuilder();
-                for (var y = 0; y < 16; y++)
-                {
-                    sb.Append("dc.l ");
-                    for (var x = 0; x < 16; x++)
-                    {
-                        var ofs = x + y * 16;
-                        sb.Append(stColors[ofs]);
-                        if (x < 15) sb.Append(",");
-                    }
-
-                    sb.AppendLine("");
-                }
-
-                PreviewText = sb.ToString();
-                UpdatePreviewFadeAction?.Invoke(generatedColors);
+                GenerateFade(UsePicture == 0 ? _rawPalette1 : _rawPalette2, "FFF");
             });
             ChangeGradientColorCommand = new DelegateCommand<string>(s =>
             {
@@ -431,6 +395,55 @@ namespace StPalCalc
             });
         }
 
+        private string SelectedDataTypePrefix
+        {
+            get
+            {
+                switch (SelectedDataType)
+                {
+                    case 0: return "dc.b ";
+                    case 1: return "dc.w ";
+                    case 2: return "dc.l ";
+                    default:
+                        return "dc.w ";
+                }
+            }
+        }
+        private void GenerateFade(ushort[] palette, string endColorStr)
+        {
+            var generatedColors = new Color[16 * 16];
+            var stColors = new string[16 * 16];
+            for (var i = 0; i < 16; i++)
+            {
+                var c = palette[i].ToString("X2");
+                var startColor = Helpers.FromStString(c);
+                var endColor = Helpers.FromStString(endColorStr);
+                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+
+                for (var j = 0; j < 16; j++)
+                {
+                    var ofs = i + j * 16;
+                    generatedColors[ofs] = data[j];
+                    stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
+                }
+            }
+            var sb = new StringBuilder();
+            for (var y = 0; y < 16; y++)
+            {
+                sb.Append(SelectedDataTypePrefix);
+                for (var x = 0; x < 16; x++)
+                {
+                    var ofs = x + y * 16;
+                    sb.Append(stColors[ofs]);
+                    if (x < 15) sb.Append(",");
+                }
+                sb.AppendLine(string.Empty);
+            }
+
+            PreviewText = sb.ToString();
+            UpdatePreviewFadeAction?.Invoke(generatedColors);
+        }
+
         public string Get12BitRgbFromPalette1(int index)
         {
             return $"${_rawPalette1[index]:X2}";
@@ -476,5 +489,54 @@ namespace StPalCalc
 
             return sb.ToString();
         }
+
+        public void RenderPi1(string filename, Image image, bool usePalette1)
+        {
+            var writeableBmp = BitmapFactory.New(320, 200);
+            image.Source = writeableBmp;
+            using (writeableBmp.GetBitmapContext())
+            {
+                using var fs = new FileStream(filename, FileMode.Open);
+                fs.Position += 34; // skip res and palette
+                for (var y = 0; y < 200; y++)
+                {
+                    var xo = 0;
+                    for (var x = 0; x < 20; x++)
+                    {
+                        // read 4bpl, 16px in each
+                        var b1 = fs.ReadByte();
+                        var b2 = fs.ReadByte();
+                        var v = (ushort)(b2 + b1 * 256);
+                        var bpl1 = Helpers.GetBits(v, true);
+                        b1 = fs.ReadByte();
+                        b2 = fs.ReadByte();
+                        v = (ushort)(b2 + b1 * 256);
+                        var bpl2 = Helpers.GetBits(v, true);
+                        b1 = fs.ReadByte();
+                        b2 = fs.ReadByte();
+                        v = (ushort)(b2 + b1 * 256);
+                        var bpl3 = Helpers.GetBits(v, true);
+                        b1 = fs.ReadByte();
+                        b2 = fs.ReadByte();
+                        v = (ushort)(b2 + b1 * 256);
+                        var bpl4 = Helpers.GetBits(v, true);
+
+                        // map pixels
+                        for (var p = 0; p < 16; p++)
+                        {
+                            // get the color based on palette
+                            var bv = bpl1[p] + (bpl2[p] * 2) + (bpl3[p] * 3) + (bpl4[p]*8);
+                            var stColor = usePalette1 ? _rawPalette1[bv] : _rawPalette2[bv];
+                            var c = Helpers.FromStString(stColor.ToString("X2"));
+
+                            writeableBmp.SetPixel((xo + p), y, c);
+                        }
+
+                        xo += 16;
+                    }
+                }
+            }
+        }
+
     }
 }

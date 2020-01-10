@@ -33,7 +33,7 @@ namespace StPalCalc
             return Color.FromRgb(r, g, b);
         }
 
-        public static List<byte> GetBits(ushort v)
+        public static List<byte> GetBits(ushort v, bool reverse = false)
         {
             var data = new List<byte>();
             for (var b = 1; b <= 16; b++)
@@ -42,7 +42,7 @@ namespace StPalCalc
                 var bit = (v & (1 << bitNumber - 1)) != 0;
                 data.Add(bit ? (byte)1 : (byte)0);
             }
-            //data.Reverse();
+            if (reverse) data.Reverse();
             return data;
         }
 
