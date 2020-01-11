@@ -158,8 +158,14 @@ namespace StPalCalc
 
         private void HueSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            var slider = (Slider) sender;
-            _vm.AdjustHueCommand.Execute(slider.Value);
+            _vm.AdjustHueCommand.Execute(new HSLSliderPayload { Hue = (int)HueSlider.Value, Saturation = (int)SaturationSlider.Value, Lightness = (int)LightnessSlider.Value});
+        }
+
+        private void ResetButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            HueSlider.Value = 0;
+            SaturationSlider.Value = 0;
+            LightnessSlider.Value = 0;
         }
     }
 }

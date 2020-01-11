@@ -21,6 +21,14 @@ namespace StPalCalc
         PreviewPicture,
         Picture1Hue
     }
+
+    public class HSLSliderPayload
+    {
+        public int Hue { get; set; }
+        public int Saturation { get; set; }
+        public int Lightness { get; set; }
+
+    }
     public class GradientItem : BaseViewModel
     {
         public int Index { get; set; }
@@ -251,8 +259,9 @@ namespace StPalCalc
         public DelegateCommand<string> LoadPreviewImageCommand { get; set; }
         public DelegateCommand<string> RefreshPreviewImageCommand { get; set; }
         public DelegateCommand<string> GenerateRastersCommand { get; set; }
-        public DelegateCommand<int> AdjustHueCommand { get; set; }
+        public DelegateCommand<HSLSliderPayload> AdjustHueCommand { get; set; }
         public DelegateCommand<string> FadeFromPaletteToHueCommand { get; set; }
+        public DelegateCommand<string> UpdatePalette1Command { get; set; }
 
         public MainViewModel()
         {
@@ -261,18 +270,32 @@ namespace StPalCalc
             {
                 GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
             }
-
             SelectedDataType = 1;
-            AdjustHueCommand = new DelegateCommand<int>(pos =>
+
+            UpdatePalette1Command = new DelegateCommand<string>(s =>
             {
-                Debug.WriteLine(pos);
+                var cleaned = s.Replace("$", "");
+                var list = cleaned.Split(",");
+                var i = 0;
+                foreach (var color in list)
+                {
+                    var us = (ushort) Convert.ToInt32(color, 16);
+                    _rawPalette1[i] = us;
+                    i++;
+                }
+                UpdateUiAction?.Invoke();
+            });
+            AdjustHueCommand = new DelegateCommand<HSLSliderPayload>(payload =>
+            {
                 var newColors = new List<Color>();
                 var index = 0;
                 foreach (var uc in _rawPalette1)
                 {
                     var col = Helpers.FromStString(uc.ToString("X2"));
                     var hsl = new HSLColor(col.R, col.G, col.B);
-                    hsl.Hue += pos;
+                    hsl.Hue += payload.Hue;
+                    hsl.Saturation += payload.Saturation;
+                    hsl.Luminosity += payload.Lightness;
                     hsl.RgbParts(out var r, out var g, out var b);
                     var nc = Color.FromRgb(r, g, b);
                     newColors.Add(nc);
