@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:StPalCalc"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Bitbendaz Atari STe palette and raster toolkit" Height="450" Width="800">
+        Title="Bitbendaz Atari STe palette and raster toolkit" Height="450" Width="830">
     <Window.Resources>
         <local:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
@@ -77,61 +77,107 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="Gradients">
-                    <Grid>
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="144"/>
                         <ColumnDefinition Width="80"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <StackPanel Orientation="Horizontal">
-                            <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256"/>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="32"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0">
                             <StackPanel Margin="4">
                                 <TextBlock Text="Generate gradient" FontWeight="Bold"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                     <TextBlock Text="Start"/>
                                     <TextBox Text="{Binding StartColor}" MinWidth="64"/>
+                                    <Button Command="{Binding PickColorCommand}" CommandParameter="0" Content="Pick"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                     <TextBlock Text="End" Margin="4,0,0,0"/>
                                     <TextBox Text="{Binding EndColor}" MinWidth="64"/>
-                                    <Button Command="{Binding GenerateCommand}" Content="Generate"/>
+                                    <Button Command="{Binding PickColorCommand}" CommandParameter="1" Content="Pick"/>
                                 </StackPanel>
+                                <Button Command="{Binding GenerateCommand}" Content="Generate" Margin="0,8,0,0"/>
                                 <StackPanel Orientation="Horizontal" x:Name="GeneratedColorsStackPanel" Height="24"/>
                                 <TextBox Text="{Binding GeneratedPalette}"/>
                             </StackPanel>
                         </StackPanel>
-                        <DockPanel LastChildFill="False" Margin="0,8,0,0">
-                            <Button Command="{Binding CopyPreviousCommand}">Copy previous</Button>
-                            <Button Command="{Binding CopyNextCommand}">Copy next</Button>
-                            <Button Command="{Binding GenerateGradientCommand}">Gradient</Button>
-                            <TextBox x:Name="GradientText"  Width="64" TextChanged="TextBoxBase_OnTextChanged"/>
-                            <Button Command="{Binding LoadGradientCommand}">Load</Button>
-                            <Button Command="{Binding SaveGradientCommand}">Save</Button>
-                            <Button Command="{Binding ParseAsmGradientCommand}">Paste ASM</Button>
-                        </DockPanel>
+                    </Grid>
 
-                    </StackPanel>
-                    <ListBox ItemsSource="{Binding GradientItems}" Grid.Column="1" SelectionChanged="Selector_OnSelectionChanged" SelectionMode="Extended" x:Name="GradientListBox">
-                        <ListBox.InputBindings>
-                            <KeyBinding Key="C" Modifiers="Control" Command="{Binding DataContext.CopyItemCommand,ElementName=GradientListBox}"/>
-                            <KeyBinding Key="V" Modifiers="Control" Command="{Binding DataContext.PasteItemCommand,ElementName=GradientListBox}"/>
-                        </ListBox.InputBindings>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Index}" FontSize="10" Width="16"/>
-                                    <!--<Button Command="{Binding ElementName=Root,Path=DataContext.ChangeGradientColorCommand}" CommandParameter="{Binding Index}" Width="88">-->
-                                    <StackPanel Orientation="Horizontal">
-                                        <Rectangle Fill="{Binding Color,Converter={StaticResource ColorToBrushConverter}}" Width="24" Height="10"/>
-                                        <TextBlock Text="{Binding Color,Converter={StaticResource ColorToStColorConverter}}" FontSize="10"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <StackPanel x:Name="GradientPreviewPanel" Width="80" Grid.Column="2"/>
+
                 </Grid>
 
             </TabItem>
+
+            <TabItem Header="Rasters">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="144"/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="32"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256" HorizontalAlignment="Left"/>
+                            <Image Width="320" Height="200"></Image>
+                        </StackPanel>
+                        <DockPanel LastChildFill="False" Margin="0,8,0,0" Grid.Row="1">
+                            <Button Command="{Binding CopyPreviousCommand}" Content="Copy prev." MinWidth="72"/>
+                            <Button Command="{Binding CopyNextCommand}" Content="Copy next" Margin="4,0,0,0" MinWidth="72"/>
+                            <Button Command="{Binding GenerateGradientCommand}" Content="Gradient" Margin="8,0,0,0" MinWidth="72"/>
+                            <Button Command="{Binding ParseAsmGradientCommand}" Content="Paste Asm" MinWidth="72" Margin="8,0,0,0"/>
+                            <Button Command="{Binding SaveGradientCommand}" DockPanel.Dock="Right" Content="Save" Margin="4,0,8,0" MinWidth="64"/>
+                            <Button Command="{Binding LoadGradientCommand}" DockPanel.Dock="Right" Content="Load" MinWidth="64"/>
+                        </DockPanel>
+                    </Grid>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Raster list" FontWeight="Bold" Grid.Row="0"/>
+                        <ListBox ItemsSource="{Binding GradientItems}" Grid.Row="1" SelectionChanged="Selector_OnSelectionChanged" SelectionMode="Extended" x:Name="GradientListBox">
+                            <ListBox.InputBindings>
+                                <KeyBinding Key="C" Modifiers="Control" Command="{Binding DataContext.CopyItemCommand,ElementName=GradientListBox}"/>
+                                <KeyBinding Key="V" Modifiers="Control" Command="{Binding DataContext.PasteItemCommand,ElementName=GradientListBox}"/>
+                            </ListBox.InputBindings>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Index}" FontSize="10" Width="16"/>
+                                        <!--<Button Command="{Binding ElementName=Root,Path=DataContext.ChangeGradientColorCommand}" CommandParameter="{Binding Index}" Width="88">-->
+                                        <StackPanel Orientation="Horizontal">
+                                            <Rectangle Fill="{Binding Color,Converter={StaticResource ColorToBrushConverter}}" Width="24" Height="10"/>
+                                            <TextBlock Text="{Binding Color,Converter={StaticResource ColorToStColorConverter}}" FontSize="10"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Grid.Row="2" Height="32">
+                            <DockPanel LastChildFill="True" Margin="0,8,0,0">
+                                <TextBlock Text="Selected"/>
+                                <TextBox x:Name="GradientText"  Width="64" TextChanged="TextBoxBase_OnTextChanged" Margin="4,0,0,0"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel x:Name="GradientPreviewPanel" Width="80" Grid.Column="2"/>
+
+                </Grid>
+            </TabItem>
+
             <TabItem Header="Output">
                 <TextBlock Text="Preview" Margin="0,8,0,0"/>
             </TabItem>

@@ -107,6 +107,7 @@ namespace StPalCalc
 
         private void ColorCanvas_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
+            GradientText.Text = Helpers.ConvertFromRgbTo12Bit(ColorCanvas.SelectedColor.Value);
             _vm.UpdateSelectedGradientColor(ColorCanvas.SelectedColor.Value);
             _vm.UpdateGradientPreviewAction?.Invoke();
         }

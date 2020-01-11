@@ -4,6 +4,9 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <UseWPF>true</UseWPF>
+    <Authors>Mikael Stalvik</Authors>
+    <Company>Bitbendaz</Company>
+    <Product>Bitbendaz Atari STe palette and raster toolkit</Product>
   </PropertyGroup>
 
   <ItemGroup>

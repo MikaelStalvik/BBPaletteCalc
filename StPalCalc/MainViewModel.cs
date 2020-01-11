@@ -64,10 +64,13 @@ namespace StPalCalc
 
         public void UpdateSelectedGradientColor(Color color)
         {
-            if (SelectedGradientItem == null)
+            if (SelectedGradientItem != null)
             {
                 SelectedGradientItem.Color = color;
                 SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
+                GradientItems[SelectedGradientItem.Index].Color = SelectedGradientItem.Color;
+                UpdateGradientPreviewAction?.Invoke();
+                RebindAction?.Invoke();
             }
         }
 
@@ -218,6 +221,7 @@ namespace StPalCalc
         public DelegateCommand<string> CopyItemCommand { get; set; }
         public DelegateCommand<string> PasteItemCommand { get; set; }
         public DelegateCommand<string> ParseAsmGradientCommand { get; set; }
+        public DelegateCommand<int> PickColorCommand { get; set; }
 
         public MainViewModel()
         {
@@ -226,6 +230,24 @@ namespace StPalCalc
             {
                 GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
             }
+
+            PickColorCommand = new DelegateCommand<int>(index =>
+            {
+                var c = ColorPickerWindow.PickColor();
+                if (c != null)
+                {
+                    var stColor = Helpers.ConvertFromRgbTo12Bit(c.Value, true);
+                    switch (index)
+                    {
+                        case 0: 
+                            StartColor = stColor;
+                            break;
+                        case 1:
+                            EndColor = stColor;
+                            break;
+                    }
+                }
+            });
             CopyItemCommand = new DelegateCommand<string>(_ =>
             {
                 ClipboardItem = new GradientItem { Color = SelectedGradientItem.Color };
@@ -430,7 +452,7 @@ namespace StPalCalc
             var sb = new StringBuilder();
             for (var y = 0; y < 16; y++)
             {
-                sb.Append(SelectedDataTypePrefix);
+                sb.Append("\t" + SelectedDataTypePrefix);
                 for (var x = 0; x < 16; x++)
                 {
                     var ofs = x + y * 16;
