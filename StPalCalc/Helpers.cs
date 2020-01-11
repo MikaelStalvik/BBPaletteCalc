@@ -9,7 +9,16 @@ namespace StPalCalc
     {
         public static Color FromStString(string source)
         {
-            var asHex = Convert.ToInt32(source, 16);
+            int asHex;
+            try
+            {
+                asHex = Convert.ToInt32(source, 16);
+            }
+            catch
+            {
+                asHex = 0;
+            }
+
             var bits = GetBits((ushort)asHex);
             var r = GetRValue(bits);
             var g = GetGValue(bits);

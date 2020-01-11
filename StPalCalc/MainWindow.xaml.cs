@@ -78,15 +78,33 @@ namespace StPalCalc
                 GradientPreviewPanel.Children.Clear();
                 foreach (var item in _vm.GradientItems)
                 {
+                    var sp = new StackPanel();
+                    sp.Width = 48;
+                    sp.Height = 2;
+                    sp.Orientation = Orientation.Horizontal;
+                    var mc = item == _vm.SelectedGradientItem ? Colors.Red : Colors.White;
+                    var marker = new Rectangle { Fill = new SolidColorBrush(mc), Width = 16, Height = 2};
+                    sp.Children.Add(marker);
                     var r = new Rectangle { Fill = new SolidColorBrush(item.Color), Width = 24, Height = 2 };
-                    GradientPreviewPanel.Children.Add(r);
+                    sp.Children.Add(r);
+                    GradientPreviewPanel.Children.Add(sp);
                 }
             };
             _vm.RebindAction += () => { GradientListBox.ItemsSource = _vm.GradientItems; };
-            _vm.UpdatePictureAction += index =>
+            _vm.UpdatePictureAction += pictureType =>
             {
-                if (index == 0) _vm.RenderPi1(_vm.ActiveFilename, Image1, true);
-                if (index == 1) _vm.RenderPi1(_vm.ActiveFilename2, Image2, false);
+                switch (pictureType)
+                {
+                    case PictureType.Picture1:
+                        _vm.RenderPi1(_vm.ActiveFilename, Image1, pictureType);
+                        break;
+                    case PictureType.Picture2:
+                        _vm.RenderPi1(_vm.ActiveFilename2, Image2, pictureType);
+                        break;
+                    case PictureType.PreviewPicture:
+                        _vm.RenderPi1(_vm.PreviewFilename, PreviewImage, pictureType, true);
+                        break;
+                }
             };
         }
 
@@ -94,6 +112,7 @@ namespace StPalCalc
         {
             var lb = (ListBox)sender;
             var item = (GradientItem)lb.SelectedItem;
+            if (item == null) return;
             _vm.SelectedGradientItem = item;
             ColorCanvas.SelectedColor = item.Color;
             GradientText.Text = Helpers.ConvertFromRgbTo12Bit(item.Color, true);

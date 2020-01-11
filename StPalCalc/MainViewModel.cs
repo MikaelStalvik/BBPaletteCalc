@@ -14,6 +14,12 @@ using Newtonsoft.Json;
 
 namespace StPalCalc
 {
+    public enum PictureType
+    {
+        Picture1,
+        Picture2,
+        PreviewPicture
+    }
     public class GradientItem : BaseViewModel
     {
         public int Index { get; set; }
@@ -37,7 +43,7 @@ namespace StPalCalc
         public Action<Color[]> UpdatePreviewFadeAction { get; set; }
         public Action UpdateGradientPreviewAction { get; set; }
         public Action RebindAction { get; set; }
-        public Action<int> UpdatePictureAction { get; set; }
+        public Action<PictureType> UpdatePictureAction { get; set; }
 
         private GradientItem ClipboardItem { get; set; }
         public int StartGradientIndex { get; set; }
@@ -207,6 +213,22 @@ namespace StPalCalc
             }
         }
 
+        private int _rasterIndexColor;
+
+        public int RasterColorIndex
+        {
+            get => _rasterIndexColor;
+            set
+            {
+                _rasterIndexColor = value;
+                OnPropertyChanged();
+                RefreshPreviewImageCommand.Execute("");
+            }
+        }
+
+        public string PreviewFilename { get; set; }
+        public ushort[] PreviewPalette = new ushort[16];
+
         public DelegateCommand<string> OpenPic1Command { get; set; }
         public DelegateCommand<string> OpenPic2Command { get; set; }
         public DelegateCommand<string> GenerateCommand { get; set; }
@@ -220,8 +242,12 @@ namespace StPalCalc
         public DelegateCommand<string> SaveGradientCommand { get; set; }
         public DelegateCommand<string> CopyItemCommand { get; set; }
         public DelegateCommand<string> PasteItemCommand { get; set; }
+        public DelegateCommand<string> DeleteGradientItemCommand { get; set; }
         public DelegateCommand<string> ParseAsmGradientCommand { get; set; }
         public DelegateCommand<int> PickColorCommand { get; set; }
+        public DelegateCommand<string> LoadPreviewImageCommand { get; set; }
+        public DelegateCommand<string> RefreshPreviewImageCommand { get; set; }
+        public DelegateCommand<string> GenerateRastersCommand { get; set; }
 
         public MainViewModel()
         {
@@ -231,6 +257,66 @@ namespace StPalCalc
                 GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
             }
 
+            SelectedDataType = 1;
+            GenerateRastersCommand = new DelegateCommand<string>(_ =>
+            {
+                var sb = new StringBuilder();
+                var lineb = new StringBuilder();
+                sb.AppendLine("; 200 items");
+                sb.AppendLine("raster_data:");
+
+                lineb.Append("\t" + SelectedDataTypePrefix + " ");
+
+                var index = 0;
+                foreach (var item in GradientItems)
+                {
+                    var isNewLine = ((index % 9) == 0) && index != 0;
+                    if (isNewLine)
+                    {
+                        var line = lineb.ToString();
+                        sb.AppendLine(line.Remove(line.Length - 1));
+                        lineb.Clear();
+                        lineb.Append("\t" + SelectedDataTypePrefix + " ");
+                    }
+
+                    lineb.Append(Helpers.ConvertFromRgbTo12Bit(item.Color));
+                    lineb.Append(",");
+                    index++;
+                }
+
+                var line2 = lineb.ToString();
+                sb.AppendLine(line2.Remove(line2.Length - 1));
+
+                PreviewText = sb.ToString();
+            });
+            DeleteGradientItemCommand = new DelegateCommand<string>( _ => {
+                if (SelectedGradientItem != null)
+                {
+                    GradientItems.Remove(SelectedGradientItem);
+                    GradientItems.Add(new GradientItem { Index = GradientItems.Count-1, Color = Colors.Black});
+                    ReindexGradientItems();
+                    SelectedGradientItem = null;
+                }
+            });
+            RefreshPreviewImageCommand = new DelegateCommand<string>(_ =>
+            {
+                if (File.Exists(PreviewFilename))
+                {
+                    ReadPalette(PreviewFilename, ref PreviewPalette);
+                    UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
+                }
+            });
+            LoadPreviewImageCommand = new DelegateCommand<string>(_ =>
+            {
+                var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;" };
+                dlg.ShowDialog();
+                if (!string.IsNullOrEmpty(dlg.FileName))
+                {
+                    PreviewFilename = dlg.FileName;
+                    ReadPalette(PreviewFilename, ref PreviewPalette);
+                    UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
+                }
+            });
             PickColorCommand = new DelegateCommand<int>(index =>
             {
                 var c = ColorPickerWindow.PickColor();
@@ -329,7 +415,7 @@ namespace StPalCalc
                     ActiveFilename = dlg.FileName;
                     RawPalette = ReadPalette(ActiveFilename, ref _rawPalette1);
                     UpdateUiAction?.Invoke();
-                    UpdatePictureAction?.Invoke(0);
+                    UpdatePictureAction?.Invoke(PictureType.Picture1);
                 }
             });
             OpenPic2Command = new DelegateCommand<string>(_ =>
@@ -341,7 +427,7 @@ namespace StPalCalc
                     ActiveFilename2 = dlg.FileName;
                     RawPalette2 = ReadPalette(ActiveFilename2, ref _rawPalette2);
                     UpdateUiAction?.Invoke();
-                    UpdatePictureAction?.Invoke(1);
+                    UpdatePictureAction?.Invoke(PictureType.Picture2);
                 }
             });
             GenerateCommand = new DelegateCommand<string>(s =>
@@ -417,6 +503,14 @@ namespace StPalCalc
             });
         }
 
+        private void ReindexGradientItems()
+        {
+            for (var i = 0; i < GradientItems.Count; i++)
+            {
+                GradientItems[i].Index = i;
+            }
+            UpdateGradientPreviewAction?.Invoke();
+        }
         private string SelectedDataTypePrefix
         {
             get
@@ -512,11 +606,11 @@ namespace StPalCalc
             return sb.ToString();
         }
 
-        public void RenderPi1(string filename, Image image, bool usePalette1)
+        public void RenderPi1(string filename, Image image, PictureType pictureType, bool useRaster = false)
         {
-            var writeableBmp = BitmapFactory.New(320, 200);
-            image.Source = writeableBmp;
-            using (writeableBmp.GetBitmapContext())
+            var wbmp = BitmapFactory.New(320, 200);
+            image.Source = wbmp;
+            using (wbmp.GetBitmapContext())
             {
                 using var fs = new FileStream(filename, FileMode.Open);
                 fs.Position += 34; // skip res and palette
@@ -548,10 +642,31 @@ namespace StPalCalc
                         {
                             // get the color based on palette
                             var bv = bpl1[p] + (bpl2[p] * 2) + (bpl3[p] * 3) + (bpl4[p]*8);
-                            var stColor = usePalette1 ? _rawPalette1[bv] : _rawPalette2[bv];
-                            var c = Helpers.FromStString(stColor.ToString("X2"));
+                            ushort stColor = 0;
+                            var outCol = Colors.Red;
 
-                            writeableBmp.SetPixel((xo + p), y, c);
+                            if (useRaster && bv == _rasterIndexColor)
+                            {
+                                outCol = GradientItems[y].Color;
+                            }
+                            else
+                            {
+                                switch (pictureType)
+                                {
+                                    case PictureType.Picture1:
+                                        stColor = _rawPalette1[bv];
+                                        break;
+                                    case PictureType.Picture2:
+                                        stColor = _rawPalette2[bv];
+                                        break;
+                                    case PictureType.PreviewPicture:
+                                        stColor = PreviewPalette[bv];
+                                        break;
+                                }
+                                outCol = Helpers.FromStString(stColor.ToString("X2"));
+                            }
+
+                            wbmp.SetPixel((xo + p), y, outCol);
                         }
 
                         xo += 16;
