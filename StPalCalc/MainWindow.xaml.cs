@@ -106,6 +106,21 @@ namespace StPalCalc
                         break;
                 }
             };
+            _vm.UpdateHueColorsAction += colors =>
+            {
+                HueColorsStackPanel1.Children.Clear();
+                foreach (var color in colors)
+                {
+                    var r = new Rectangle
+                    {
+                        Fill = new SolidColorBrush(color),
+                        Width = 24,
+                        Height = 24,
+                    };
+                    HueColorsStackPanel1.Children.Add(r);
+                }
+                _vm.RenderPi1(_vm.ActiveFilename, Image1, PictureType.Picture1Hue);
+            };
         }
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -139,6 +154,12 @@ namespace StPalCalc
         private void DataTypesCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _vm.SelectedDataType = ((ComboBox) sender).SelectedIndex;
+        }
+
+        private void HueSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            var slider = (Slider) sender;
+            _vm.AdjustHueCommand.Execute(slider.Value);
         }
     }
 }

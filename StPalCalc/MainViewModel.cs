@@ -18,7 +18,8 @@ namespace StPalCalc
     {
         Picture1,
         Picture2,
-        PreviewPicture
+        PreviewPicture,
+        Picture1Hue
     }
     public class GradientItem : BaseViewModel
     {
@@ -44,6 +45,7 @@ namespace StPalCalc
         public Action UpdateGradientPreviewAction { get; set; }
         public Action RebindAction { get; set; }
         public Action<PictureType> UpdatePictureAction { get; set; }
+        public Action<List<Color>> UpdateHueColorsAction { get; set; }
 
         private GradientItem ClipboardItem { get; set; }
         public int StartGradientIndex { get; set; }
@@ -142,6 +144,7 @@ namespace StPalCalc
             set { _generatedPalette = value; OnPropertyChanged(); }
         }
         private ushort[] _rawPalette1 = new ushort[16];
+        private ushort[] _rawPalette1Hue = new ushort[16];
         private ushort[] _rawPalette2 = new ushort[16];
 
         private string _startColor;
@@ -248,6 +251,8 @@ namespace StPalCalc
         public DelegateCommand<string> LoadPreviewImageCommand { get; set; }
         public DelegateCommand<string> RefreshPreviewImageCommand { get; set; }
         public DelegateCommand<string> GenerateRastersCommand { get; set; }
+        public DelegateCommand<int> AdjustHueCommand { get; set; }
+        public DelegateCommand<string> FadeFromPaletteToHueCommand { get; set; }
 
         public MainViewModel()
         {
@@ -258,6 +263,24 @@ namespace StPalCalc
             }
 
             SelectedDataType = 1;
+            AdjustHueCommand = new DelegateCommand<int>(pos =>
+            {
+                Debug.WriteLine(pos);
+                var newColors = new List<Color>();
+                var index = 0;
+                foreach (var uc in _rawPalette1)
+                {
+                    var col = Helpers.FromStString(uc.ToString("X2"));
+                    var hsl = new HSLColor(col.R, col.G, col.B);
+                    hsl.Hue += pos;
+                    hsl.RgbParts(out var r, out var g, out var b);
+                    var nc = Color.FromRgb(r, g, b);
+                    newColors.Add(nc);
+                    _rawPalette1Hue[index] = (ushort)Convert.ToInt32(Helpers.ConvertFromRgbTo12Bit(nc, true), 16);
+                    index++;
+                }
+                UpdateHueColorsAction?.Invoke(newColors);
+            });
             GenerateRastersCommand = new DelegateCommand<string>(_ =>
             {
                 var sb = new StringBuilder();
@@ -454,6 +477,11 @@ namespace StPalCalc
             {
                 GenerateFade(UsePicture == 0 ? _rawPalette1 : _rawPalette2, "FFF");
             });
+            FadeFromPaletteToHueCommand = new DelegateCommand<string>(_ =>
+            {
+                GenerateFade(UsePicture == 0 ? _rawPalette1 : _rawPalette2,
+                    UsePicture == 0 ? _rawPalette1Hue : _rawPalette2);
+            });
             ChangeGradientColorCommand = new DelegateCommand<string>(s =>
             {
                 UpdateGradientPreviewAction?.Invoke();
@@ -470,7 +498,7 @@ namespace StPalCalc
                     foreach (var line in lines)
                     {
                         var line2 = line.Replace("dc.w", string.Empty, StringComparison.CurrentCultureIgnoreCase).Trim();
-                        var lineData = line2.Split(",", StringSplitOptions.None);
+                        var lineData = line2.Split(",");
                         foreach (var item in lineData)
                         {
                             var cleanedItem = item.Replace("$", "");
@@ -534,6 +562,41 @@ namespace StPalCalc
                 var c = palette[i].ToString("X2");
                 var startColor = Helpers.FromStString(c);
                 var endColor = Helpers.FromStString(endColorStr);
+                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+
+                for (var j = 0; j < 16; j++)
+                {
+                    var ofs = i + j * 16;
+                    generatedColors[ofs] = data[j];
+                    stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
+                }
+            }
+            var sb = new StringBuilder();
+            for (var y = 0; y < 16; y++)
+            {
+                sb.Append("\t" + SelectedDataTypePrefix);
+                for (var x = 0; x < 16; x++)
+                {
+                    var ofs = x + y * 16;
+                    sb.Append(stColors[ofs]);
+                    if (x < 15) sb.Append(",");
+                }
+                sb.AppendLine(string.Empty);
+            }
+
+            PreviewText = sb.ToString();
+            UpdatePreviewFadeAction?.Invoke(generatedColors);
+        }
+        private void GenerateFade(ushort[] palette, ushort[] endPalette)
+        {
+            var generatedColors = new Color[16 * 16];
+            var stColors = new string[16 * 16];
+            for (var i = 0; i < 16; i++)
+            {
+                var c = palette[i].ToString("X2");
+                var startColor = Helpers.FromStString(c);
+                c = endPalette[i].ToString("X2");
+                var endColor = Helpers.FromStString(c);
                 var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
 
                 for (var j = 0; j < 16; j++)
@@ -661,6 +724,9 @@ namespace StPalCalc
                                         break;
                                     case PictureType.PreviewPicture:
                                         stColor = PreviewPalette[bv];
+                                        break;
+                                    case PictureType.Picture1Hue:
+                                        stColor = _rawPalette1Hue[bv];
                                         break;
                                 }
                                 outCol = Helpers.FromStString(stColor.ToString("X2"));

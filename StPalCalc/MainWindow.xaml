@@ -24,10 +24,11 @@
                     <StackPanel Grid.Row="0">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="138*"/>
+                                <ColumnDefinition Width="267*"/>
+                                <ColumnDefinition Width="404*"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
+                            <StackPanel Grid.Column="0" Grid.ColumnSpan="2">
                                 <DockPanel>
                                     <TextBlock Text="Picture 1" FontWeight="Bold"/>
                                     <Button Width="80" Command="{Binding OpenPic1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
@@ -36,8 +37,12 @@
                                 <Image x:Name="Image1" Width="320" Height="200" Margin="0,0,0,8"/>
                                 <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
                                 <TextBox Text="{Binding RawPalette}"/>
+
+                                <Slider Minimum="-239" Maximum="239" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged"/>
+                                <!--<Button Command="{Binding AdjustHueCommand}" CommandParameter="{Binding ElementName=HueSlider,Path=Value}" Content="Adjust Hue"/>-->
+                                <StackPanel Orientation="Horizontal" x:Name="HueColorsStackPanel1" Height="24"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="1">
+                            <StackPanel Grid.Column="2">
                                 <DockPanel>
                                     <TextBlock Text="Picture 2" FontWeight="Bold"/>
                                     <Button Width="80" Command="{Binding OpenPic2Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
@@ -65,6 +70,7 @@
                     <DockPanel LastChildFill="False" Margin="0,8,0,0">
                         <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black"/>
                         <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="8,0,0,0"/>
+                        <Button Command="{Binding FadeFromPaletteToHueCommand}" Content="Hue Fade" Margin="8,0,0,0"/>
                     </DockPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>

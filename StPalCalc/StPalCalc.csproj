@@ -7,6 +7,7 @@
     <Authors>Mikael Stalvik</Authors>
     <Company>Bitbendaz</Company>
     <Product>Bitbendaz Atari STe palette and raster toolkit</Product>
+    <ApplicationIcon>Atari.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
