@@ -23,7 +23,6 @@ namespace StPalCalc
             _vm.UpdateUiAction += () =>
             {
                 ColorsStackPanel1.Children.Clear();
-                ColorsStackPanel2.Children.Clear();
                 for (var i = 0; i < 16; i++)
                 {
                     var color = _vm.GetRgbFromPalette1(i);
@@ -34,9 +33,7 @@ namespace StPalCalc
                         Height = 24,
                         ToolTip = _vm.Get12BitRgbFromPalette1(i)
                     };
-                    var btn = new Button();
-                    btn.Content = r;
-                    btn.Tag = i;
+                    var btn = new Button {Content = r, Tag = i};
                     btn.Click += (sender, args) =>
                     {
                         var b = (Button) sender;
@@ -46,19 +43,10 @@ namespace StPalCalc
                         {
                             var stColor = Helpers.ConvertFromRgbTo12Bit(pc.Value, true);
                             _vm.SetPaletteValue((ushort)Convert.ToInt32(stColor, 16), index);
+                            _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
                         }
                     };
                     ColorsStackPanel1.Children.Add(btn);
-
-                    color = _vm.GetRgbFromPalette2(i);
-                    r = new Rectangle
-                    {
-                        Fill = new SolidColorBrush(color),
-                        Width = 24,
-                        Height = 24,
-                        ToolTip = _vm.Get12BitRgbFromPalette2(i)
-                    };
-                    ColorsStackPanel2.Children.Add(r);
                 }
             };
             _vm.UpdateGradientAction += colors =>
@@ -113,9 +101,6 @@ namespace StPalCalc
                 {
                     case PictureType.Picture1:
                         _vm.RenderPi1(_vm.ActiveFilename, Image1, pictureType);
-                        break;
-                    case PictureType.Picture2:
-                        _vm.RenderPi1(_vm.ActiveFilename2, Image2, pictureType);
                         break;
                     case PictureType.PreviewPicture:
                         _vm.RenderPi1(_vm.PreviewFilename, PreviewImage, pictureType, true);

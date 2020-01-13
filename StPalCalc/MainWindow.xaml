@@ -24,21 +24,21 @@
                     <StackPanel Grid.Row="0">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="138*"/>
-                                <ColumnDefinition Width="267*"/>
-                                <ColumnDefinition Width="404*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Grid.ColumnSpan="2">
                                 <DockPanel>
                                     <TextBlock Text="Picture 1" FontWeight="Bold"/>
-                                    <Button Width="80" Command="{Binding OpenPic1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
                                 </DockPanel>
-                                <TextBlock Text="{Binding ActiveFilename}"/>
+                                <DockPanel>
+                                    <Button Width="72" Command="{Binding OpenPic1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                                    <TextBlock Text="{Binding ActiveFilename}"/>
+                                </DockPanel>
                                 <Image x:Name="Image1" Width="320" Height="200" Margin="0,0,0,8"/>
                                 <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
 
                                 <DockPanel>
-                                    <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right"/>
+                                    <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
                                     <TextBox Text="{Binding RawPalette}" x:Name="Palette1TextBox"/>
                                 </DockPanel>
 
@@ -60,16 +60,6 @@
                                 <Button Click="ResetButtonBase_OnClick" Content="Reset" Margin="0,8,0,0"/>
                                 <StackPanel Orientation="Horizontal" x:Name="HueColorsStackPanel1" Height="24"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <DockPanel>
-                                    <TextBlock Text="Picture 2" FontWeight="Bold"/>
-                                    <Button Width="80" Command="{Binding OpenPic2Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
-                                </DockPanel>
-                                <TextBlock Text="{Binding ActiveFilename2}"/>
-                                <Image x:Name="Image2" Width="320" Height="200" Margin="0,0,0,8"/>
-                                <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel2" Height="24"/>
-                                <TextBox Text="{Binding RawPalette2}"/>
-                            </StackPanel>
                         </Grid>
 
 
@@ -80,8 +70,6 @@
             <TabItem Header="Fades">
                 <StackPanel>
                     <DockPanel LastChildFill="False">
-                        <RadioButton x:Name="UsePicture1" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=0}" Content="Use picture 1"/>
-                        <RadioButton x:Name="UsePicture2" IsChecked="{Binding Path=UsePicture, Converter={StaticResource RadioBoolToIntConverter}, ConverterParameter=1}"  Content="Use picture 2" Margin="8,0,0,0"/>
                         <TextBlock Text="Data type:" Margin="8,0,0,0"/>
                         <ComboBox x:Name="DataTypesCombo" SelectedIndex="1" Margin="4,0,0,0" SelectionChanged="DataTypesCombo_OnSelectionChanged"/>
                     </DockPanel>

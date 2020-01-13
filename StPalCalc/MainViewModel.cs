@@ -128,16 +128,6 @@ namespace StPalCalc
             }
         }
 
-        private int _usePicture;
-        public int UsePicture
-        {
-            get => _usePicture;
-            set
-            {
-                _usePicture = value;
-                OnPropertyChanged();
-            }
-        }
         private string _previewText;
         public string PreviewText
         {
@@ -153,7 +143,6 @@ namespace StPalCalc
         }
         private ushort[] _rawPalette1 = new ushort[16];
         private ushort[] _rawPalette1Hue = new ushort[16];
-        private ushort[] _rawPalette2 = new ushort[16];
 
         private string _startColor;
         public string StartColor
@@ -181,17 +170,6 @@ namespace StPalCalc
             }
         }
 
-        private string _rawPaletteString2;
-        public string RawPalette2
-        {
-            get => _rawPaletteString2;
-            set
-            {
-                _rawPaletteString2 = value;
-                OnPropertyChanged();
-            }
-        }
-
         private string _orgPaletteRgb;
         public string OrgPaletteRgb
         {
@@ -213,16 +191,6 @@ namespace StPalCalc
                 OnPropertyChanged();
             }
         }
-        private string _activeFilename2;
-        public string ActiveFilename2
-        {
-            get => _activeFilename2;
-            set
-            {
-                _activeFilename2 = value;
-                OnPropertyChanged();
-            }
-        }
 
         private int _rasterIndexColor;
 
@@ -241,7 +209,6 @@ namespace StPalCalc
         public ushort[] PreviewPalette = new ushort[16];
 
         public DelegateCommand<string> OpenPic1Command { get; set; }
-        public DelegateCommand<string> OpenPic2Command { get; set; }
         public DelegateCommand<string> GenerateCommand { get; set; }
         public DelegateCommand<string> FadeToBlackCommand { get; set; }
         public DelegateCommand<string> FadeToWhiteCommand { get; set; }
@@ -474,18 +441,6 @@ namespace StPalCalc
                     UpdatePictureAction?.Invoke(PictureType.Picture1);
                 }
             });
-            OpenPic2Command = new DelegateCommand<string>(_ =>
-            {
-                var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;" };
-                dlg.ShowDialog();
-                if (!string.IsNullOrEmpty(dlg.FileName))
-                {
-                    ActiveFilename2 = dlg.FileName;
-                    RawPalette2 = ReadPalette(ActiveFilename2, ref _rawPalette2);
-                    UpdateUiAction?.Invoke();
-                    UpdatePictureAction?.Invoke(PictureType.Picture2);
-                }
-            });
             GenerateCommand = new DelegateCommand<string>(s =>
             {
                 var startColor = Helpers.FromStString(_startColor);
@@ -504,16 +459,15 @@ namespace StPalCalc
             });
             FadeToBlackCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(UsePicture == 0 ? _rawPalette1 : _rawPalette2, "0");
+                GenerateFade(_rawPalette1, "0");
             });
             FadeToWhiteCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(UsePicture == 0 ? _rawPalette1 : _rawPalette2, "FFF");
+                GenerateFade(_rawPalette1, "FFF");
             });
             FadeFromPaletteToHueCommand = new DelegateCommand<string>(_ =>
             {
-                GenerateFade(UsePicture == 0 ? _rawPalette1 : _rawPalette2,
-                    UsePicture == 0 ? _rawPalette1Hue : _rawPalette2);
+                GenerateFade(_rawPalette1,_rawPalette1Hue);
             });
             ChangeGradientColorCommand = new DelegateCommand<string>(s =>
             {
@@ -665,23 +619,11 @@ namespace StPalCalc
         {
             return $"${_rawPalette1[index]:X2}";
         }
-        public string Get12BitRgbFromPalette2(int index)
-        {
-            return $"${_rawPalette2[index]:X2}";
-        }
         public Color GetRgbFromPalette1(int index)
         {
             var data = Helpers.GetBits(_rawPalette1[index]);
             return Helpers.ToColor(Helpers.GetRValue(data), Helpers.GetGValue(data), Helpers.GetBValue(data));
         }
-        public Color GetRgbFromPalette2(int index)
-        {
-            var data = Helpers.GetBits(_rawPalette2[index]);
-            return Helpers.ToColor(Helpers.GetRValue(data), Helpers.GetGValue(data), Helpers.GetBValue(data));
-        }
-
-
-
 
         private string ReadPalette(string filename, ref ushort[] target)
         {
@@ -758,7 +700,6 @@ namespace StPalCalc
                                         stColor = _rawPalette1[bv];
                                         break;
                                     case PictureType.Picture2:
-                                        stColor = _rawPalette2[bv];
                                         break;
                                     case PictureType.PreviewPicture:
                                         stColor = PreviewPalette[bv];
