@@ -82,5 +82,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 [Beerware](https://en.wikipedia.org/wiki/Beerware)
 
 
-Created by [Mikael Stalvik (Stalvik / Bitbendaz)](https://demozoo.org/sceners/27448/)
+Created by [Mikael Stalvik (Stalvik^Bitbendaz)](https://demozoo.org/sceners/27448/)
 
