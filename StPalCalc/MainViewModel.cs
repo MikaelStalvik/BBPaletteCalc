@@ -35,14 +35,7 @@ namespace StPalCalc
             {
                 _selectedGradientItem = value;
                 OnPropertyChanged();
-                if (_selectedGradientItem != null)
-                {
-                    SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
-                }
-                else
-                {
-                    SelectedGradientColor = string.Empty;
-                }
+                SelectedGradientColor = _selectedGradientItem != null ? Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color) : string.Empty;
             }
         }
         public List<GradientItem> SelectedGradientItems { get; set; }
@@ -66,7 +59,7 @@ namespace StPalCalc
             UpdateSelectedGradientColor(Helpers.FromStString(inp));
         }
 
-        public ObservableCollection<GradientItem> GradientItems { get; set; }
+        public ObservableCollection<GradientItem> GradientItems { get; private set; }
 
         private string _selectedGradientColor;
         public string SelectedGradientColor

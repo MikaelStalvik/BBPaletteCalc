@@ -45,7 +45,7 @@
                                     <TextBox Text="{Binding RawPalette}" x:Name="Palette1TextBox"/>
                                 </DockPanel>
 
-                                <DockPanel>
+                                <DockPanel Margin="0,8,0,0">
                                     <TextBlock Text="Hue" Width="64"/>
                                     <Slider Minimum="-239" Maximum="239" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
                                 </DockPanel>

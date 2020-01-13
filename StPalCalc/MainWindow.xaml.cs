@@ -48,6 +48,7 @@ namespace StPalCalc
                     };
                     ColorsStackPanel1.Children.Add(btn);
                 }
+                HueSlider_OnValueChanged(null, null);
             };
             _vm.UpdateGradientAction += colors =>
             {
