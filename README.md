@@ -15,6 +15,17 @@ Warning, this is an early alpha version, most likely containing issues and ugly 
 
 VisualStudio 2019 is recommended for compiling the WPF client.
 
+## Documentation
+### Pictures and Palettes tab
+Click Browse to load a Degas PI1 picture. When loaded, the picture and the palette will be shown.
+Click a color in the palette to select a new color. When a new color is selected, the picture and palette will be updated.
+Modify a hex-value in the palette textbox and click Update to apply the new color.
+Click Reset to restore the original palette.
+#### Adjusting HSL 
+Adjust Hue, Saturation and Lightness with the sliders.
+The generated palette are shown below the sliders.
+
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
