@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -33,7 +34,22 @@ namespace StPalCalc
                         Height = 24,
                         ToolTip = _vm.Get12BitRgbFromPalette1(i)
                     };
-                    ColorsStackPanel1.Children.Add(r);
+                    var btn = new Button();
+                    btn.Content = r;
+                    btn.Tag = i;
+                    btn.Click += (sender, args) =>
+                    {
+                        var b = (Button) sender;
+                        var index = (int) b.Tag;
+                        var pc = ColorPickerWindow.PickColor(_vm.GetRgbFromPalette1(index));
+                        if (pc != null)
+                        {
+                            var stColor = Helpers.ConvertFromRgbTo12Bit(pc.Value, true);
+                            _vm.SetPaletteValue((ushort)Convert.ToInt32(stColor, 16), index);
+                        }
+                    };
+                    ColorsStackPanel1.Children.Add(btn);
+
                     color = _vm.GetRgbFromPalette2(i);
                     r = new Rectangle
                     {

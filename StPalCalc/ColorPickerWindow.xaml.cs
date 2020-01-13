@@ -30,9 +30,10 @@ namespace StPalCalc
             SelectedColor = ((ColorCanvas) sender).SelectedColor.Value;
         }
 
-        public static Color? PickColor()
+        public static Color? PickColor(Color startColor)
         {
             var dlg = new ColorPickerWindow();
+            dlg.ColorCanvas.SelectedColor = startColor;
             if (dlg.ShowDialog() == true)
             {
                 return dlg.SelectedColor;

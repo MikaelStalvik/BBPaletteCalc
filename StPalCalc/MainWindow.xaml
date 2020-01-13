@@ -37,24 +37,24 @@
                                 <Image x:Name="Image1" Width="320" Height="200" Margin="0,0,0,8"/>
                                 <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
 
-                                <StackPanel Orientation="Horizontal">
+                                <DockPanel>
+                                    <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right"/>
                                     <TextBox Text="{Binding RawPalette}" x:Name="Palette1TextBox"/>
-                                    <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}"/>
-                                </StackPanel>
+                                </DockPanel>
 
                                 <DockPanel>
                                     <TextBlock Text="Hue" Width="64"/>
-                                    <Slider Minimum="-239" Maximum="239" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged"/>
+                                    <Slider Minimum="-239" Maximum="239" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
                                 </DockPanel>
                                 <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
                                 <DockPanel>
                                     <TextBlock Text="Saturation" Width="64"/>
-                                    <Slider Minimum="-239" Maximum="239" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged"/>
+                                    <Slider Minimum="-239" Maximum="239" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
                                 </DockPanel>
                                 <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
                                 <DockPanel>
                                     <TextBlock Text="Lightness" Width="64"/>
-                                    <Slider Minimum="-239" Maximum="239" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged"/>
+                                    <Slider Minimum="-239" Maximum="239" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
                                 </DockPanel>
                                 <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
                                 <Button Click="ResetButtonBase_OnClick" Content="Reset" Margin="0,8,0,0"/>

@@ -365,7 +365,17 @@ namespace StPalCalc
             });
             PickColorCommand = new DelegateCommand<int>(index =>
             {
-                var c = ColorPickerWindow.PickColor();
+                var startColor = Colors.Red;
+                switch (index)
+                {
+                    case 0: 
+                        startColor = Helpers.FromStString(StartColor);
+                        break;
+                    case 1:
+                        startColor = Helpers.FromStString(EndColor);
+                        break;
+                }
+                var c = ColorPickerWindow.PickColor(startColor);
                 if (c != null)
                 {
                     var stColor = Helpers.ConvertFromRgbTo12Bit(c.Value, true);
@@ -646,6 +656,11 @@ namespace StPalCalc
             UpdatePreviewFadeAction?.Invoke(generatedColors);
         }
 
+        public void SetPaletteValue(ushort stColor, int index)
+        {
+            _rawPalette1[index] = stColor;
+            UpdateUiAction?.Invoke();
+        }
         public string Get12BitRgbFromPalette1(int index)
         {
             return $"${_rawPalette1[index]:X2}";
