@@ -33,7 +33,31 @@ Click Hue Fade to generate a fade from the loaded picture's palette to the adjus
 
 When a fade is generated, the generated assembler code will be shown as well as the generated palette data as a matrix of 16 * 16 items.
 
+### Rasters
+This tab allows you to create, preview and export raster-data.
+The tab i divided into four main columns:
 
+#### Picture preview:
+* Click Load to load a picture used for the previewing
+* Click Refresh to refresh the preview image with the defined raster data
+* Change Mask color to control which color in the picture the raster data will be merged into
+
+#### Color picker
+* Use the color picker to change color for the selected item in the Raster list
+
+#### Raster list
+Displays all 200 items with color and 12-bit hexcode for the color in the list.
+* Select a color to chnage it
+* Copy the selected color by pressing Ctrl+C or click the Copy button
+* Paste a copied color to one or more selected items with Ctrl+V or click the Paste button
+* Create a gradient between the first selected color and the last selected color by clicking the Gradient button
+* Click the Paste Asm button to paste raster data from the clipboard in dc.w assembler syntax. The data will automatically be parsed and shown.
+* Click Load to load saved raster data
+* Click Save to save the current raster data
+* Click Generate to generate assembler raster data. The generated data is shown in the Output tab
+
+#### Preview
+Displays a preview of the definied raster data. The selected index is shown to the left of the preview in red.
 
 
 ## Contributing
