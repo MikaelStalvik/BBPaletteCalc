@@ -8,16 +8,15 @@ Warning, this is an early alpha version, most likely containing issues and ugly 
 
 **Work in progress!**
 
-![](screen1.png)
-![](screen2.png)
-![](screen3.png)
-
 ## Requirements
 .NET Core 3.
 
 VisualStudio 2019 is recommended for compiling the WPF client.
 
 ## Documentation
+
+![](screen1.png)
+
 ### Pictures and Palettes tab
 Click **Browse** to load a Degas PI1 picture. When loaded, the picture and the palette will be shown.
 Click a color in the palette to select a new color. When a new color is selected, the picture and palette will be updated.
@@ -34,6 +33,8 @@ Click **Fade to white** to generate a fade from the loaded picture's palette whi
 Click **Hue Fade** to generate a fade from the loaded picture's palette to the adjusted HSL palette in 16 steps.
 
 When a fade is generated, the generated assembler code will be shown as well as the generated palette data as a matrix of 16 * 16 items.
+
+![](screen2.png)
 
 ### Rasters
 This tab allows you to create, preview and export raster-data.
@@ -61,12 +62,18 @@ Displays all 200 items with color and 12-bit hexcode for the color in the list.
 #### Preview
 Displays a preview of the definied raster data. The selected index is shown to the left of the preview in red.
 
+![](screen3.png)
+
+
 ### Gradients
 Generate a gradient between the start color and the end color (16 steps). Change the colors either by entering the 12-bit hexcode for the color (RGB) or click **Pick** to select a color.
 Click **Generate** to generate the gradient and a preview.
 
 ### Output
 Generated assembler data from the *Raster list* page is shown here.
+
+![](screen4.png)
+
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
@@ -75,5 +82,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 [Beerware](https://en.wikipedia.org/wiki/Beerware)
 
 
-Created by [Mikael Stalvik (Stalvik / Bitbendaz)](https://demozoo.org/sceners/27448/)
+Created by [Mikael Stalvik (Stalvik^Bitbendaz)](https://demozoo.org/sceners/27448/)
 
