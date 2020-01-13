@@ -25,6 +25,16 @@ Click Reset to restore the original palette.
 Adjust Hue, Saturation and Lightness with the sliders.
 The generated palette are shown below the sliders.
 
+### Fades
+Data type allows you to control which datatype the generated assembler code will use.
+Click Fade to black to generate a fade from the loaded picture's palette which fades to black in 16 steps.
+Click Fade to white to generate a fade from the loaded picture's palette which fades to white in 16 steps.
+Click Hue Fade to generate a fade from the loaded picture's palette to the adjusted HSL palette in 16 steps.
+
+When a fade is generated, the generated assembler code will be shown as well as the generated palette data as a matrix of 16 * 16 items.
+
+
+
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
