@@ -61,6 +61,12 @@ Displays all 200 items with color and 12-bit hexcode for the color in the list.
 #### Preview
 Displays a preview of the definied raster data. The selected index is shown to the left of the preview in red.
 
+### Gradients
+Generate a gradient between the start color and the end color (16 steps). Change the colors either by entering the 12-bit hexcode for the color (RGB) or click **Pick** to select a color.
+Click **Generate** to generate the gradient and a preview.
+
+### Output
+Generated assembler data from the *Raster list* page is shown here.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
