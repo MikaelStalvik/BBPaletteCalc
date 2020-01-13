@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:StPalCalc"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="ColorPickerWindow" Height="384" Width="640">
+        Title="ColorPickerWindow" Height="384" Width="640" WindowStyle="ToolWindow" ShowInTaskbar="False" ResizeMode="NoResize">
     <Grid>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -15,7 +15,7 @@
             </Grid.RowDefinitions>
             <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256" Grid.Row="0"/>
             <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,8,0,0">
-                <Button Width="80" DockPanel.Dock="Right" Content="Cancel" IsCancel="True" Click="CancelButtonBase_OnClick"/>
+                <Button Width="80" DockPanel.Dock="Right" Content="Cancel" IsCancel="True" Click="CancelButtonBase_OnClick" Margin="8,0,0,0"/>
                 <Button Width="80" DockPanel.Dock="Right" Content="OK" IsDefault="True" Click="OkButtonBase_OnClick"/>
             </DockPanel>
 

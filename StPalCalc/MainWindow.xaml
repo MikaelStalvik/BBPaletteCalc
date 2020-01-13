@@ -31,13 +31,16 @@
                                     <TextBlock Text="Picture 1" FontWeight="Bold"/>
                                 </DockPanel>
                                 <DockPanel>
-                                    <Button Width="72" Command="{Binding OpenPic1Command}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                                    <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
                                     <TextBlock Text="{Binding ActiveFilename}"/>
                                 </DockPanel>
                                 <Image x:Name="Image1" Width="320" Height="200" Margin="0,0,0,8"/>
-                                <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
-
                                 <DockPanel>
+                                    <Button Click="ResetButtonBase_OnClick" Content="Reset" Margin="0,8,0,0" DockPanel.Dock="Right" Width="72"/>
+                                    <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
+                                </DockPanel>
+
+                                <DockPanel Margin="0,8,0,0">
                                     <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
                                     <TextBox Text="{Binding RawPalette}" x:Name="Palette1TextBox"/>
                                 </DockPanel>
@@ -57,7 +60,6 @@
                                     <Slider Minimum="-239" Maximum="239" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
                                 </DockPanel>
                                 <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                                <Button Click="ResetButtonBase_OnClick" Content="Reset" Margin="0,8,0,0"/>
                                 <StackPanel Orientation="Horizontal" x:Name="HueColorsStackPanel1" Height="24"/>
                             </StackPanel>
                         </Grid>
