@@ -72,13 +72,17 @@
             <TabItem Header="Fades">
                 <StackPanel>
                     <DockPanel LastChildFill="False">
-                        <TextBlock Text="Data type:" Margin="8,0,0,0"/>
+                        <TextBlock Text="Data type:" Margin="8,0,0,0" VerticalAlignment="Center"/>
                         <ComboBox x:Name="DataTypesCombo" SelectedIndex="1" Margin="4,0,0,0" SelectionChanged="DataTypesCombo_OnSelectionChanged"/>
                     </DockPanel>
                     <DockPanel LastChildFill="False" Margin="0,8,0,0">
                         <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black"/>
                         <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="8,0,0,0"/>
                         <Button Command="{Binding FadeFromPaletteToHueCommand}" Content="Hue Fade" Margin="8,0,0,0"/>
+                        <Button Command="{Binding FadeToColorCommand}" Content="Fade to color" Margin="8,0,0,0"/>
+                        <TextBlock Text="Color" Margin="32,0,0,0" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding FadeToColor}" Width="64"/>
+                        <Button Command="{Binding PickColorCommand}" CommandParameter="2" Content="Pick"/>
                     </DockPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>

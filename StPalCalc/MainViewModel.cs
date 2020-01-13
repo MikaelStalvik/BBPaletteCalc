@@ -104,6 +104,13 @@ namespace StPalCalc
             set { _generatedPalette = value; OnPropertyChanged(); }
         }
 
+        private string _fadeToColor;
+        public string FadeToColor
+        {
+            get => _fadeToColor;
+            set { _fadeToColor = value; OnPropertyChanged(); }
+        }
+
         private string _startColor;
         public string StartColor
         {
@@ -173,6 +180,7 @@ namespace StPalCalc
 
         public DelegateCommand<string> OpenPictureCommand { get; set; }
         public DelegateCommand<string> GenerateCommand { get; set; }
+        public DelegateCommand<string> FadeToColorCommand { get; set; }
         public DelegateCommand<string> FadeToBlackCommand { get; set; }
         public DelegateCommand<string> FadeToWhiteCommand { get; set; }
         public DelegateCommand<string> ChangeGradientColorCommand { get; set; }
@@ -314,6 +322,9 @@ namespace StPalCalc
                     case 1:
                         startColor = Helpers.FromStString(EndColor);
                         break;
+                    case 2:
+                        startColor = Helpers.FromStString(FadeToColor);
+                        break;
                 }
                 var c = ColorPickerWindow.PickColor(startColor);
                 if (c != null)
@@ -326,6 +337,9 @@ namespace StPalCalc
                             break;
                         case 1:
                             EndColor = stColor;
+                            break;
+                        case 2:
+                            FadeToColor = stColor;
                             break;
                     }
                 }
@@ -429,6 +443,10 @@ namespace StPalCalc
 
                 GeneratedPalette = sb.ToString();
                 UpdateGradientAction?.Invoke(data.ToList());
+            });
+            FadeToColorCommand = new DelegateCommand<string>(b =>
+            {
+                GenerateFade(_rawPalette, FadeToColor);
             });
             FadeToBlackCommand = new DelegateCommand<string>(b =>
             {
