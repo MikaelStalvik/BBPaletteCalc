@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:StPalCalc"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Bitbendaz Atari STe palette and raster toolkit" Height="512" Width="850" MinWidth="850">
+        Title="Bitbendaz Atari STe palette and raster toolkit" Height="528" Width="850" MinWidth="850">
     <Window.Resources>
         <local:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
