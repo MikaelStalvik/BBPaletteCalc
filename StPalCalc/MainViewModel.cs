@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using StPalCalc.PictureFormats;
 
 namespace StPalCalc
 {
@@ -23,6 +24,8 @@ namespace StPalCalc
         public Action RebindAction { get; set; }
         public Action<PictureType> UpdatePictureAction { get; set; }
         public Action<List<Color>> UpdateHueColorsAction { get; set; }
+
+        public IPicture PreviewPicture { get; set; }
 
         private GradientItem ClipboardItem { get; set; }
         public int StartGradientIndex { get; set; }
@@ -168,12 +171,12 @@ namespace StPalCalc
             {
                 _rasterIndexColor = value;
                 OnPropertyChanged();
-                RefreshPreviewImageCommand.Execute("");
+                RefreshRasterPreviewImageCommand.Execute("");
             }
         }
 
-        public string PreviewFilename { get; set; }
-        public ushort[] PreviewPalette = new ushort[16];
+        //public string PreviewFilename { get; set; }
+        //public ushort[] PreviewPalette = new ushort[16];
         private ushort[] _rawPaletteOrg = new ushort[16];
         private ushort[] _rawPalette = new ushort[16];
         private ushort[] _rawPaletteHue = new ushort[16];
@@ -195,15 +198,16 @@ namespace StPalCalc
         public DelegateCommand<string> ParseAsmGradientCommand { get; set; }
         public DelegateCommand<int> PickColorCommand { get; set; }
         public DelegateCommand<string> LoadPreviewImageCommand { get; set; }
-        public DelegateCommand<string> RefreshPreviewImageCommand { get; set; }
+        public DelegateCommand<string> RefreshRasterPreviewImageCommand { get; set; }
         public DelegateCommand<string> GenerateRastersCommand { get; set; }
         public DelegateCommand<HslSliderPayload> AdjustHueCommand { get; set; }
         public DelegateCommand<string> FadeFromPaletteToHueCommand { get; set; }
         public DelegateCommand<string> UpdatePalette1Command { get; set; }
 
-        private (bool, string) SelectPi1File()
+        private (bool, string) SelectPictureFile()
         {
-            var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;" };
+            //in a filter pattern with a semicolon. Example: \"Image files (*.bmp, *.jpg)|*.bmp;*.jpg|All files (*.*)|*.*\"'
+            var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1|IFF files|*.iff" };
             if (dlg.ShowDialog() == true)
             {
                 return (true, dlg.FileName);
@@ -293,22 +297,18 @@ namespace StPalCalc
                     SelectedGradientItem = null;
                 }
             });
-            RefreshPreviewImageCommand = new DelegateCommand<string>(_ =>
+            RefreshRasterPreviewImageCommand = new DelegateCommand<string>(_ =>
             {
-                if (File.Exists(PreviewFilename))
-                {
-                    ReadPalette(PreviewFilename, ref PreviewPalette);
-                    UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
-                }
+                UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
             });
             LoadPreviewImageCommand = new DelegateCommand<string>(_ =>
             {
-                var (res, filename) = SelectPi1File();
+                var (res, filename) = SelectPictureFile();
                 if (res)
-                { 
-                    PreviewFilename = filename;
-                    ReadPalette(PreviewFilename, ref PreviewPalette);
-                    UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
+                {
+                    PreviewPicture = PictureFactory.ReadPicture(filename);
+                    PreviewPicture.Load(filename);
+                    UpdatePictureAction?.Invoke(PictureType.PreviewPicture); 
                 }
             });
             PickColorCommand = new DelegateCommand<int>(index =>
@@ -418,7 +418,7 @@ namespace StPalCalc
 
             OpenPictureCommand = new DelegateCommand<string>(_ =>
             {
-                var (res, filename) = SelectPi1File();
+                var (res, filename) = SelectPictureFile();
                 if (res)
                 {
                     ActiveFilename = filename;
@@ -645,6 +645,7 @@ namespace StPalCalc
 
         public void RenderPi1(string filename, Image image, PictureType pictureType, bool useRaster = false)
         {
+            byte[] pd = new byte[320*200];
             var wbmp = BitmapFactory.New(320, 200);
             image.Source = wbmp;
             using (wbmp.GetBitmapContext())
@@ -693,9 +694,9 @@ namespace StPalCalc
                                     case PictureType.Picture1:
                                         stColor = _rawPalette[bv];
                                         break;
-                                    case PictureType.PreviewPicture:
-                                        stColor = PreviewPalette[bv];
-                                        break;
+                                    //case PictureType.PreviewPicture:
+                                    //    stColor = PreviewPalette[bv];
+                                    //    break;
                                     case PictureType.Picture1Hue:
                                         stColor = _rawPaletteHue[bv];
                                         break;
@@ -704,6 +705,7 @@ namespace StPalCalc
                             }
 
                             wbmp.SetPixel((xo + p), y, outCol);
+                            pd[(xo + p) + (y * 200)] = (byte)bv;
                         }
 
                         xo += 16;

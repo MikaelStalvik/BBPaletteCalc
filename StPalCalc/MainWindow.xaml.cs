@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Linq;
+using StPalCalc.iff;
+using StPalCalc.PictureFormats;
 
 namespace StPalCalc
 {
@@ -17,6 +19,8 @@ namespace StPalCalc
         {
             InitializeComponent();
             DataContext = _vm;
+
+
             DataTypesCombo.ItemsSource = _vm.DataTypes;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
@@ -104,7 +108,7 @@ namespace StPalCalc
                         _vm.RenderPi1(_vm.ActiveFilename, Image1, pictureType);
                         break;
                     case PictureType.PreviewPicture:
-                        _vm.RenderPi1(_vm.PreviewFilename, PreviewImage, pictureType, true);
+                        _vm.PreviewPicture.RenderWithRasters(PreviewImage, _vm.GradientItems.ToList(), _vm.RasterColorIndex);
                         break;
                 }
             };
@@ -165,6 +169,13 @@ namespace StPalCalc
 
         private void ResetButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
+            IPicture pi1;
+            pi1 = new Pi1Picture();
+            pi1.Load(@"C:\dev\Misery-master\gfx\303.pi1");
+            //var pi1 = new Pi1Picture();
+            //var iff = new IffReader(); 
+            //iff.Parse(@"C:\dev\Misery-master\gfx\sc_gerp.iff");
+
             HueSlider.Value = 0;
             SaturationSlider.Value = 0;
             LightnessSlider.Value = 0;
