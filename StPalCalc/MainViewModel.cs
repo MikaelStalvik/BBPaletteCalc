@@ -256,6 +256,7 @@ namespace StPalCalc
                     index++;
                 }
                 HuePalette = newColors.ToArray();
+                ActivePicture.ActivePalette = newColors.ToArray();
                 UpdateHueColorsAction?.Invoke(newColors);
             });
             GenerateRastersCommand = new DelegateCommand<string>(_ =>
@@ -423,7 +424,7 @@ namespace StPalCalc
                 {
                     ActivePicture = PictureFactory.GetPicture(filename);
                     ActiveFilename = filename;
-                    RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.OriginalPalette);
+                    RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
                     UpdatePictureAction?.Invoke(PictureType.Picture1);
                     UpdateUiAction?.Invoke();
                 }
@@ -446,20 +447,23 @@ namespace StPalCalc
             });
             FadeToColorCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(_rawPalette, FadeToColor);
+                if (ActivePicture?.ActivePalette == null) return;
+                GenerateFade(ActivePicture.ActivePalette, FadeToColor);
             });
             FadeToBlackCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(_rawPalette, "0");
+                if (ActivePicture?.ActivePalette == null) return;
+                GenerateFade(ActivePicture.ActivePalette, "0");
             });
             FadeToWhiteCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(_rawPalette, "FFF");
+                if (ActivePicture?.ActivePalette == null) return;
+                GenerateFade(ActivePicture.ActivePalette, "FFF");
             });
             FadeFromPaletteToHueCommand = new DelegateCommand<string>(_ =>
             {
                 if (ActivePicture?.OriginalPalette == null || HuePalette == null) return;
-                GenerateFade(ActivePicture.OriginalPalette, HuePalette);
+                GenerateFade(ActivePicture.OriginalPalette, ActivePicture.ActivePalette);
             });
             ChangeGradientColorCommand = new DelegateCommand<string>(s =>
             {
@@ -532,14 +536,13 @@ namespace StPalCalc
                 }
             }
         }
-        private void GenerateFade(ushort[] palette, string endColorStr)
+        private void GenerateFade(Color[] fromPalette, string endColorStr)
         {
             var generatedColors = new Color[16 * 16];
             var stColors = new string[16 * 16];
             for (var i = 0; i < 16; i++)
             {
-                var c = palette[i].ToString("X2");
-                var startColor = Helpers.FromStString(c);
+                var startColor = fromPalette[i];
                 var endColor = Helpers.FromStString(endColorStr);
                 var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
 

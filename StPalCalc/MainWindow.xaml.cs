@@ -31,13 +31,13 @@ namespace StPalCalc
                 ColorsStackPanel1.Children.Clear();
                 for (var i = 0; i < 16; i++)
                 {
-                    var color = _vm.ActivePicture.OriginalPalette[i]; // GetRgbFromPalette1(i);
+                    var color = _vm.ActivePicture.ActivePalette[i];
                     var r = new Rectangle
                     {
                         Fill = new SolidColorBrush(color),
                         Width = 24,
                         Height = 24,
-                        ToolTip = Helpers.ConvertFromRgbTo12Bit(color) // _vm.Get12BitRgbFromPalette1(i)
+                        ToolTip = Helpers.ConvertFromRgbTo12Bit(color)
                     };
                     var btn = new Button {Content = r, Tag = i};
                     btn.Click += (sender, args) =>
@@ -45,7 +45,7 @@ namespace StPalCalc
                         var b = (Button) sender;
                         var index = (int) b.Tag;
                         var pc = ColorPickerWindow.PickColor(
-                            _vm.ActivePicture.OriginalPalette[index]); // _vm.GetRgbFromPalette1(index)
+                            _vm.ActivePicture.ActivePalette[index]);
                         if (pc != null)
                         {
                             var stColor = Helpers.ConvertFromRgbTo12Bit(pc.Value, true);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -13,6 +14,7 @@ namespace StPalCalc.PictureFormats
         private int _height { get; set; }
         private ushort[] _original12BitPalette = new ushort[16];
         public Color[] OriginalPalette { get; private set; }
+        public Color[] ActivePalette { get; set; }
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
         public void Load(string filename)
@@ -22,6 +24,7 @@ namespace StPalCalc.PictureFormats
             Filename = filename;
             ReadPalette(filename, ref _original12BitPalette);
             Map12BitPaletteToRgb();
+            ActivePalette = OriginalPalette.ToArray();
             ReadPixels(filename);
         }
 

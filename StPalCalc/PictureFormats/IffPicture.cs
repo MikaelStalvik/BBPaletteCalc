@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -12,6 +13,7 @@ namespace StPalCalc.PictureFormats
         private int _width { get; set; }
         private int _height { get; set; }
         public Color[] OriginalPalette { get; private set; }
+        public Color[] ActivePalette { get; set; }
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
         public void Load(string filename)
@@ -23,6 +25,7 @@ namespace StPalCalc.PictureFormats
             _width = w;
             _height = h;
             OriginalPalette = new Color[iff.CMAP.Length];
+            ActivePalette = OriginalPalette.ToArray();
             for (var i = 0; i < iff.CMAP.Length; i++) OriginalPalette[i] = iff.CMAP[i];
             _pixelData = new byte[_width*_height];
             for (var i = 0; i < iff.PixelData.Length; i++)

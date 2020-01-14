@@ -7,6 +7,7 @@ namespace StPalCalc
     public interface IPicture
     {
         Color[] OriginalPalette { get; }
+        Color[] ActivePalette { get; set;  }
         string Filename { get; }
         (int, int) GetDimensions { get; }
         void Load(string filename);
