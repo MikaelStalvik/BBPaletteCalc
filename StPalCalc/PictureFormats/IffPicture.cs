@@ -36,7 +36,7 @@ namespace StPalCalc.PictureFormats
 
         public void Render(Image target, Color[] specialPalette = null)
         {
-            var palette = specialPalette ?? OriginalPalette;
+            var palette = specialPalette ?? ActivePalette;
             var wbmp = BitmapFactory.New(_width, _height);
             target.Source = wbmp;
             using (wbmp.GetBitmapContext())
@@ -69,7 +69,7 @@ namespace StPalCalc.PictureFormats
                         }
                         else
                         {
-                            wbmp.SetPixel(x, y, OriginalPalette[bv]);
+                            wbmp.SetPixel(x, y, ActivePalette[bv]);
                         }
                     }
                 }

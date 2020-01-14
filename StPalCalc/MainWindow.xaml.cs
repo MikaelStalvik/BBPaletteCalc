@@ -1,11 +1,8 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Linq;
-using StPalCalc.iff;
-using StPalCalc.PictureFormats;
 
 namespace StPalCalc
 {
@@ -16,6 +13,34 @@ namespace StPalCalc
     {
         private readonly MainViewModel _vm = new MainViewModel();
 
+        private void RebuildActivePalette()
+        {
+            ColorsStackPanel1.Children.Clear();
+            for (var i = 0; i < 16; i++)
+            {
+                var color = _vm.ActivePicture.ActivePalette[i];
+                var r = new Rectangle
+                {
+                    Fill = new SolidColorBrush(color),
+                    Width = 24,
+                    Height = 24,
+                    ToolTip = Helpers.ConvertFromRgbTo12Bit(color)
+                };
+                var btn = new Button { Content = r, Tag = i };
+                btn.Click += (sender, args) =>
+                {
+                    var b = (Button)sender;
+                    var index = (int)b.Tag;
+                    var pc = ColorPickerWindow.PickColor(_vm.ActivePicture.ActivePalette[index]);
+                    if (pc != null)
+                    {
+                        _vm.SetPaletteValue(pc.Value, index);
+                        _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
+                    }
+                };
+                ColorsStackPanel1.Children.Add(btn);
+            }
+        }
         public MainWindow()
         {
             InitializeComponent();
@@ -28,35 +53,8 @@ namespace StPalCalc
             _vm.EndColor = "770";
             _vm.UpdateUiAction += () =>
             {
-                ColorsStackPanel1.Children.Clear();
-                for (var i = 0; i < 16; i++)
-                {
-                    var color = _vm.ActivePicture.ActivePalette[i];
-                    var r = new Rectangle
-                    {
-                        Fill = new SolidColorBrush(color),
-                        Width = 24,
-                        Height = 24,
-                        ToolTip = Helpers.ConvertFromRgbTo12Bit(color)
-                    };
-                    var btn = new Button {Content = r, Tag = i};
-                    btn.Click += (sender, args) =>
-                    {
-                        var b = (Button) sender;
-                        var index = (int) b.Tag;
-                        var pc = ColorPickerWindow.PickColor(
-                            _vm.ActivePicture.ActivePalette[index]);
-                        if (pc != null)
-                        {
-                            var stColor = Helpers.ConvertFromRgbTo12Bit(pc.Value, true);
-                            _vm.SetPaletteValue((ushort) Convert.ToInt32(stColor, 16), index);
-                            _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
-                        }
-                    };
-                    ColorsStackPanel1.Children.Add(btn);
-                }
-
-                HueSlider_OnValueChanged(null, null);
+                RebuildActivePalette();
+                HueSlider_OnValueChanged(null, null); // TODO skip when pick color
             };
             _vm.UpdateGradientAction += colors =>
             {
@@ -132,6 +130,7 @@ namespace StPalCalc
 
                 _vm.ActivePicture?.Render(Image1, _vm.HuePalette);
                 _vm.RawPalette = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
+                RebuildActivePalette();
             };
         }
 

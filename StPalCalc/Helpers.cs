@@ -12,7 +12,7 @@ namespace StPalCalc
             var sb = new StringBuilder();
             for (var i = 0; i < 16; i++)
             {
-                var stColor = ConvertFromRgbTo12Bit(palette[i], false);
+                var stColor = ConvertFromRgbTo12Bit(palette[i]);
                 sb.Append(stColor);
                 if (i != 15) sb.Append(",");
             }
