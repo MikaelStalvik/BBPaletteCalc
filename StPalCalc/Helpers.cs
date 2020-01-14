@@ -7,6 +7,17 @@ namespace StPalCalc
 {
     public static class Helpers
     {
+        public static string RgbPaletteTo12BitString(Color[] palette)
+        {
+            var sb = new StringBuilder();
+            for (var i = 0; i < 16; i++)
+            {
+                var stColor = ConvertFromRgbTo12Bit(palette[i], false);
+                sb.Append(stColor);
+                if (i != 15) sb.Append(",");
+            }
+            return sb.ToString();
+        }
         public static Color FromStString(string source)
         {
             int asHex;

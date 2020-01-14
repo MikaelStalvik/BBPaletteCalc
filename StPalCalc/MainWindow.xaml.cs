@@ -15,11 +15,13 @@ namespace StPalCalc
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm = new MainViewModel();
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = _vm;
 
+            // Todo: support more than 16 colors
 
             DataTypesCombo.ItemsSource = _vm.DataTypes;
             _vm.StartColor = "700";
@@ -29,29 +31,31 @@ namespace StPalCalc
                 ColorsStackPanel1.Children.Clear();
                 for (var i = 0; i < 16; i++)
                 {
-                    var color = _vm.GetRgbFromPalette1(i);
+                    var color = _vm.ActivePicture.OriginalPalette[i]; // GetRgbFromPalette1(i);
                     var r = new Rectangle
                     {
                         Fill = new SolidColorBrush(color),
                         Width = 24,
                         Height = 24,
-                        ToolTip = _vm.Get12BitRgbFromPalette1(i)
+                        ToolTip = Helpers.ConvertFromRgbTo12Bit(color) // _vm.Get12BitRgbFromPalette1(i)
                     };
                     var btn = new Button {Content = r, Tag = i};
                     btn.Click += (sender, args) =>
                     {
                         var b = (Button) sender;
                         var index = (int) b.Tag;
-                        var pc = ColorPickerWindow.PickColor(_vm.GetRgbFromPalette1(index));
+                        var pc = ColorPickerWindow.PickColor(
+                            _vm.ActivePicture.OriginalPalette[index]); // _vm.GetRgbFromPalette1(index)
                         if (pc != null)
                         {
                             var stColor = Helpers.ConvertFromRgbTo12Bit(pc.Value, true);
-                            _vm.SetPaletteValue((ushort)Convert.ToInt32(stColor, 16), index);
+                            _vm.SetPaletteValue((ushort) Convert.ToInt32(stColor, 16), index);
                             _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
                         }
                     };
                     ColorsStackPanel1.Children.Add(btn);
                 }
+
                 HueSlider_OnValueChanged(null, null);
             };
             _vm.UpdateGradientAction += colors =>
@@ -105,7 +109,7 @@ namespace StPalCalc
                 switch (pictureType)
                 {
                     case PictureType.Picture1:
-                        _vm.RenderPi1(_vm.ActiveFilename, Image1, pictureType);
+                        _vm.ActivePicture.Render(Image1);
                         break;
                     case PictureType.PreviewPicture:
                         _vm.PreviewPicture.RenderWithRasters(PreviewImage, _vm.GradientItems.ToList(), _vm.RasterColorIndex);
@@ -125,7 +129,9 @@ namespace StPalCalc
                     };
                     HueColorsStackPanel1.Children.Add(r);
                 }
-                _vm.RenderPi1(_vm.ActiveFilename, Image1, PictureType.Picture1Hue);
+
+                _vm.ActivePicture?.Render(Image1, _vm.HuePalette);
+                _vm.RawPalette = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
             };
         }
 
@@ -169,13 +175,6 @@ namespace StPalCalc
 
         private void ResetButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            IPicture pi1;
-            pi1 = new Pi1Picture();
-            pi1.Load(@"C:\dev\Misery-master\gfx\303.pi1");
-            //var pi1 = new Pi1Picture();
-            //var iff = new IffReader(); 
-            //iff.Parse(@"C:\dev\Misery-master\gfx\sc_gerp.iff");
-
             HueSlider.Value = 0;
             SaturationSlider.Value = 0;
             LightnessSlider.Value = 0;

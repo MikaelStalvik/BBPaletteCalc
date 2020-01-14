@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -10,23 +8,22 @@ namespace StPalCalc.PictureFormats
 {
     public class IffPicture : IPicture
     {
-        private Color[] _originalPalette;
         private byte[] _pixelData;
         private int _width { get; set; }
         private int _height { get; set; }
-        private string _filename;
-        public string Filename => _filename;
+        public Color[] OriginalPalette { get; private set; }
+        public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
         public void Load(string filename)
         {
-            _filename = filename;
+            Filename = filename;
             var iff = new IffReader();
             iff.Parse(filename);
             var (w, h) = iff.GetDimensions;
             _width = w;
             _height = h;
-            _originalPalette = new Color[iff.CMAP.Length];
-            for (var i = 0; i < iff.CMAP.Length; i++) _originalPalette[i] = iff.CMAP[i];
+            OriginalPalette = new Color[iff.CMAP.Length];
+            for (var i = 0; i < iff.CMAP.Length; i++) OriginalPalette[i] = iff.CMAP[i];
             _pixelData = new byte[_width*_height];
             for (var i = 0; i < iff.PixelData.Length; i++)
             {
@@ -34,8 +31,9 @@ namespace StPalCalc.PictureFormats
             }
         }
 
-        public void Render(Image target)
+        public void Render(Image target, Color[] specialPalette = null)
         {
+            var palette = specialPalette ?? OriginalPalette;
             var wbmp = BitmapFactory.New(_width, _height);
             target.Source = wbmp;
             using (wbmp.GetBitmapContext())
@@ -45,9 +43,7 @@ namespace StPalCalc.PictureFormats
                     for (var x = 0; x < _width; x++)
                     {
                         var bv = _pixelData[x + y * _width];
-                        //var stColor = _originalPalette[bv];
-                        //var outCol = Helpers.FromStString(stColor.ToString("X2"));
-                        wbmp.SetPixel(x, y, _originalPalette[bv]);
+                        wbmp.SetPixel(x, y, palette[bv]);
                     }
                 }
             }
@@ -70,7 +66,7 @@ namespace StPalCalc.PictureFormats
                         }
                         else
                         {
-                            wbmp.SetPixel(x, y, _originalPalette[bv]);
+                            wbmp.SetPixel(x, y, OriginalPalette[bv]);
                         }
                     }
                 }
