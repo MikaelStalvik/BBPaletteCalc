@@ -18,31 +18,11 @@ namespace StPalCalc
 
         private void RebuildActivePalette()
         {
-            ColorsStackPanel1.Children.Clear();
-            for (var i = 0; i < _vm.ActivePicture.ActivePalette.Length; i++)
+            ColorsPaletteControl.Update(_vm.ActivePicture.ActivePalette, (color, index) =>
             {
-                var color = _vm.ActivePicture.ActivePalette[i];
-                var r = new Rectangle
-                {
-                    Fill = new SolidColorBrush(color),
-                    Width = 24,
-                    Height = 24,
-                    ToolTip = Helpers.ConvertFromRgbTo12Bit(color)
-                };
-                var btn = new Button { Content = r, Tag = i };
-                btn.Click += (sender, args) =>
-                {
-                    var b = (Button)sender;
-                    var index = (int)b.Tag;
-                    var pc = ColorPickerWindow.PickColor(_vm.ActivePicture.ActivePalette[index]);
-                    if (pc != null)
-                    {
-                        _vm.SetPaletteValue(pc.Value, index);
-                        _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
-                    }
-                };
-                ColorsStackPanel1.Children.Add(btn);
-            }
+                _vm.SetPaletteValue(color, index);
+                _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
+            }, true);
         }
         public MainWindow()
         {
@@ -62,28 +42,24 @@ namespace StPalCalc
             };
             _vm.UpdateGradientAction += colors =>
             {
-                GeneratedColorsStackPanel.Children.Clear();
-                foreach (var color in colors)
-                {
-                    var r = new Rectangle
-                    {
-                        Fill = new SolidColorBrush(color),
-                        Width = 24,
-                        Height = 24,
-                        ToolTip = Helpers.ConvertFromRgbTo12Bit(color)
-                    };
-                    GeneratedColorsStackPanel.Children.Add(r);
-                }
+                GeneratedGradientPresenter.Update(colors.ToArray(), null, false);
             };
             _vm.UpdatePreviewFadeAction += colors =>
             {
+                PreviewPanel.Width = _vm.ActivePicture.ActivePalette.Length * 24;
                 PreviewPanel.Children.Clear();
                 for (var y = 0; y < Constants.FADE_STEPS; y++)
                 {
-                    for (var x = 0; x < colors.Length; x++)
+                    for (var x = 0; x < _vm.ActivePicture.ActivePalette.Length; x++)
                     {
-                        var ofs = x + y * colors.Length;
-                        var r = new Rectangle { Fill = new SolidColorBrush(colors[ofs]), Width = 24, Height = 24 };
+                        var ofs = x + y * _vm.ActivePicture.ActivePalette.Length;
+                        var r = new Rectangle
+                        {
+                            Fill = new SolidColorBrush(colors[ofs]), 
+                            Width = 24, 
+                            Height = 24,
+                            ToolTip = Helpers.ConvertFromRgbTo12Bit(colors[ofs]) + $" index: {x}, row: {y}"
+                        };
                         PreviewPanel.Children.Add(r);
                     }
                 }
@@ -120,18 +96,7 @@ namespace StPalCalc
             };
             _vm.UpdateHueColorsAction += colors =>
             {
-                HueColorsStackPanel1.Children.Clear();
-                foreach (var color in colors)
-                {
-                    var r = new Rectangle
-                    {
-                        Fill = new SolidColorBrush(color),
-                        Width = 24,
-                        Height = 24,
-                    };
-                    HueColorsStackPanel1.Children.Add(r);
-                }
-
+                HSLPalettePresenter.Update(colors.ToArray(), null, false);
                 _vm.ActivePicture?.Render(Image1, _vm.HuePalette);
                 _vm.RawPalette = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
                 RebuildActivePalette();

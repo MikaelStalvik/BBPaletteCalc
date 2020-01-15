@@ -140,17 +140,6 @@ namespace StPalCalc
             }
         }
 
-        //private string _orgPaletteRgb;
-        //public string OrgPaletteRgb
-        //{
-        //    get => _orgPaletteRgb;
-        //    set
-        //    {
-        //        _orgPaletteRgb = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
         private string _activeFilename;
         public string ActiveFilename
         {
