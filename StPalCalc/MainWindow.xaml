@@ -7,7 +7,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:userControls="clr-namespace:StPalCalc.UserControls"
         mc:Ignorable="d"
-        Title="Bitbendaz palette and raster toolkit" Height="540" Width="850" MinWidth="850">
+        Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="850">
     <Window.Resources>
         <local:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
@@ -21,6 +21,8 @@
         <DockPanel LastChildFill="False" Grid.Row="0" Margin="0,8,0,0">
             <TextBlock Text="Data type:" Margin="8,0,0,0" VerticalAlignment="Center"/>
             <ComboBox x:Name="DataTypesCombo" SelectedIndex="1" Margin="4,0,0,0" SelectionChanged="DataTypesCombo_OnSelectionChanged"/>
+            <TextBlock Text="Platform:" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            <ComboBox x:Name="PlatformCombo" SelectedIndex="0" Margin="4,0,0,0" SelectionChanged="PlatformCombo_OnSelectionChanged"/>
         </DockPanel>
 
         <TabControl Margin="8" Grid.Row="1">
@@ -47,13 +49,12 @@
                                 <Image x:Name="Image1" Width="320" Height="200" Margin="0,0,0,8"/>
                                 <DockPanel>
                                     <Button Click="ResetButtonBase_OnClick" Content="Reset" Margin="0,8,0,0" DockPanel.Dock="Right" Width="72" VerticalAlignment="Top" MaxHeight="24"/>
-                                    <!--<WrapPanel ItemWidth="24" ItemHeight="24" x:Name="ColorsWrapPanel" MaxWidth="384"/>-->
                                     <userControls:PalettePresenterUserControl x:Name="ColorsPaletteControl"/>
                                 </DockPanel>
 
                                 <DockPanel Margin="0,8,0,0">
                                     <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
-                                    <TextBox Text="{Binding RawPalette}" x:Name="Palette1TextBox"/>
+                                    <TextBox Text="{Binding ActivePaletteString}" x:Name="Palette1TextBox" Margin="4,0,0,0"/>
                                 </DockPanel>
 
                                 <DockPanel Margin="0,8,0,0">

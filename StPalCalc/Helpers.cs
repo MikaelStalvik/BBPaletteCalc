@@ -5,16 +5,23 @@ using System.Windows.Media;
 
 namespace StPalCalc
 {
+    public enum PlatformTypes
+    {
+        AtariSte,
+        Amiga
+    };
     public static class Helpers
     {
+        public static  PlatformTypes ActivePlatform { get; set; }
+
         public static string RgbPaletteTo12BitString(Color[] palette)
         {
             var sb = new StringBuilder();
-            for (var i = 0; i < 16; i++)
+            for (var i = 0; i < palette.Length; i++)
             {
                 var stColor = ConvertFromRgbTo12Bit(palette[i]);
                 sb.Append(stColor);
-                if (i != 15) sb.Append(",");
+                if (i < palette.Length-1) sb.Append(",");
             }
             return sb.ToString();
         }
@@ -135,7 +142,15 @@ namespace StPalCalc
             var b2 = data[9];
             var b3 = data[10];
             var b4 = data[11];
-            return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+            switch (ActivePlatform)
+            {
+                case PlatformTypes.AtariSte:
+                    return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                case PlatformTypes.Amiga:
+                    return (byte) (b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                default:
+                    return 0;
+            }
         }
         public static byte GetGValue(List<byte> data)
         {
@@ -143,7 +158,15 @@ namespace StPalCalc
             var b2 = data[5];
             var b3 = data[6];
             var b4 = data[7];
-            return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+            switch (ActivePlatform)
+            {
+                case PlatformTypes.AtariSte:
+                    return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                case PlatformTypes.Amiga:
+                    return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                default:
+                    return 0;
+            }
         }
         public static byte GetBValue(List<byte> data)
         {
@@ -151,27 +174,42 @@ namespace StPalCalc
             var b2 = data[1];
             var b3 = data[2];
             var b4 = data[3];
-            return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+            switch (ActivePlatform)
+            {
+                case PlatformTypes.AtariSte:
+                    return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                case PlatformTypes.Amiga:
+                    return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                default:
+                    return 0;
+            }
         }
 
         public static string ConvertFromRgbTo12Bit(Color color, bool skipDollar = false)
         {
-            var r = RemapToStColor((byte)(color.R / 16));
-            var g = RemapToStColor((byte)(color.G / 16));
-            var b = RemapToStColor((byte)(color.B / 16));
-            if (skipDollar)
-                return $"{r:X}{g:X}{b:X}";
-            return $"${r:X}{g:X}{b:X}";
+            byte r = 0;
+            byte g = 0;
+            byte b = 0;
+            switch (ActivePlatform)
+            {
+                case PlatformTypes.AtariSte:
+                    r = RemapToStColor((byte)(color.R / 16));
+                    g = RemapToStColor((byte)(color.G / 16));
+                    b = RemapToStColor((byte)(color.B / 16));
+                    break;
+                case PlatformTypes.Amiga:
+                    r = (byte)(color.R / 16);
+                    g = (byte)(color.G / 16);
+                    b = (byte)(color.B / 16);
+                    break;
+            }
+            return skipDollar ? $"{r:X}{g:X}{b:X}" : $"${r:X}{g:X}{b:X}";
         }
         private static byte RemapFrom12BitToRgb(byte source)
         {
             return (byte)(source * 16);
         }
-        public static Color ToColor(byte r, byte g, byte b)
-        {
-            return Color.FromRgb((byte)(r * 16), (byte)(g * 16), (byte)(b * 16));
-        }
-
+        
         private static void GetScaledRgbPartsFromColor(Color color, out byte r, out byte g, out byte b)
         {
             r = (byte)(color.R / 16);

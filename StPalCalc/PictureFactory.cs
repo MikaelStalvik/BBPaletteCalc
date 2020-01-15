@@ -11,8 +11,8 @@ namespace StPalCalc
             IPicture picture = null;
             if (ext == ".pi1") picture = new Pi1Picture();
             if (ext == ".iff") picture = new IffPicture();
-            picture?.Load(filename);
-            return picture;
+            if (picture != null && picture.Load(filename)) return picture;
+            return null;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace StPalCalc
         int Colors { get; }
         string Filename { get; }
         (int, int) GetDimensions { get; }
-        void Load(string filename);
+        bool Load(string filename);
         void Render(Image target, Color[] specialPalette = null);
         void RenderWithRasters(Image target, List<GradientItem> rasters, int maskIndex);
     }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -18,11 +19,16 @@ namespace StPalCalc.PictureFormats
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
         public int Colors { get; private set; }
-        public void Load(string filename)
+        public bool Load(string filename)
         {
             Filename = filename;
             var iff = new IffReader();
             iff.Parse(filename);
+            if (iff.CMAP == null)
+            {
+                MessageBox.Show("Unsupported IFF (24-bit?)");
+                return false;
+            }
             var (w, h) = iff.GetDimensions;
             _width = w;
             _height = h;
@@ -35,6 +41,8 @@ namespace StPalCalc.PictureFormats
             {
                 _pixelData[i] = iff.PixelData[i];
             }
+
+            return true;
         }
 
         public void Render(Image target, Color[] specialPalette = null)

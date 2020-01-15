@@ -18,7 +18,7 @@ namespace StPalCalc.PictureFormats
         public int Colors => 16;
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
-        public void Load(string filename)
+        public bool Load(string filename)
         {
             _width = 320;
             _height = 200;
@@ -27,6 +27,7 @@ namespace StPalCalc.PictureFormats
             Map12BitPaletteToRgb();
             ActivePalette = OriginalPalette.ToArray();
             ReadPixels(filename);
+            return true;
         }
 
         private void Map12BitPaletteToRgb()

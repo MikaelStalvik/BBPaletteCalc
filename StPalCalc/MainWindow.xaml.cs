@@ -12,6 +12,8 @@ namespace StPalCalc
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// TODO: Support variable steps
+    /// TODO: Support more than 200 raster items
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm = new MainViewModel();
@@ -30,6 +32,7 @@ namespace StPalCalc
             DataContext = _vm;
 
             DataTypesCombo.ItemsSource = _vm.DataTypes;
+            PlatformCombo.ItemsSource = _vm.Platforms;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
             _vm.UpdateUiAction += updateHue =>
@@ -98,7 +101,7 @@ namespace StPalCalc
             {
                 HSLPalettePresenter.Update(colors.ToArray(), null, false);
                 _vm.ActivePicture?.Render(Image1, _vm.HuePalette);
-                _vm.RawPalette = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
+                _vm.ActivePaletteString = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
                 RebuildActivePalette();
             };
         }
@@ -134,6 +137,11 @@ namespace StPalCalc
         private void DataTypesCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _vm.SelectedDataType = ((ComboBox) sender).SelectedIndex;
+        }
+        private void PlatformCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _vm.SelectedPlatform = ((ComboBox) sender).SelectedIndex;
+            _vm.UpdateCurrentPicture();
         }
 
         private void HueSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

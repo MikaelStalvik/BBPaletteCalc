@@ -75,13 +75,12 @@ namespace StPalCalc
             }
         }
 
-        public ObservableCollection<string> DataTypes = new ObservableCollection<string>
+        public readonly ObservableCollection<string> DataTypes = new ObservableCollection<string>
         {
             "Byte (dc.b)",
             "Word (dc.w)",
             "Long (dc.l)"
         };
-
         private int _selectedDataType;
         public int SelectedDataType
         {
@@ -92,6 +91,25 @@ namespace StPalCalc
                 OnPropertyChanged();
             }
         }
+
+        public readonly ObservableCollection<string> Platforms = new ObservableCollection<string>
+        {
+            "Atari Ste",
+            "Amiga"
+        };
+        private int _selectedPlatform;
+        public int SelectedPlatform
+        {
+            get => _selectedPlatform;
+            set
+            {
+                _selectedPlatform = value;
+                Helpers.ActivePlatform = (PlatformTypes) _selectedPlatform;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         private string _previewText;
         public string PreviewText
@@ -129,13 +147,13 @@ namespace StPalCalc
         }
 
 
-        private string _rawPaletteString;
-        public string RawPalette
+        private string _activePaletteString;
+        public string ActivePaletteString
         {
-            get => _rawPaletteString;
+            get => _activePaletteString;
             set
             {
-                _rawPaletteString = value;
+                _activePaletteString = value;
                 OnPropertyChanged();
             }
         }
@@ -188,7 +206,7 @@ namespace StPalCalc
 
         private (bool, string) SelectPictureFile()
         {
-            var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1|IFF files|*.iff|All files|*.iff;*.pi1" };
+            var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "All files|*.iff;*.pi1|PI1 files|*.pi1|IFF files|*.iff" };
             if (dlg.ShowDialog() == true)
             {
                 return (true, dlg.FileName);
@@ -401,8 +419,9 @@ namespace StPalCalc
                 if (res)
                 {
                     ActivePicture = PictureFactory.GetPicture(filename);
+                    if (ActivePicture == null) return;
                     ActiveFilename = filename;
-                    RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+                    ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
                     UpdatePictureAction?.Invoke(PictureType.Picture1);
                     UpdateUiAction?.Invoke(true);
                 }
@@ -584,7 +603,7 @@ namespace StPalCalc
         public void SetPaletteValue(Color color, int index)
         {
             ActivePicture.ActivePalette[index] = color;
-            RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
             UpdateUiAction?.Invoke(false);
         }
 
@@ -592,9 +611,17 @@ namespace StPalCalc
         {
             if (ActivePicture == null) return;
             ActivePicture.ActivePalette = ActivePicture.OriginalPalette.ToArray();
-            RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
             UpdateUiAction?.Invoke(true);
             UpdatePictureAction?.Invoke(PictureType.Picture1);
+        }
+
+        public void UpdateCurrentPicture()
+        {
+            if (ActivePicture == null) return;
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            UpdatePictureAction?.Invoke(PictureType.Picture1);
+            UpdateUiAction?.Invoke(true);
         }
 
     }
