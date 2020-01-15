@@ -24,13 +24,13 @@ namespace StPalCalc.PictureFormats
             _height = 200;
             Filename = filename;
             ReadPalette(filename, ref _original12BitPalette);
-            Map12BitPaletteToRgb();
+            MapPaletteToRgb();
             ActivePalette = OriginalPalette.ToArray();
             ReadPixels(filename);
             return true;
         }
 
-        private void Map12BitPaletteToRgb()
+        private void MapPaletteToRgb()
         {
             OriginalPalette = new Color[Colors];
             for (var i = 0; i < Colors; i++)

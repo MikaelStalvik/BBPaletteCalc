@@ -219,7 +219,10 @@ namespace StPalCalc
         }
         private static byte RemapFrom12BitToRgb(byte source)
         {
-            return (byte)(source * ScaleFactor);
+            var scaledCol = ((source + 1) * ScaleFactor) - 1;
+            if (scaledCol < 0) scaledCol = 0;
+            if (scaledCol > 255) scaledCol = 255;
+            return (byte)scaledCol;
         }
 
         private static int ScaleFactor => ActivePlatform == PlatformTypes.AtariSt ? 32 : 16;
