@@ -422,7 +422,7 @@ namespace StPalCalc
             {
                 var startColor = Helpers.FromStString(_startColor);
                 var endColor = Helpers.FromStString(_endColor);
-                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+                var data = Helpers.GetGradients(startColor, endColor, Constants.GRADIENT_STEPS).ToList();
 
                 var sb = new StringBuilder();
                 foreach (var color in data)
@@ -527,30 +527,30 @@ namespace StPalCalc
         }
         private void GenerateFade(Color[] fromPalette, string endColorStr)
         {
-            var generatedColors = new Color[16 * 16];
-            var stColors = new string[16 * 16];
-            for (var i = 0; i < 16; i++)
+            var generatedColors = new Color[fromPalette.Length * Constants.FADE_STEPS]; // 16 * 16
+            var stColors = new string[fromPalette.Length * Constants.FADE_STEPS]; // 16 * 16
+            for (var i = 0; i < fromPalette.Length; i++)
             {
                 var startColor = fromPalette[i];
                 var endColor = Helpers.FromStString(endColorStr);
-                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+                var data = Helpers.GetGradients(startColor, endColor, Constants.FADE_STEPS).ToList();
 
-                for (var j = 0; j < 16; j++)
+                for (var j = 0; j < Constants.FADE_STEPS; j++)
                 {
-                    var ofs = i + j * 16;
+                    var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
                     stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
                 }
             }
             var sb = new StringBuilder();
-            for (var y = 0; y < 16; y++)
+            for (var y = 0; y < Constants.FADE_STEPS; y++)
             {
                 sb.Append("\t" + SelectedDataTypePrefix);
-                for (var x = 0; x < 16; x++)
+                for (var x = 0; x < fromPalette.Length; x++)
                 {
-                    var ofs = x + y * 16;
+                    var ofs = x + y * fromPalette.Length;
                     sb.Append(stColors[ofs]);
-                    if (x < 15) sb.Append(",");
+                    if (x < fromPalette.Length-1) sb.Append(",");
                 }
                 sb.AppendLine(string.Empty);
             }
@@ -560,30 +560,30 @@ namespace StPalCalc
         }
         private void GenerateFade(Color[] fromPalette, Color[] toPalette)
         {
-            var generatedColors = new Color[16 * 16];
-            var stColors = new string[16 * 16];
-            for (var i = 0; i < 16; i++)
+            var generatedColors = new Color[fromPalette.Length * Constants.FADE_STEPS];
+            var stColors = new string[fromPalette.Length * Constants.FADE_STEPS];
+            for (var i = 0; i < fromPalette.Length; i++)
             {
                 var startColor = fromPalette[i];
                 var endColor = toPalette[i];
-                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+                var data = Helpers.GetGradients(startColor, endColor, Constants.FADE_STEPS).ToList();
 
-                for (var j = 0; j < 16; j++)
+                for (var j = 0; j < Constants.FADE_STEPS; j++)
                 {
-                    var ofs = i + j * 16;
+                    var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
                     stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
                 }
             }
             var sb = new StringBuilder();
-            for (var y = 0; y < 16; y++)
+            for (var y = 0; y < Constants.FADE_STEPS; y++)
             {
                 sb.Append("\t" + SelectedDataTypePrefix);
-                for (var x = 0; x < 16; x++)
+                for (var x = 0; x < fromPalette.Length; x++)
                 {
-                    var ofs = x + y * 16;
+                    var ofs = x + y * fromPalette.Length;
                     sb.Append(stColors[ofs]);
-                    if (x < 15) sb.Append(",");
+                    if (x < fromPalette.Length-1) sb.Append(",");
                 }
                 sb.AppendLine(string.Empty);
             }

@@ -19,7 +19,7 @@ namespace StPalCalc
         private void RebuildActivePalette()
         {
             ColorsStackPanel1.Children.Clear();
-            for (var i = 0; i < 16; i++)
+            for (var i = 0; i < _vm.ActivePicture.ActivePalette.Length; i++)
             {
                 var color = _vm.ActivePicture.ActivePalette[i];
                 var r = new Rectangle
@@ -48,8 +48,6 @@ namespace StPalCalc
         {
             InitializeComponent();
             DataContext = _vm;
-
-            // Todo: support more than 16 colors
 
             DataTypesCombo.ItemsSource = _vm.DataTypes;
             _vm.StartColor = "700";
@@ -80,11 +78,11 @@ namespace StPalCalc
             _vm.UpdatePreviewFadeAction += colors =>
             {
                 PreviewPanel.Children.Clear();
-                for (var y = 0; y < 16; y++)
+                for (var y = 0; y < Constants.FADE_STEPS; y++)
                 {
-                    for (var x = 0; x < 16; x++)
+                    for (var x = 0; x < colors.Length; x++)
                     {
-                        var ofs = x + y * 16;
+                        var ofs = x + y * colors.Length;
                         var r = new Rectangle { Fill = new SolidColorBrush(colors[ofs]), Width = 24, Height = 24 };
                         PreviewPanel.Children.Add(r);
                     }

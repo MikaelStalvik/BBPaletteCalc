@@ -31,8 +31,8 @@ namespace StPalCalc.PictureFormats
 
         private void Map12BitPaletteToRgb()
         {
-            OriginalPalette = new Color[16];
-            for (var i = 0; i < 16; i++)
+            OriginalPalette = new Color[Colors];
+            for (var i = 0; i < Colors; i++)
             {
                 var stColor = _original12BitPalette[i];
                 OriginalPalette[i] = Helpers.FromStString(stColor.ToString("X2"));
@@ -61,7 +61,7 @@ namespace StPalCalc.PictureFormats
             using (var fs = new FileStream(filename, FileMode.Open))
             {
                 fs.Position = 2; // skip resolution
-                for (var i = 0; i < 16; i++)
+                for (var i = 0; i < Colors; i++)
                 {
                     var b1 = fs.ReadByte();
                     var b2 = fs.ReadByte();
