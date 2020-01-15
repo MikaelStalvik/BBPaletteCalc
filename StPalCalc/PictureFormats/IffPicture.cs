@@ -12,10 +12,12 @@ namespace StPalCalc.PictureFormats
         private byte[] _pixelData;
         private int _width { get; set; }
         private int _height { get; set; }
+        private int _colors { get; set; }
         public Color[] OriginalPalette { get; private set; }
         public Color[] ActivePalette { get; set; }
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
+        public int Colors { get; private set; }
         public void Load(string filename)
         {
             Filename = filename;
@@ -24,6 +26,7 @@ namespace StPalCalc.PictureFormats
             var (w, h) = iff.GetDimensions;
             _width = w;
             _height = h;
+            _colors = iff.CMAP.Length;
             OriginalPalette = new Color[iff.CMAP.Length];
             ActivePalette = OriginalPalette.ToArray();
             for (var i = 0; i < iff.CMAP.Length; i++) OriginalPalette[i] = iff.CMAP[i];

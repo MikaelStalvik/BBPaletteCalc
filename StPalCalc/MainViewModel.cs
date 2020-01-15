@@ -15,7 +15,7 @@ namespace StPalCalc
 {
     public class MainViewModel : BaseViewModel
     {
-        public Action UpdateUiAction { get; set; }
+        public Action<bool> UpdateUiAction { get; set; }
         public Action<List<Color>> UpdateGradientAction { get; set; }
         public Action<Color[]> UpdatePreviewFadeAction { get; set; }
         public Action UpdateGradientPreviewAction { get; set; }
@@ -227,7 +227,7 @@ namespace StPalCalc
                     var us = (ushort)Convert.ToInt32(color, 16);
                     ActivePicture.ActivePalette[i++] = Helpers.StColorFromInt(us);
                 }
-                UpdateUiAction?.Invoke();
+                UpdateUiAction?.Invoke(false);
                 UpdatePictureAction?.Invoke(PictureType.Picture1);
             });
             AdjustHueCommand = new DelegateCommand<HslSliderPayload>(payload =>
@@ -415,7 +415,7 @@ namespace StPalCalc
                     ActiveFilename = filename;
                     RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
                     UpdatePictureAction?.Invoke(PictureType.Picture1);
-                    UpdateUiAction?.Invoke();
+                    UpdateUiAction?.Invoke(true);
                 }
             });
             GenerateCommand = new DelegateCommand<string>(s =>
@@ -596,7 +596,7 @@ namespace StPalCalc
         {
             ActivePicture.ActivePalette[index] = color;
             RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
-            UpdateUiAction?.Invoke();
+            UpdateUiAction?.Invoke(false);
         }
 
         public void ResetPalette()
@@ -604,7 +604,7 @@ namespace StPalCalc
             if (ActivePicture == null) return;
             ActivePicture.ActivePalette = ActivePicture.OriginalPalette.ToArray();
             RawPalette = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
-            UpdateUiAction?.Invoke();
+            UpdateUiAction?.Invoke(true);
             UpdatePictureAction?.Invoke(PictureType.Picture1);
         }
 

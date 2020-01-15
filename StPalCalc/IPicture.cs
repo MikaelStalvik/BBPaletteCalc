@@ -8,6 +8,7 @@ namespace StPalCalc
     {
         Color[] OriginalPalette { get; }
         Color[] ActivePalette { get; set;  }
+        int Colors { get; }
         string Filename { get; }
         (int, int) GetDimensions { get; }
         void Load(string filename);

@@ -15,6 +15,7 @@ namespace StPalCalc.PictureFormats
         private ushort[] _original12BitPalette = new ushort[16];
         public Color[] OriginalPalette { get; private set; }
         public Color[] ActivePalette { get; set; }
+        public int Colors => 16;
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
         public void Load(string filename)

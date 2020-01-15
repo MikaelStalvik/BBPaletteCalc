@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace StPalCalc
 {
+    /// IFF-LBM reader based on Pavel Torgashows implementation:
+    /// https://github.com/PavelTorgashov/IFF-ILBM-Parser
+    /// 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -51,10 +54,13 @@ namespace StPalCalc
             DataTypesCombo.ItemsSource = _vm.DataTypes;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
-            _vm.UpdateUiAction += () =>
+            _vm.UpdateUiAction += updateHue =>
             {
                 RebuildActivePalette();
-                HueSlider_OnValueChanged(null, null); // TODO skip when pick color
+                if (updateHue)
+                {
+                    HueSlider_OnValueChanged(null, null);
+                }
             };
             _vm.UpdateGradientAction += colors =>
             {
