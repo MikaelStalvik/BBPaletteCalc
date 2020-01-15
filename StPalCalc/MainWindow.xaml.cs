@@ -12,8 +12,8 @@ namespace StPalCalc
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    /// TODO: Support variable steps
     /// TODO: Support more than 200 raster items
+    /// TODO: Support standard ST
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm = new MainViewModel();
@@ -51,7 +51,7 @@ namespace StPalCalc
             {
                 PreviewPanel.Width = _vm.ActivePicture.ActivePalette.Length * 24;
                 PreviewPanel.Children.Clear();
-                for (var y = 0; y < Constants.FADE_STEPS; y++)
+                for (var y = 0; y < _vm.FadeSteps; y++)
                 {
                     for (var x = 0; x < _vm.ActivePicture.ActivePalette.Length; x++)
                     {

@@ -23,6 +23,8 @@
             <ComboBox x:Name="DataTypesCombo" SelectedIndex="1" Margin="4,0,0,0" SelectionChanged="DataTypesCombo_OnSelectionChanged"/>
             <TextBlock Text="Platform:" Margin="8,0,0,0" VerticalAlignment="Center"/>
             <ComboBox x:Name="PlatformCombo" SelectedIndex="0" Margin="4,0,0,0" SelectionChanged="PlatformCombo_OnSelectionChanged"/>
+            <TextBlock Text="Fade/gradient steps:" Margin="8,0,0,0"/>
+            <xctk:IntegerUpDown x:Name="FadeStepsUpDown" Value="{Binding FadeSteps}"/>
         </DockPanel>
 
         <TabControl Margin="8" Grid.Row="1">
@@ -186,40 +188,22 @@
             </TabItem>
 
             <TabItem Header="Gradients">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="144"/>
-                        <ColumnDefinition Width="80"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="32"/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0">
-                            <StackPanel Margin="4">
+                <StackPanel Margin="8">
+                    <DockPanel Margin="0,8,0,0">
+                        <TextBlock Text="Start" Width="56"/>
+                        <Button Command="{Binding PickColorCommand}" CommandParameter="0" Content="Pick" DockPanel.Dock="Right" Width="72"/>
+                        <TextBox Text="{Binding StartColor}" MinWidth="80"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,8,0,0">
+                        <TextBlock Text="End" Width="56"/>
+                        <Button Command="{Binding PickColorCommand}" CommandParameter="1" Content="Pick" DockPanel.Dock="Right" Width="72"/>
+                        <TextBox Text="{Binding EndColor}" MinWidth="80"/>
+                    </DockPanel>
 
-                                <DockPanel Margin="0,8,0,0">
-                                    <TextBlock Text="Start" Width="56"/>
-                                    <Button Command="{Binding PickColorCommand}" CommandParameter="0" Content="Pick" DockPanel.Dock="Right"/>
-                                    <TextBox Text="{Binding StartColor}" MinWidth="80"/>
-                                </DockPanel>
-                                <DockPanel Margin="0,8,0,0">
-                                    <TextBlock Text="End" Width="56"/>
-                                    <Button Command="{Binding PickColorCommand}" CommandParameter="1" Content="Pick" DockPanel.Dock="Right"/>
-                                    <TextBox Text="{Binding EndColor}" MinWidth="80"/>
-                                </DockPanel>
-
-                                <Button Command="{Binding GenerateCommand}" Content="Generate" Margin="0,8,0,0"/>
-                                <userControls:PalettePresenterUserControl x:Name="GeneratedGradientPresenter"/>
-                                <TextBox Text="{Binding GeneratedPalette}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-
-
-                </Grid>
+                    <Button Command="{Binding GenerateCommand}" Content="Generate" Margin="0,8,0,0" Width="80" HorizontalAlignment="Left"/>
+                    <userControls:PalettePresenterUserControl x:Name="GeneratedGradientPresenter"/>
+                    <TextBox Text="{Binding GeneratedPalette}"/>
+                </StackPanel>
 
             </TabItem>
 

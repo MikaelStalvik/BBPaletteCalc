@@ -109,6 +109,18 @@ namespace StPalCalc
             }
         }
 
+        private int _fadeSteps;
+
+        public int FadeSteps
+        {
+            get => _fadeSteps;
+            set
+            {
+                _fadeSteps = value;
+                OnPropertyChanged();
+            }
+        }
+
 
 
         private string _previewText;
@@ -222,6 +234,7 @@ namespace StPalCalc
                 GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
             }
             SelectedDataType = 1;
+            FadeSteps = 16;
 
             UpdatePalette1Command = new DelegateCommand<string>(s =>
             {
@@ -430,7 +443,7 @@ namespace StPalCalc
             {
                 var startColor = Helpers.FromStString(_startColor);
                 var endColor = Helpers.FromStString(_endColor);
-                var data = Helpers.GetGradients(startColor, endColor, Constants.GRADIENT_STEPS).ToList();
+                var data = Helpers.GetGradients(startColor, endColor, FadeSteps).ToList();
 
                 var sb = new StringBuilder();
                 foreach (var color in data)
@@ -535,15 +548,15 @@ namespace StPalCalc
         }
         private void GenerateFade(Color[] fromPalette, string endColorStr)
         {
-            var generatedColors = new Color[fromPalette.Length * Constants.FADE_STEPS]; // 16 * 16
-            var stColors = new string[fromPalette.Length * Constants.FADE_STEPS]; // 16 * 16
+            var generatedColors = new Color[fromPalette.Length * _fadeSteps];
+            var stColors = new string[fromPalette.Length * _fadeSteps];
             for (var i = 0; i < fromPalette.Length; i++)
             {
                 var startColor = fromPalette[i];
                 var endColor = Helpers.FromStString(endColorStr);
-                var data = Helpers.GetGradients(startColor, endColor, Constants.FADE_STEPS).ToList();
+                var data = Helpers.GetGradients(startColor, endColor, _fadeSteps).ToList();
 
-                for (var j = 0; j < Constants.FADE_STEPS; j++)
+                for (var j = 0; j < _fadeSteps; j++)
                 {
                     var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
@@ -551,7 +564,7 @@ namespace StPalCalc
                 }
             }
             var sb = new StringBuilder();
-            for (var y = 0; y < Constants.FADE_STEPS; y++)
+            for (var y = 0; y < _fadeSteps; y++)
             {
                 sb.Append("\t" + SelectedDataTypePrefix);
                 for (var x = 0; x < fromPalette.Length; x++)
@@ -568,15 +581,15 @@ namespace StPalCalc
         }
         private void GenerateFade(Color[] fromPalette, Color[] toPalette)
         {
-            var generatedColors = new Color[fromPalette.Length * Constants.FADE_STEPS];
-            var stColors = new string[fromPalette.Length * Constants.FADE_STEPS];
+            var generatedColors = new Color[fromPalette.Length * _fadeSteps];
+            var stColors = new string[fromPalette.Length * _fadeSteps];
             for (var i = 0; i < fromPalette.Length; i++)
             {
                 var startColor = fromPalette[i];
                 var endColor = toPalette[i];
-                var data = Helpers.GetGradients(startColor, endColor, Constants.FADE_STEPS).ToList();
+                var data = Helpers.GetGradients(startColor, endColor, _fadeSteps).ToList();
 
-                for (var j = 0; j < Constants.FADE_STEPS; j++)
+                for (var j = 0; j < _fadeSteps; j++)
                 {
                     var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
@@ -584,7 +597,7 @@ namespace StPalCalc
                 }
             }
             var sb = new StringBuilder();
-            for (var y = 0; y < Constants.FADE_STEPS; y++)
+            for (var y = 0; y < _fadeSteps; y++)
             {
                 sb.Append("\t" + SelectedDataTypePrefix);
                 for (var x = 0; x < fromPalette.Length; x++)
