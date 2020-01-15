@@ -95,7 +95,8 @@ namespace StPalCalc
         public readonly ObservableCollection<string> Platforms = new ObservableCollection<string>
         {
             "Atari Ste",
-            "Amiga"
+            "Amiga",
+            "Atari St"
         };
         private int _selectedPlatform;
         public int SelectedPlatform
@@ -214,7 +215,7 @@ namespace StPalCalc
         public DelegateCommand<string> RefreshRasterPreviewImageCommand { get; set; }
         public DelegateCommand<string> GenerateRastersCommand { get; set; }
         public DelegateCommand<HslSliderPayload> AdjustHueCommand { get; set; }
-        public DelegateCommand<string> UpdatePalette1Command { get; set; }
+        public DelegateCommand<string> UpdatePaletteCommand { get; set; }
 
         private (bool, string) SelectPictureFile()
         {
@@ -236,7 +237,7 @@ namespace StPalCalc
             SelectedDataType = 1;
             FadeSteps = 16;
 
-            UpdatePalette1Command = new DelegateCommand<string>(s =>
+            UpdatePaletteCommand = new DelegateCommand<string>(s =>
             {
                 if (ActivePicture == null) return;
                 var cleaned = s.Replace("$", "");

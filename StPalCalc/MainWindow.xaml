@@ -55,7 +55,7 @@
                                 </DockPanel>
 
                                 <DockPanel Margin="0,8,0,0">
-                                    <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
+                                    <Button Content="Update" Command="{Binding UpdatePaletteCommand}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
                                     <TextBox Text="{Binding ActivePaletteString}" x:Name="Palette1TextBox" Margin="4,0,0,0"/>
                                 </DockPanel>
 

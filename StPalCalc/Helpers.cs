@@ -8,7 +8,8 @@ namespace StPalCalc
     public enum PlatformTypes
     {
         AtariSte,
-        Amiga
+        Amiga,
+        AtariSt
     };
     public static class Helpers
     {
@@ -86,7 +87,7 @@ namespace StPalCalc
             return sb.ToString();
         }
 
-        private static byte RemapStColor(byte b)
+        private static byte RemapSteColor(byte b)
         {
             switch (b)
             {
@@ -111,7 +112,7 @@ namespace StPalCalc
             }
         }
 
-        private static byte RemapToStColor(byte b)
+        private static byte RemapToSteColor(byte b)
         {
             switch (b)
             {
@@ -145,9 +146,11 @@ namespace StPalCalc
             switch (ActivePlatform)
             {
                 case PlatformTypes.AtariSte:
-                    return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                    return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
                 case PlatformTypes.Amiga:
                     return (byte) (b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                case PlatformTypes.AtariSt:
+                    return (byte)(b3 * 4 + b2 * 2 + b1);
                 default:
                     return 0;
             }
@@ -161,9 +164,11 @@ namespace StPalCalc
             switch (ActivePlatform)
             {
                 case PlatformTypes.AtariSte:
-                    return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                    return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
                 case PlatformTypes.Amiga:
                     return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                case PlatformTypes.AtariSt:
+                    return (byte)(b3 * 4 + b2 * 2 + b1);
                 default:
                     return 0;
             }
@@ -177,9 +182,11 @@ namespace StPalCalc
             switch (ActivePlatform)
             {
                 case PlatformTypes.AtariSte:
-                    return RemapStColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                    return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
                 case PlatformTypes.Amiga:
                     return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                case PlatformTypes.AtariSt:
+                    return (byte)(b3 * 4 + b2 * 2 + b1);
                 default:
                     return 0;
             }
@@ -193,28 +200,35 @@ namespace StPalCalc
             switch (ActivePlatform)
             {
                 case PlatformTypes.AtariSte:
-                    r = RemapToStColor((byte)(color.R / 16));
-                    g = RemapToStColor((byte)(color.G / 16));
-                    b = RemapToStColor((byte)(color.B / 16));
+                    r = RemapToSteColor((byte)(color.R / 16));
+                    g = RemapToSteColor((byte)(color.G / 16));
+                    b = RemapToSteColor((byte)(color.B / 16));
                     break;
                 case PlatformTypes.Amiga:
                     r = (byte)(color.R / 16);
                     g = (byte)(color.G / 16);
                     b = (byte)(color.B / 16);
                     break;
+                case PlatformTypes.AtariSt:
+                    r = (byte)(color.R / 32);
+                    g = (byte)(color.G / 32);
+                    b = (byte)(color.B / 32);
+                    break;
             }
             return skipDollar ? $"{r:X}{g:X}{b:X}" : $"${r:X}{g:X}{b:X}";
         }
         private static byte RemapFrom12BitToRgb(byte source)
         {
-            return (byte)(source * 16);
+            return (byte)(source * ScaleFactor);
         }
-        
+
+        private static int ScaleFactor => ActivePlatform == PlatformTypes.AtariSt ? 32 : 16;
+
         private static void GetScaledRgbPartsFromColor(Color color, out byte r, out byte g, out byte b)
         {
-            r = (byte)(color.R / 16);
-            g = (byte)(color.G / 16);
-            b = (byte)(color.B / 16);
+            r = (byte)(color.R / ScaleFactor);
+            g = (byte)(color.G / ScaleFactor);
+            b = (byte)(color.B / ScaleFactor);
         }
         public static IEnumerable<Color> GetGradients(Color start, Color end, int steps)
         {
@@ -234,9 +248,9 @@ namespace StPalCalc
             for (var i = 0; i < steps; i++)
             {
                 yield return Color.FromRgb(
-                    (byte)((sr + stepR * i) * 16),
-                    (byte)((sg + stepG * i) * 16),
-                    (byte)((sb + stepB * i) * 16)
+                    (byte)((sr + stepR * i) * ScaleFactor),
+                    (byte)((sg + stepG * i) * ScaleFactor),
+                    (byte)((sb + stepB * i) * ScaleFactor)
                 );
             }
 
