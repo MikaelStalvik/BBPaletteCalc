@@ -7,5 +7,6 @@ namespace BBPalCalc.Platforms
         Color ToRgb(ushort source);
         string ColorToString(Color source);
         byte RemapFromLowerDepth(byte color);
+        int ScaleFactor { get; }
     }
 }

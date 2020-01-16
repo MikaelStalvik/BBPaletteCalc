@@ -80,5 +80,7 @@ namespace BBPalCalc.Platforms
                     return 0;
             }
         }
+
+        public int ScaleFactor => 32;
     }
 }

@@ -104,7 +104,6 @@ namespace BBPalCalc
             set
             {
                 _selectedPlatform = value;
-                Helpers.ActivePlatformType = (PlatformTypes) _selectedPlatform;
                 OnPropertyChanged();
             }
         }
@@ -288,6 +287,7 @@ namespace BBPalCalc
                         lineBuilder.Append("\t" + SelectedDataTypePrefix + " ");
                     }
 
+                    lineBuilder.Append("$");
                     lineBuilder.Append(Helpers.Globals.ActivePlatform.ColorToString(item.Color));
                     lineBuilder.Append(",");
                     index++;
@@ -445,10 +445,12 @@ namespace BBPalCalc
                 var data = Helpers.GetGradients(startColor, endColor, FadeSteps).ToList();
 
                 var sb = new StringBuilder();
+                var iterator = 0;
                 foreach (var color in data)
                 {
-                    sb.Append(Helpers.Globals.ActivePlatform.ColorToString(color));
-                    sb.Append(",");
+                    sb.Append("$" + Helpers.Globals.ActivePlatform.ColorToString(color));
+                    if (iterator < data.Count-1) sb.Append(",");
+                    iterator++;
                 }
 
                 GeneratedPalette = sb.ToString();
@@ -568,6 +570,7 @@ namespace BBPalCalc
                 for (var x = 0; x < fromPalette.Length; x++)
                 {
                     var ofs = x + y * fromPalette.Length;
+                    sb.Append("$");
                     sb.Append(stColors[ofs]);
                     if (x < fromPalette.Length-1) sb.Append(",");
                 }
@@ -601,6 +604,7 @@ namespace BBPalCalc
                 for (var x = 0; x < fromPalette.Length; x++)
                 {
                     var ofs = x + y * fromPalette.Length;
+                    sb.Append("$");
                     sb.Append(stColors[ofs]);
                     if (x < fromPalette.Length-1) sb.Append(",");
                 }
