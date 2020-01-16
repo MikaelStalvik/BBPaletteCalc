@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace StPalCalc.iff
+namespace BBPalCalc.iff
 {
     class BigEndianBinaryReader : BinaryReader
     {

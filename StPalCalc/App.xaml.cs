@@ -1,8 +1,7 @@
 ﻿using System.Windows;
 using Autofac;
-using StPalCalc.Platforms;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     /// <summary>
     /// Interaction logic for App.xaml

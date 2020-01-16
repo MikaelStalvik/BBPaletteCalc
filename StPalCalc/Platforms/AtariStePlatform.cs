@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows.Media;
 
-namespace StPalCalc.Platforms
+namespace BBPalCalc.Platforms
 {
     public class AtariStePlatform : IPlatform
     {

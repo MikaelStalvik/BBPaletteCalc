@@ -4,9 +4,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using StPalCalc.iff;
+using BBPalCalc.iff;
 
-namespace StPalCalc.PictureFormats
+namespace BBPalCalc.PictureFormats
 {
     public class IffPicture : IPicture
     {

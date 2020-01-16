@@ -1,4 +1,4 @@
-﻿namespace StPalCalc.iff
+﻿namespace BBPalCalc.iff
 {
     public class VERS
     {

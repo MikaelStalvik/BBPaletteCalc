@@ -1,4 +1,4 @@
-﻿namespace StPalCalc.Platforms
+﻿namespace BBPalCalc.Platforms
 {
     public static class PlatformFactory
     {

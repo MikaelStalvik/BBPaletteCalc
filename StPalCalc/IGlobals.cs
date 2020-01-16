@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using StPalCalc.Platforms;
+﻿using BBPalCalc.Platforms;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public interface IGlobals
     {

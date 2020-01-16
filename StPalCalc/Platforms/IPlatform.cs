@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media;
 
-namespace StPalCalc.Platforms
+namespace BBPalCalc.Platforms
 {
     public interface IPlatform
     {

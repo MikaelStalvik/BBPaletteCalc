@@ -4,9 +4,9 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using StPalCalc.Platforms;
+using BBPalCalc.Platforms;
 
-namespace StPalCalc.PictureFormats
+namespace BBPalCalc.PictureFormats
 {
     public class Pi1Picture : IPicture
     {

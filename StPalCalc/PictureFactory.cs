@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using StPalCalc.PictureFormats;
+using BBPalCalc.PictureFormats;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public static class PictureFactory
     {

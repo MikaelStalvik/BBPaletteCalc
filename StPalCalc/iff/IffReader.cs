@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Media;
 
-namespace StPalCalc.iff
+namespace BBPalCalc.iff
 {
     public class IffReader
     {

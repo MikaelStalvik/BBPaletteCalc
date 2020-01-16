@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public static class Extensions
     {

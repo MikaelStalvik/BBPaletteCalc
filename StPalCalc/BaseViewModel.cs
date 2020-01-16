@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using StPalCalc.Annotations;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public class BaseViewModel : INotifyPropertyChanged
     {

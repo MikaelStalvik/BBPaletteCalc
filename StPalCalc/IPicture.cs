@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public interface IPicture
     {

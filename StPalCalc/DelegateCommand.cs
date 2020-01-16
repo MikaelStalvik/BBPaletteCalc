@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public class DelegateCommand<T> : ICommand
     {

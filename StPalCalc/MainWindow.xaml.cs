@@ -1,11 +1,11 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Linq;
-using StPalCalc.Platforms;
+using BBPalCalc.Platforms;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     /// IFF-LBM reader based on Pavel Torgashows implementation:
     /// https://github.com/PavelTorgashov/IFF-ILBM-Parser

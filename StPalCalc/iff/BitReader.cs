@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StPalCalc.iff
+namespace BBPalCalc.iff
 {
     public class BitReader
     {

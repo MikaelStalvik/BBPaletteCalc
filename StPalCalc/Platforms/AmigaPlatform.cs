@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Windows.Media;
 
-namespace StPalCalc.Platforms
+namespace BBPalCalc.Platforms
 {
     public class AmigaPlatform : IPlatform
     {

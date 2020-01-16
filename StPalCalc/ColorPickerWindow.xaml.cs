@@ -2,7 +2,7 @@
 using System.Windows.Media;
 using Xceed.Wpf.Toolkit;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     /// <summary>
     /// Interaction logic for ColorPickerWindow.xaml

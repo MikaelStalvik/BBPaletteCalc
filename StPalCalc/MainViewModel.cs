@@ -10,8 +10,7 @@ using System.Windows.Media;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
-
-namespace StPalCalc
+namespace BBPalCalc
 {
     public class MainViewModel : BaseViewModel
     {

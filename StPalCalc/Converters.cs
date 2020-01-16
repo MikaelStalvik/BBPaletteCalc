@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public class RadioBoolToIntConverter : IValueConverter
     {
