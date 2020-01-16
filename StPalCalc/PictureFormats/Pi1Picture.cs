@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using StPalCalc.Platforms;
 
 namespace StPalCalc.PictureFormats
 {
@@ -32,11 +33,13 @@ namespace StPalCalc.PictureFormats
 
         private void MapPaletteToRgb()
         {
+            // Always use ST to remap colors otherwise it will fail
+            var atariPlatform = PlatformFactory.CreatePlatform(PlatformTypes.AtariSte);
             OriginalPalette = new Color[Colors];
             for (var i = 0; i < Colors; i++)
             {
                 var stColor = _original12BitPalette[i];
-                OriginalPalette[i] = Helpers.FromStString(stColor.ToString("X2"));
+                OriginalPalette[i] = atariPlatform.ToRgb(stColor);
             }
         }
         public void Render(Image target, Color[] specialPalette = null)

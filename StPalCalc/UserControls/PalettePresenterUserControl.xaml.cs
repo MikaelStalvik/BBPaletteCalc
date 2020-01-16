@@ -26,7 +26,7 @@ namespace StPalCalc.UserControls
                     Fill = new SolidColorBrush(color),
                     Width = 24,
                     Height = 24,
-                    ToolTip = Helpers.ConvertFromRgbTo12Bit(color) + $"\nR:{color.R} G:{color.G} B:{color.B}\nIndex: {i}"
+                    ToolTip = "$" + Helpers.Globals.ActivePlatform.ColorToString(color) + $"\nR:{color.R} G:{color.G} B:{color.B}\nIndex: {i}"
                 };
                 if (clickable)
                 {

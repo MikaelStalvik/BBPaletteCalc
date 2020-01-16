@@ -34,8 +34,8 @@ namespace StPalCalc.PictureFormats
             _height = h;
             _colors = iff.CMAP.Length;
             OriginalPalette = new Color[iff.CMAP.Length];
-            ActivePalette = OriginalPalette.ToArray();
             for (var i = 0; i < iff.CMAP.Length; i++) OriginalPalette[i] = iff.CMAP[i];
+            ActivePalette = OriginalPalette.ToArray();
             _pixelData = new byte[_width*_height];
             for (var i = 0; i < iff.PixelData.Length; i++)
             {

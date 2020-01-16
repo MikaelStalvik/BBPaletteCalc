@@ -12,9 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="3.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="WriteableBitmapEx" Version="1.6.3" />
+    <PackageReference Include="WriteableBitmapEx" Version="1.6.5" />
   </ItemGroup>
 
 </Project>

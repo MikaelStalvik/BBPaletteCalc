@@ -38,7 +38,7 @@ namespace StPalCalc
             {
                 _selectedGradientItem = value;
                 OnPropertyChanged();
-                SelectedGradientColor = _selectedGradientItem != null ? Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color) : string.Empty;
+                SelectedGradientColor = _selectedGradientItem != null ? Helpers.Globals.ActivePlatform.ColorToString(SelectedGradientItem.Color) : string.Empty;
             }
         }
         public List<GradientItem> SelectedGradientItems { get; set; }
@@ -48,7 +48,7 @@ namespace StPalCalc
             if (SelectedGradientItem != null)
             {
                 SelectedGradientItem.Color = color;
-                SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
+                SelectedGradientColor = Helpers.Globals.ActivePlatform.ColorToString(SelectedGradientItem.Color);
                 GradientItems[SelectedGradientItem.Index].Color = SelectedGradientItem.Color;
                 UpdateGradientPreviewAction?.Invoke();
                 RebindAction?.Invoke();
@@ -59,7 +59,7 @@ namespace StPalCalc
         {
             if (SelectedGradientItem == null) return;
             var inp = data.Replace("$", string.Empty);
-            UpdateSelectedGradientColor(Helpers.FromStString(inp));
+            UpdateSelectedGradientColor(Helpers.Globals.ActivePlatform.ToRgb(inp.ToHex()));
         }
 
         public ObservableCollection<GradientItem> GradientItems { get; private set; }
@@ -105,7 +105,7 @@ namespace StPalCalc
             set
             {
                 _selectedPlatform = value;
-                Helpers.ActivePlatform = (PlatformTypes) _selectedPlatform;
+                Helpers.ActivePlatformType = (PlatformTypes) _selectedPlatform;
                 OnPropertyChanged();
             }
         }
@@ -245,7 +245,7 @@ namespace StPalCalc
                 var i = 0;
                 foreach (var item in list)
                 {
-                    ActivePicture.ActivePalette[i++] = Helpers.ColorFromString(item);
+                    ActivePicture.ActivePalette[i++] = Helpers.Globals.ActivePlatform.ToRgb(item.ToHex());// ColorFromString(item);
                 }
                 UpdateUiAction?.Invoke(false);
                 UpdatePictureAction?.Invoke(PictureType.Picture1);
@@ -289,7 +289,7 @@ namespace StPalCalc
                         lineBuilder.Append("\t" + SelectedDataTypePrefix + " ");
                     }
 
-                    lineBuilder.Append(Helpers.ConvertFromRgbTo12Bit(item.Color));
+                    lineBuilder.Append(Helpers.Globals.ActivePlatform.ColorToString(item.Color));
                     lineBuilder.Append(",");
                     index++;
                 }
@@ -327,19 +327,19 @@ namespace StPalCalc
                 switch (index)
                 {
                     case 0: 
-                        startColor = Helpers.FromStString(StartColor);
+                        startColor = Helpers.Globals.ActivePlatform.ToRgb(StartColor.ToHex());
                         break;
                     case 1:
-                        startColor = Helpers.FromStString(EndColor);
+                        startColor = Helpers.Globals.ActivePlatform.ToRgb(EndColor.ToHex());
                         break;
                     case 2:
-                        startColor = Helpers.FromStString(FadeToColor);
+                        startColor = Helpers.Globals.ActivePlatform.ToRgb(FadeToColor.ToHex());
                         break;
                 }
                 var c = ColorPickerWindow.PickColor(startColor);
                 if (c != null)
                 {
-                    var stColor = Helpers.ConvertFromRgbTo12Bit(c.Value, true);
+                    var stColor = Helpers.Globals.ActivePlatform.ColorToString(c.Value);
                     switch (index)
                     {
                         case 0: 
@@ -441,14 +441,14 @@ namespace StPalCalc
             });
             GenerateGradientCommand = new DelegateCommand<string>(s =>
             {
-                var startColor = Helpers.FromStString(_startColor);
-                var endColor = Helpers.FromStString(_endColor);
+                var startColor = Helpers.Globals.ActivePlatform.ToRgb(_startColor.ToHex());
+                var endColor = Helpers.Globals.ActivePlatform.ToRgb(_endColor.ToHex());
                 var data = Helpers.GetGradients(startColor, endColor, FadeSteps).ToList();
 
                 var sb = new StringBuilder();
                 foreach (var color in data)
                 {
-                    sb.Append(Helpers.ConvertFromRgbTo12Bit(color));
+                    sb.Append(Helpers.Globals.ActivePlatform.ColorToString(color));
                     sb.Append(",");
                 }
 
@@ -497,8 +497,7 @@ namespace StPalCalc
                             var cleanedItem = item.Replace("$", "");
                             try
                             {
-                                var converted = Convert.ToInt32(cleanedItem, 16);
-                                colorData.Add(Helpers.StColorFromInt(converted));
+                                colorData.Add(Helpers.Globals.ActivePlatform.ToRgb(cleanedItem.ToHex()));
                             }
                             catch
                             {
@@ -553,14 +552,14 @@ namespace StPalCalc
             for (var i = 0; i < fromPalette.Length; i++)
             {
                 var startColor = fromPalette[i];
-                var endColor = Helpers.FromStString(endColorStr);
+                var endColor = Helpers.Globals.ActivePlatform.ToRgb(endColorStr.ToHex());
                 var data = Helpers.GetGradients(startColor, endColor, _fadeSteps).ToList();
 
                 for (var j = 0; j < _fadeSteps; j++)
                 {
                     var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
-                    stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
+                    stColors[ofs] = Helpers.Globals.ActivePlatform.ColorToString(data[j]);
                 }
             }
             var sb = new StringBuilder();
@@ -593,7 +592,7 @@ namespace StPalCalc
                 {
                     var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
-                    stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
+                    stColors[ofs] = Helpers.Globals.ActivePlatform.ColorToString(data[j]);
                 }
             }
             var sb = new StringBuilder();

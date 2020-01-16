@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Linq;
+using StPalCalc.Platforms;
 
 namespace StPalCalc
 {
@@ -61,7 +62,7 @@ namespace StPalCalc
                             Fill = new SolidColorBrush(colors[ofs]), 
                             Width = 24, 
                             Height = 24,
-                            ToolTip = Helpers.ConvertFromRgbTo12Bit(colors[ofs]) + $" index: {x}, row: {y}"
+                            ToolTip = "$" + Helpers.Globals.ActivePlatform.ColorToString(colors[ofs]) + $"\nIndex: {x}, row: {y}"
                         };
                         PreviewPanel.Children.Add(r);
                     }
@@ -113,7 +114,7 @@ namespace StPalCalc
             if (item == null) return;
             _vm.SelectedGradientItem = item;
             ColorCanvas.SelectedColor = item.Color;
-            GradientText.Text = Helpers.ConvertFromRgbTo12Bit(item.Color, true);
+            GradientText.Text = Helpers.Globals.ActivePlatform.ColorToString(item.Color);
             var selectedItems = lb.SelectedItems.Cast<GradientItem>().ToList();
             var min = selectedItems.Min(x => x.Index);
             var max = selectedItems.Max(x => x.Index);
@@ -124,7 +125,7 @@ namespace StPalCalc
 
         private void ColorCanvas_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            GradientText.Text = Helpers.ConvertFromRgbTo12Bit(ColorCanvas.SelectedColor.Value);
+            GradientText.Text = Helpers.Globals.ActivePlatform.ColorToString(ColorCanvas.SelectedColor.Value);
             _vm.UpdateSelectedGradientColor(ColorCanvas.SelectedColor.Value);
             _vm.UpdateGradientPreviewAction?.Invoke();
         }
@@ -141,6 +142,7 @@ namespace StPalCalc
         private void PlatformCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _vm.SelectedPlatform = ((ComboBox) sender).SelectedIndex;
+            Helpers.Globals.ActivePlatform = PlatformFactory.CreatePlatform((PlatformTypes)_vm.SelectedPlatform);
             if (_vm.ActivePicture != null)
             {
                 _vm.ReloadActivePicture();
@@ -160,5 +162,6 @@ namespace StPalCalc
             LightnessSlider.Value = 0;
             _vm.ResetPalette();
         }
+
     }
 }

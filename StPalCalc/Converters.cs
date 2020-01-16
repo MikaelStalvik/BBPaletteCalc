@@ -36,7 +36,7 @@ namespace StPalCalc
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Helpers.ConvertFromRgbTo12Bit((Color) value);
+            return Helpers.Globals.ActivePlatform.ColorToString((Color)value);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -59,22 +59,30 @@
                                     <TextBox Text="{Binding ActivePaletteString}" x:Name="Palette1TextBox" Margin="4,0,0,0"/>
                                 </DockPanel>
 
-                                <DockPanel Margin="0,8,0,0">
-                                    <TextBlock Text="Hue" Width="64"/>
-                                    <Slider Minimum="-120" Maximum="120" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                </DockPanel>
-                                <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                                <DockPanel>
-                                    <TextBlock Text="Saturation" Width="64"/>
-                                    <Slider Minimum="-120" Maximum="120" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                </DockPanel>
-                                <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                                <DockPanel>
-                                    <TextBlock Text="Lightness" Width="64"/>
-                                    <Slider Minimum="-120" Maximum="120" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                </DockPanel>
-                                <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                                <userControls:PalettePresenterUserControl x:Name="HSLPalettePresenter" Margin="0,8,0,0"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="384"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <DockPanel Margin="0,8,0,0">
+                                            <TextBlock Text="Hue" Width="64"/>
+                                            <Slider Minimum="-120" Maximum="120" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                                        <DockPanel>
+                                            <TextBlock Text="Saturation" Width="64"/>
+                                            <Slider Minimum="-120" Maximum="120" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                                        <DockPanel>
+                                            <TextBlock Text="Lightness" Width="64"/>
+                                            <Slider Minimum="-120" Maximum="120" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                                    </StackPanel>
+                                    <userControls:PalettePresenterUserControl x:Name="HSLPalettePresenter" Margin="0,8,0,0" Grid.Column="1"/>
+                                </Grid>
                             </StackPanel>
                         </Grid>
 
