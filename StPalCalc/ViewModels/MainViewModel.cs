@@ -8,13 +8,16 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using BBPalCalc.Interfaces;
+using BBPalCalc.Util;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
-namespace BBPalCalc
+namespace BBPalCalc.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        private const int RASTER_NUM = 256;
+
         public Action<bool> UpdateUiAction { get; set; }
         public Action<List<Color>> UpdateGradientAction { get; set; }
         public Action<Color[]> UpdatePreviewFadeAction { get; set; }
@@ -229,7 +232,7 @@ namespace BBPalCalc
         public MainViewModel()
         {
             GradientItems = new ObservableCollection<GradientItem>();
-            for (var i = 0; i < 200; i++)
+            for (var i = 0; i < RASTER_NUM; i++)
             {
                 GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
             }
@@ -271,7 +274,7 @@ namespace BBPalCalc
             {
                 var sb = new StringBuilder();
                 var lineBuilder = new StringBuilder();
-                sb.AppendLine("; 200 items");
+                sb.AppendLine($"; {GradientItems.Count} items");
                 sb.AppendLine("raster_data:");
 
                 lineBuilder.Append("\t" + SelectedDataTypePrefix + " ");
@@ -389,6 +392,16 @@ namespace BBPalCalc
                     {
                         GradientItems.Add(new GradientItem { Color = item.Color, Index = i });
                         i++;
+                        if (i == RASTER_NUM) break;
+                    }
+
+                    if (GradientItems.Count < RASTER_NUM)
+                    {
+                        var diff = RASTER_NUM - GradientItems.Count;
+                        for (i = 0; i < diff; i++)
+                        {
+                            GradientItems.Add(new GradientItem { Color = Colors.Black, Index = GradientItems.Count});
+                        }
                     }
                     UpdateGradientPreviewAction?.Invoke();
                     RebindAction?.Invoke();
@@ -511,7 +524,7 @@ namespace BBPalCalc
 
                     for (var i = 0; i < colorData.Count; i++)
                     {
-                        if (i == 200) break;
+                        if (i == GradientItems.Count) break;
                         GradientItems[i].Color = colorData[i];
                     }
                     UpdateGradientPreviewAction?.Invoke();

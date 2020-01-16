@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BBPalCalc
+namespace BBPalCalc.Util
 {
     public static class Extensions
     {

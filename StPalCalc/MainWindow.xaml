@@ -6,12 +6,13 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:bbPalCalc="clr-namespace:BBPalCalc"
         xmlns:userControls="clr-namespace:BBPalCalc.UserControls"
+        xmlns:util="clr-namespace:BBPalCalc.Util"
         mc:Ignorable="d"
         Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="800" Width="800" Height="560">
     <Window.Resources>
-        <bbPalCalc:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
-        <bbPalCalc:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
-        <bbPalCalc:ColorToStColorConverter x:Key="ColorToStColorConverter"/>
+        <util:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
+        <util:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+        <util:ColorToStColorConverter x:Key="ColorToStColorConverter"/>
     </Window.Resources>
     <Grid x:Name="Root">
         <Grid.RowDefinitions>
@@ -40,7 +41,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Grid.ColumnSpan="2">
+                            <StackPanel Grid.Column="0">
                                 <DockPanel>
                                     <TextBlock Text="Picture 1" FontWeight="Bold"/>
                                 </DockPanel>
@@ -48,7 +49,7 @@
                                     <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
                                     <TextBlock Text="{Binding ActiveFilename}"/>
                                 </DockPanel>
-                                <Image x:Name="Image1" Width="320" Height="200" Margin="0,0,0,8"/>
+                                <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200"/>
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MaxHeight="96">
                                     <DockPanel>
                                         <Button Click="ResetButtonBase_OnClick" Content="Reset" Margin="0,8,0,0" DockPanel.Dock="Right" Width="72" VerticalAlignment="Top" MaxHeight="24"/>
@@ -124,9 +125,9 @@
                             <RowDefinition Height="32"/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal">
-                            <StackPanel Margin="8">
+                            <StackPanel Margin="8" MinWidth="320" MinHeight="200">
                                 <TextBlock Text="Picture preview"/>
-                                <Image Width="320" Height="200" x:Name="PreviewImage"/>
+                                <Image Width="Auto" Height="Auto" x:Name="PreviewImage"/>
                                 <DockPanel LastChildFill="False">
                                     <Button Command="{Binding LoadPreviewImageCommand}" Content="Load" MinWidth="72"/>
                                     <Button Command="{Binding RefreshRasterPreviewImageCommand}" Content="Refresh" MinWidth="72" Margin="8,0,0,0"/>
