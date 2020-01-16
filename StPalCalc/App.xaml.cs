@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Autofac;
+using BBPalCalc.Interfaces;
 
 namespace BBPalCalc
 {

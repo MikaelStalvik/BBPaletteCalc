@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using BBPalCalc.Interfaces;
 using BBPalCalc.PictureFormats;
 
 namespace BBPalCalc

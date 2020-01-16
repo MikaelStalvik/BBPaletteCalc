@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using BBPalCalc.Interfaces;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 

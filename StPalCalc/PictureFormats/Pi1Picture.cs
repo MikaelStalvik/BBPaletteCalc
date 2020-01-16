@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using BBPalCalc.Interfaces;
 using BBPalCalc.Platforms;
 
 namespace BBPalCalc.PictureFormats

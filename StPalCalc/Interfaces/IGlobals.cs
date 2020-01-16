@@ -1,6 +1,6 @@
 ﻿using BBPalCalc.Platforms;
 
-namespace BBPalCalc
+namespace BBPalCalc.Interfaces
 {
     public interface IGlobals
     {

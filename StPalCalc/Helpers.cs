@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Windows.Media;
+using BBPalCalc.Interfaces;
 
 namespace BBPalCalc
 {
