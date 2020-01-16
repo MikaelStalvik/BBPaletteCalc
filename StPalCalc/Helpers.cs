@@ -145,10 +145,10 @@ namespace StPalCalc
             var b4 = data[11];
             switch (ActivePlatform)
             {
+                case PlatformTypes.Amiga:
                 case PlatformTypes.AtariSte:
                     return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
-                case PlatformTypes.Amiga:
-                    return (byte) (b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                    //return (byte) (b4 * 8 + b3 * 4 + b2 * 2 + b1);
                 case PlatformTypes.AtariSt:
                     return (byte)(b3 * 4 + b2 * 2 + b1);
                 default:
@@ -164,9 +164,9 @@ namespace StPalCalc
             switch (ActivePlatform)
             {
                 case PlatformTypes.AtariSte:
-                    return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
                 case PlatformTypes.Amiga:
-                    return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                    return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                    //return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
                 case PlatformTypes.AtariSt:
                     return (byte)(b3 * 4 + b2 * 2 + b1);
                 default:
@@ -182,9 +182,9 @@ namespace StPalCalc
             switch (ActivePlatform)
             {
                 case PlatformTypes.AtariSte:
-                    return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
                 case PlatformTypes.Amiga:
-                    return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
+                    return RemapSteColor((byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1));
+                    //return (byte)(b4 * 8 + b3 * 4 + b2 * 2 + b1);
                 case PlatformTypes.AtariSt:
                     return (byte)(b3 * 4 + b2 * 2 + b1);
                 default:
@@ -250,13 +250,51 @@ namespace StPalCalc
 
             for (var i = 0; i < steps; i++)
             {
-                yield return Color.FromRgb(
-                    (byte)((sr + stepR * i) * ScaleFactor),
-                    (byte)((sg + stepG * i) * ScaleFactor),
-                    (byte)((sb + stepB * i) * ScaleFactor)
-                );
+                var nr = RemapFrom12BitToRgb((byte)(sr + stepR * i));
+                var ng = RemapFrom12BitToRgb((byte)(sg + stepG * i));
+                var nb = RemapFrom12BitToRgb((byte)(sb + stepB * i));
+                yield return Color.FromRgb(nr, ng, nb);
             }
+        }
 
+        private static int GetHexValue(char c)
+        {
+            switch (c)
+            {
+                case '0': return 0;
+                case '1': return 1;
+                case '2': return 2;
+                case '3': return 3;
+                case '4': return 4;
+                case '5': return 5;
+                case '6': return 6;
+                case '7': return 7;
+                case '8': return 8;
+                case '9': return 9;
+                case 'a': return 10;
+                case 'b': return 11;
+                case 'c': return 12;
+                case 'd': return 13;
+                case 'e': return 14;
+                case 'f': return 15;
+                default:
+                    return 0;
+            }
+        }
+        public static Color ColorFromString(string data)
+        {
+            if (data.Length != 3) return Colors.Red;
+            var asLow = data.ToLowerInvariant();
+            var r = GetHexValue(asLow[0]);
+            var g = GetHexValue(asLow[1]);
+            var b = GetHexValue(asLow[2]);
+            if (ActivePlatform == PlatformTypes.AtariSte)
+            {
+                r = RemapSteColor((byte)r);
+                g = RemapSteColor((byte)g);
+                b = RemapSteColor((byte)b);
+            }
+            return Color.FromRgb((byte)(r * ScaleFactor), (byte)(g * ScaleFactor), (byte)(b * ScaleFactor));
         }
     }
 }

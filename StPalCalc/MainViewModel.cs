@@ -195,7 +195,7 @@ namespace StPalCalc
         }
 
         public DelegateCommand<string> OpenPictureCommand { get; set; }
-        public DelegateCommand<string> GenerateCommand { get; set; }
+        public DelegateCommand<string> GenerateGradientCommand { get; set; }
         public DelegateCommand<string> FadeToColorCommand { get; set; }
         public DelegateCommand<string> FadeToBlackCommand { get; set; }
         public DelegateCommand<string> FadeFromPaletteToHueCommand { get; set; }
@@ -203,7 +203,7 @@ namespace StPalCalc
         public DelegateCommand<string> ChangeGradientColorCommand { get; set; }
         public DelegateCommand<string> CopyPreviousCommand { get; set; }
         public DelegateCommand<string> CopyNextCommand { get; set; }
-        public DelegateCommand<string> GenerateGradientCommand { get; set; }
+        public DelegateCommand<string> GenerateGradientRasterCommand { get; set; }
         public DelegateCommand<string> LoadGradientCommand { get; set; }
         public DelegateCommand<string> SaveGradientCommand { get; set; }
         public DelegateCommand<string> CopyItemCommand { get; set; }
@@ -243,10 +243,9 @@ namespace StPalCalc
                 var cleaned = s.Replace("$", "");
                 var list = cleaned.Split(",");
                 var i = 0;
-                foreach (var color in list)
+                foreach (var item in list)
                 {
-                    var us = (ushort)Convert.ToInt32(color, 16);
-                    ActivePicture.ActivePalette[i++] = Helpers.StColorFromInt(us);
+                    ActivePicture.ActivePalette[i++] = Helpers.ColorFromString(item);
                 }
                 UpdateUiAction?.Invoke(false);
                 UpdatePictureAction?.Invoke(PictureType.Picture1);
@@ -405,7 +404,7 @@ namespace StPalCalc
                     File.WriteAllText(dlg.FileName, json);
                 }
             });
-            GenerateGradientCommand = new DelegateCommand<string>(s =>
+            GenerateGradientRasterCommand = new DelegateCommand<string>(s =>
             {
                 var startColor = GradientItems[StartGradientIndex].Color;
                 var endColor = GradientItems[EndGradientIndex].Color;
@@ -440,7 +439,7 @@ namespace StPalCalc
                     UpdateUiAction?.Invoke(true);
                 }
             });
-            GenerateCommand = new DelegateCommand<string>(s =>
+            GenerateGradientCommand = new DelegateCommand<string>(s =>
             {
                 var startColor = Helpers.FromStString(_startColor);
                 var endColor = Helpers.FromStString(_endColor);
@@ -632,6 +631,15 @@ namespace StPalCalc
 
         public void UpdateCurrentPicture()
         {
+            if (ActivePicture == null) return;
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            UpdatePictureAction?.Invoke(PictureType.Picture1);
+            UpdateUiAction?.Invoke(true);
+        }
+
+        public void ReloadActivePicture()
+        {
+            ActivePicture = PictureFactory.GetPicture(_activeFilename);
             if (ActivePicture == null) return;
             ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
             UpdatePictureAction?.Invoke(PictureType.Picture1);

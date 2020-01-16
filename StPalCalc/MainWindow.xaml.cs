@@ -13,13 +13,13 @@ namespace StPalCalc
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// TODO: Support more than 200 raster items
-    /// TODO: Support standard ST
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm = new MainViewModel();
 
         private void RebuildActivePalette()
         {
+            if (_vm.ActivePicture == null) return;
             ColorsPaletteControl.Update(_vm.ActivePicture.ActivePalette, (color, index) =>
             {
                 _vm.SetPaletteValue(color, index);
@@ -141,7 +141,11 @@ namespace StPalCalc
         private void PlatformCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _vm.SelectedPlatform = ((ComboBox) sender).SelectedIndex;
-            _vm.UpdateCurrentPicture();
+            if (_vm.ActivePicture != null)
+            {
+                _vm.ReloadActivePicture();
+                _vm.UpdatePaletteCommand.Execute(_vm.ActivePaletteString);
+            }
         }
 
         private void HueSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

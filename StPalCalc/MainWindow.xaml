@@ -7,7 +7,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:userControls="clr-namespace:StPalCalc.UserControls"
         mc:Ignorable="d"
-        Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="850">
+        Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="800" Width="800" Height="560">
     <Window.Resources>
         <local:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
@@ -94,14 +94,9 @@
                         <TextBox Text="{Binding FadeToColor}" Width="64"/>
                         <Button Command="{Binding PickColorCommand}" CommandParameter="2" Content="Pick"/>
                     </DockPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" TextWrapping="Wrap" Text="{Binding PreviewText}" FontFamily="Courier New"/>
-                        <WrapPanel Grid.Column="1" x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
-                    </Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <WrapPanel x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
+                    </ScrollViewer>
                 </StackPanel>
             </TabItem>
 
@@ -171,7 +166,7 @@
                                 <TextBlock Text="Selected"/>
                                 <TextBox x:Name="GradientText"  MinWidth="64" TextChanged="TextBoxBase_OnTextChanged" Margin="4,0,0,0"/>
                             </DockPanel>
-                            <Button Command="{Binding GenerateGradientCommand}" Content="Gradient" MinWidth="72" Height="24" Margin="8,0"/>
+                            <Button Command="{Binding GenerateGradientRasterCommand}" Content="Gradient" MinWidth="72" Height="24" Margin="8,0"/>
                         </StackPanel>
                     </Grid>
 
@@ -200,7 +195,7 @@
                         <TextBox Text="{Binding EndColor}" MinWidth="80"/>
                     </DockPanel>
 
-                    <Button Command="{Binding GenerateCommand}" Content="Generate" Margin="0,8,0,0" Width="80" HorizontalAlignment="Left"/>
+                    <Button Command="{Binding GenerateGradientCommand}" Content="Generate" Margin="0,8,0,0" Width="80" HorizontalAlignment="Left"/>
                     <userControls:PalettePresenterUserControl x:Name="GeneratedGradientPresenter"/>
                     <TextBox Text="{Binding GeneratedPalette}"/>
                 </StackPanel>

@@ -6,8 +6,9 @@
     <UseWPF>true</UseWPF>
     <Authors>Mikael Stalvik</Authors>
     <Company>Bitbendaz</Company>
-    <Product>Bitbendaz Atari STe palette and raster toolkit</Product>
+    <Product>Bitbendaz palette and raster toolkit</Product>
     <ApplicationIcon>mainicon.ico</ApplicationIcon>
+    <Copyright>Mikael Stalvik</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
