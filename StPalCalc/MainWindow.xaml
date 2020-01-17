@@ -1,226 +1,234 @@
-﻿<Window x:Class="StPalCalc.MainWindow"
+﻿<Window x:Class="BBPalCalc.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:StPalCalc"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:bbPalCalc="clr-namespace:BBPalCalc"
+        xmlns:userControls="clr-namespace:BBPalCalc.UserControls"
+        xmlns:util="clr-namespace:BBPalCalc.Util"
         mc:Ignorable="d"
-        Title="Bitbendaz Atari STe palette and raster toolkit" Height="528" Width="850" MinWidth="850">
+        Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="824" Width="824" Height="560">
     <Window.Resources>
-        <local:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
-        <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
-        <local:ColorToStColorConverter x:Key="ColorToStColorConverter"/>
+        <util:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+        <util:ColorToStColorConverter x:Key="ColorToStColorConverter"/>
+        <util:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
     <Grid x:Name="Root">
-        <TabControl Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <DockPanel LastChildFill="False" Grid.Row="0" Margin="0,8,0,0">
+            <TextBlock Text="Data type:" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            <ComboBox x:Name="DataTypesCombo" SelectedIndex="1" Margin="4,0,0,0" SelectionChanged="DataTypesCombo_OnSelectionChanged"/>
+            <TextBlock Text="Platform:" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            <ComboBox x:Name="PlatformCombo" SelectedIndex="0" Margin="4,0,0,0" SelectionChanged="PlatformCombo_OnSelectionChanged"/>
+            <TextBlock Text="Fade/gradient steps:" Margin="8,0,0,0"/>
+            <xctk:IntegerUpDown x:Name="FadeStepsUpDown" Value="{Binding FadeSteps}" Margin="4,0,0,0"/>
+            <TextBlock Text="Number of rasters" Margin="8,0,0,0"/>
+            <ComboBox x:Name="NumRastersComboBox" SelectedIndex="0" SelectionChanged="NumRastersComboBox_OnSelectionChanged" Width="112" Margin="4,0,0,0"/>
+        </DockPanel>
+
+        <TabControl Margin="8" Grid.Row="1">
             <TabItem Header="Pictures and Palettes">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" MaxHeight="192"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0">
-                        <Grid>
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="Loaded picture" FontWeight="Bold"/>
+                            <DockPanel>
+                                <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                                <TextBlock Text="{Binding ActiveFilename}"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding PictureProperties}"/>
+                        </StackPanel>
+
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="24"/>
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition MinWidth="384" MaxWidth="424"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Grid.ColumnSpan="2">
-                                <DockPanel>
-                                    <TextBlock Text="Picture 1" FontWeight="Bold"/>
+                            <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0" Grid.Row="0"/>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="1" Grid.Row="0">
+                                <DockPanel VerticalAlignment="Stretch">
+                                    <TextBlock Text="Active palette" DockPanel.Dock="Top" FontWeight="Bold" Visibility="{Binding PictureLoaded,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <userControls:PalettePresenterUserControl x:Name="ColorsPaletteControl" DockPanel.Dock="Top"/>
+                                    <TextBlock Text="Original palette" DockPanel.Dock="Top" FontWeight="Bold" Visibility="{Binding PictureLoaded,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <userControls:PalettePresenterUserControl x:Name="OriginalColorsPaletteControl" DockPanel.Dock="Top"/>
                                 </DockPanel>
-                                <DockPanel>
-                                    <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
-                                    <TextBlock Text="{Binding ActiveFilename}"/>
-                                </DockPanel>
-                                <Image x:Name="Image1" Width="320" Height="200" Margin="0,0,0,8"/>
-                                <DockPanel>
-                                    <Button Click="ResetButtonBase_OnClick" Content="Reset" Margin="0,8,0,0" DockPanel.Dock="Right" Width="72"/>
-                                    <StackPanel Orientation="Horizontal" x:Name="ColorsStackPanel1" Height="24"/>
-                                </DockPanel>
-
-                                <DockPanel Margin="0,8,0,0">
-                                    <Button Content="Update" Command="{Binding UpdatePalette1Command}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
-                                    <TextBox Text="{Binding RawPalette}" x:Name="Palette1TextBox"/>
-                                </DockPanel>
-
-                                <DockPanel Margin="0,8,0,0">
-                                    <TextBlock Text="Hue" Width="64"/>
-                                    <Slider Minimum="-239" Maximum="239" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                </DockPanel>
-                                <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                                <DockPanel>
-                                    <TextBlock Text="Saturation" Width="64"/>
-                                    <Slider Minimum="-239" Maximum="239" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                </DockPanel>
-                                <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                                <DockPanel>
-                                    <TextBlock Text="Lightness" Width="64"/>
-                                    <Slider Minimum="-239" Maximum="239" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                </DockPanel>
-                                <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal" x:Name="HueColorsStackPanel1" Height="24"/>
-                            </StackPanel>
+                            </ScrollViewer>
+                            <Button Click="ResetButtonBase_OnClick" Content="Reset" DockPanel.Dock="Right" Width="72" Margin="8,0,0,0" Grid.Row="1"  Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right"/>
                         </Grid>
 
+                        <DockPanel Margin="0,8,0,0" Grid.Row="2">
+                            <Button Content="Update" Command="{Binding UpdatePaletteCommand}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
+                            <TextBox Text="{Binding ActivePaletteString}" x:Name="Palette1TextBox" Margin="4,0,0,0"/>
+                        </DockPanel>
 
+                    </Grid>
+                    <StackPanel Grid.Row="1">
+                        <DockPanel Margin="0,8,0,0">
+                            <TextBlock Text="Hue" Width="64"/>
+                            <Slider Minimum="-120" Maximum="120" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                        <DockPanel>
+                            <TextBlock Text="Saturation" Width="64"/>
+                            <Slider Minimum="-120" Maximum="120" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                        <DockPanel>
+                            <TextBlock Text="Lightness" Width="64"/>
+                            <Slider Minimum="-120" Maximum="120" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
                     </StackPanel>
 
                 </Grid>
             </TabItem>
             <TabItem Header="Fades">
-                <StackPanel>
-                    <DockPanel LastChildFill="False">
-                        <TextBlock Text="Data type:" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="DataTypesCombo" SelectedIndex="1" Margin="4,0,0,0" SelectionChanged="DataTypesCombo_OnSelectionChanged"/>
-                    </DockPanel>
+                <StackPanel Margin="8">
                     <DockPanel LastChildFill="False" Margin="0,8,0,0">
                         <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black"/>
                         <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="8,0,0,0"/>
                         <Button Command="{Binding FadeFromPaletteToHueCommand}" Content="Hue Fade" Margin="8,0,0,0"/>
                         <Button Command="{Binding FadeToColorCommand}" Content="Fade to color" Margin="8,0,0,0"/>
                         <TextBlock Text="Color" Margin="32,0,0,0" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding FadeToColor}" Width="64"/>
+                        <TextBox Text="{Binding FadeToColor}" Width="64" Margin="4,0,0,0"/>
                         <Button Command="{Binding PickColorCommand}" CommandParameter="2" Content="Pick"/>
                     </DockPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="384"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" TextWrapping="Wrap" Text="{Binding PreviewText}" FontFamily="Courier New"/>
-                        <WrapPanel Grid.Column="1" x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
-                    </Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,8,0,0">
+                        <WrapPanel x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
+                    </ScrollViewer>
                 </StackPanel>
             </TabItem>
 
             <TabItem Header="Rasters">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="144"/>
-                        <ColumnDefinition Width="80"/>
-                    </Grid.ColumnDefinitions>
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="32"/>
+                    </Grid.RowDefinitions>
 
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="32"/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" Orientation="Horizontal">
-                            <StackPanel Margin="8">
-                                <TextBlock Text="Picture preview"/>
-                                <Image Width="320" Height="200" x:Name="PreviewImage"/>
-                                <DockPanel LastChildFill="False">
-                                    <Button Command="{Binding LoadPreviewImageCommand}" Content="Load" MinWidth="72"/>
-                                    <Button Command="{Binding RefreshPreviewImageCommand}" Content="Refresh" MinWidth="72" Margin="8,0,0,0"/>
-                                    <xctk:IntegerUpDown DockPanel.Dock="Right" Value="{Binding RasterColorIndex}"/>
-                                    <TextBlock Text="Mask Color" FontSize="10" DockPanel.Dock="Right" VerticalAlignment="Center"/>
-                                </DockPanel>
-                            </StackPanel>
-                            <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256" HorizontalAlignment="Left"/>
-                        </StackPanel>
-                        <DockPanel LastChildFill="False" Margin="0,8,0,0" Grid.Row="1">
-                            <Button Command="{Binding CopyItemCommand}" Content="Copy" MinWidth="72"/>
-                            <Button Command="{Binding PasteItemCommand}" Content="Paste" Margin="4,0,0,0" MinWidth="72"/>
-                            <Button Command="{Binding ParseAsmGradientCommand}" Content="Paste Asm" MinWidth="72" Margin="8,0,0,0"/>
-                            <Button Command="{Binding GenerateRastersCommand}" Content="Generate" MinWidth="72" Margin="4,0,0,0" DockPanel.Dock="Right"/>
-                            <Button Command="{Binding SaveGradientCommand}" DockPanel.Dock="Right" Content="Save" Margin="4,0,0,0" MinWidth="64"/>
-                            <Button Command="{Binding LoadGradientCommand}" DockPanel.Dock="Right" Content="Load" MinWidth="64"/>
-                        </DockPanel>
-                    </Grid>
-
-                    <Grid Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="Raster list" FontWeight="Bold" Grid.Row="0"/>
-                        <ListBox ItemsSource="{Binding GradientItems}" Grid.Row="1" SelectionChanged="Selector_OnSelectionChanged" SelectionMode="Extended" x:Name="GradientListBox">
-                            <ListBox.InputBindings>
-                                <KeyBinding Key="C" Modifiers="Control" Command="{Binding DataContext.CopyItemCommand,ElementName=GradientListBox}"/>
-                                <KeyBinding Key="V" Modifiers="Control" Command="{Binding DataContext.PasteItemCommand,ElementName=GradientListBox}"/>
-                                <KeyBinding Key="Delete" Command="{Binding DataContext.DeleteGradientItemCommand,ElementName=GradientListBox}"/>
-                            </ListBox.InputBindings>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Index}" FontSize="10" Width="16"/>
-                                        <!--<Button Command="{Binding ElementName=Root,Path=DataContext.ChangeGradientColorCommand}" CommandParameter="{Binding Index}" Width="88">-->
-                                        <StackPanel Orientation="Horizontal">
-                                            <Rectangle Fill="{Binding Color,Converter={StaticResource ColorToBrushConverter}}" Width="24" Height="10"/>
-                                            <TextBlock Text="{Binding Color,Converter={StaticResource ColorToStColorConverter}}" FontSize="10"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                        <StackPanel Grid.Row="2" Margin="4,8,4,0">
-                            <DockPanel LastChildFill="True" Margin="0,0,0,4">
-                                <TextBlock Text="Selected"/>
-                                <TextBox x:Name="GradientText"  MinWidth="64" TextChanged="TextBoxBase_OnTextChanged" Margin="4,0,0,0"/>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="13*" MinWidth="256"/>
+                            <ColumnDefinition Width="51*"/>
+                            <ColumnDefinition Width="256"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <DockPanel Margin="4" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch">
+                            <TextBlock Text="Picture preview" FontWeight="Bold" DockPanel.Dock="Top"/>
+                            <Image x:Name="PreviewImage" DockPanel.Dock="Top"/>
+                            <DockPanel LastChildFill="False" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
+                                <Button Command="{Binding LoadPreviewImageCommand}" Content="Load" MinWidth="72"/>
+                                <Button Command="{Binding RefreshRasterPreviewImageCommand}" Content="Refresh" MinWidth="72" Margin="8,0,0,0"/>
+                                <xctk:IntegerUpDown DockPanel.Dock="Right" Value="{Binding RasterColorIndex}" Margin="4,0,0,0"/>
+                                <TextBlock Text="Mask Color" FontSize="10" DockPanel.Dock="Right" VerticalAlignment="Center"/>
                             </DockPanel>
-                            <Button Command="{Binding GenerateGradientCommand}" Content="Gradient" MinWidth="72" Height="24" Margin="8,0"/>
-                        </StackPanel>
+                        </DockPanel>
+
+                        <DockPanel Grid.Column="2" Margin="4" LastChildFill="False">
+                            <TextBlock Text="Color picker" FontWeight="Bold" DockPanel.Dock="Top"/>
+                            <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256" HorizontalAlignment="Left" DockPanel.Dock="Top"/>
+                        </DockPanel>
+                        <Grid Grid.Column="3" Margin="4">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Raster list" FontWeight="Bold" Grid.Row="0"/>
+                            <ListBox ItemsSource="{Binding GradientItems}" Grid.Row="1" SelectionChanged="Selector_OnSelectionChanged" SelectionMode="Extended" x:Name="GradientListBox">
+                                <ListBox.InputBindings>
+                                    <KeyBinding Key="C" Modifiers="Control" Command="{Binding DataContext.CopyItemCommand,ElementName=GradientListBox}"/>
+                                    <KeyBinding Key="V" Modifiers="Control" Command="{Binding DataContext.PasteItemCommand,ElementName=GradientListBox}"/>
+                                    <KeyBinding Key="Delete" Command="{Binding DataContext.DeleteGradientItemCommand,ElementName=GradientListBox}"/>
+                                </ListBox.InputBindings>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Index}" FontSize="10" Width="16"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Rectangle Fill="{Binding Color,Converter={StaticResource ColorToBrushConverter}}" Width="24" Height="10"/>
+                                                <TextBlock Text="{Binding Color,Converter={StaticResource ColorToStColorConverter}}" FontSize="10"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <StackPanel Grid.Row="2" Margin="4,8,4,0">
+                                <DockPanel LastChildFill="True" Margin="0,0,0,4">
+                                    <TextBlock Text="Selected"/>
+                                    <TextBox x:Name="GradientText"  MinWidth="64" TextChanged="TextBoxBase_OnTextChanged" Margin="4,0,0,0"/>
+                                </DockPanel>
+                                <Button Command="{Binding GenerateGradientRasterCommand}" Content="Make gradient" MinWidth="72" Height="24"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Column="4" Margin="0,4">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Preview" FontWeight="Bold"/>
+                            <StackPanel x:Name="GradientPreviewPanel" Width="80" Grid.Row="1"/>
+                        </Grid>
                     </Grid>
 
-                    <Grid Grid.Column="2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="Preview" FontWeight="Bold"/>
-                        <StackPanel x:Name="GradientPreviewPanel" Width="80" Grid.Row="1"/>
-                    </Grid>
+                    <DockPanel LastChildFill="False" Margin="0,8,0,0" Grid.Row="1">
+                        <Button Command="{Binding CopyItemCommand}" Content="Copy" MinWidth="72"/>
+                        <Button Command="{Binding PasteItemCommand}" Content="Paste" Margin="4,0,0,0" MinWidth="72"/>
+                        <Button Command="{Binding ParseAsmGradientCommand}" Content="Paste Asm" MinWidth="72" Margin="8,0,0,0"/>
+                        <Button Command="{Binding GenerateRastersCommand}" Content="Generate" MinWidth="72" Margin="4,0,0,0" DockPanel.Dock="Right"/>
+                        <Button Command="{Binding SaveGradientCommand}" DockPanel.Dock="Right" Content="Save" Margin="4,0,0,0" MinWidth="64"/>
+                        <Button Command="{Binding LoadGradientCommand}" DockPanel.Dock="Right" Content="Load" MinWidth="64"/>
+                    </DockPanel>
+
 
                 </Grid>
             </TabItem>
 
             <TabItem Header="Gradients">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="144"/>
-                        <ColumnDefinition Width="80"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="32"/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0">
-                            <StackPanel Margin="4">
+                <StackPanel Margin="8">
+                    <DockPanel Margin="0,8,0,0">
+                        <TextBlock Text="Start" Width="56"/>
+                        <Button Command="{Binding PickColorCommand}" CommandParameter="0" Content="Pick" DockPanel.Dock="Right" Width="72"/>
+                        <TextBox Text="{Binding StartColor}" MinWidth="80"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,8,0,0">
+                        <TextBlock Text="End" Width="56"/>
+                        <Button Command="{Binding PickColorCommand}" CommandParameter="1" Content="Pick" DockPanel.Dock="Right" Width="72"/>
+                        <TextBox Text="{Binding EndColor}" MinWidth="80"/>
+                    </DockPanel>
 
-                                <DockPanel Margin="0,8,0,0">
-                                    <TextBlock Text="Start" Width="56"/>
-                                    <Button Command="{Binding PickColorCommand}" CommandParameter="0" Content="Pick" DockPanel.Dock="Right"/>
-                                    <TextBox Text="{Binding StartColor}" MinWidth="80"/>
-                                </DockPanel>
-                                <DockPanel Margin="0,8,0,0">
-                                    <TextBlock Text="End" Width="56"/>
-                                    <Button Command="{Binding PickColorCommand}" CommandParameter="1" Content="Pick" DockPanel.Dock="Right"/>
-                                    <TextBox Text="{Binding EndColor}" MinWidth="80"/>
-                                </DockPanel>
-
-                                <Button Command="{Binding GenerateCommand}" Content="Generate" Margin="0,8,0,0"/>
-                                <StackPanel Orientation="Horizontal" x:Name="GeneratedColorsStackPanel" Height="24"/>
-                                <TextBox Text="{Binding GeneratedPalette}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-
-
-                </Grid>
+                    <Button Command="{Binding GenerateGradientCommand}" Content="Generate" Margin="0,8,0,0" Width="80" HorizontalAlignment="Left"/>
+                    <userControls:PalettePresenterUserControl x:Name="GeneratedGradientPresenter"/>
+                    <TextBox Text="{Binding GeneratedPalette}"/>
+                </StackPanel>
 
             </TabItem>
 
             <TabItem Header="Output">
-                <StackPanel>
-                    <TextBlock Text="Preview" Margin="0,8,0,0"/>
-                    <TextBox FontFamily="Courier New" Text="{Binding PreviewText}" TextWrapping="Wrap"/>
-                </StackPanel>
+                <DockPanel Margin="4" VerticalAlignment="Stretch">
+                    <TextBlock Text="Preview" Margin="0,8,0,0" FontWeight="Bold" DockPanel.Dock="Top"/>
+                    <TextBox FontFamily="Courier New" Text="{Binding PreviewText}" TextWrapping="Wrap" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto"/>
+                </DockPanel>
             </TabItem>
         </TabControl>
 

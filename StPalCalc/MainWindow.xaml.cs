@@ -1,96 +1,91 @@
-﻿using System;
+﻿using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Linq;
+using BBPalCalc.Platforms;
+using BBPalCalc.ViewModels;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
+    /// IFF-LBM reader based on Pavel Torgashows implementation:
+    /// https://github.com/PavelTorgashov/IFF-ILBM-Parser
+    /// 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm = new MainViewModel();
+
+        private void RebuildActivePalette()
+        {
+            if (_vm.ActivePicture == null) return;
+            ColorsPaletteControl.Update(_vm.ActivePicture.ActivePalette, (color, index) =>
+            {
+                _vm.SetPaletteValue(color, index);
+                _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
+            }, true);
+            OriginalColorsPaletteControl.Update(_vm.ActivePicture.OriginalPalette, null, false);
+        }
         public MainWindow()
         {
             InitializeComponent();
             DataContext = _vm;
+
             DataTypesCombo.ItemsSource = _vm.DataTypes;
+            PlatformCombo.ItemsSource = _vm.Platforms;
+            NumRastersComboBox.ItemsSource = _vm.NumberOfRasters;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
-            _vm.UpdateUiAction += () =>
+            _vm.UpdateUiAction += updateHue =>
             {
-                ColorsStackPanel1.Children.Clear();
-                for (var i = 0; i < 16; i++)
+                RebuildActivePalette();
+                if (updateHue)
                 {
-                    var color = _vm.GetRgbFromPalette1(i);
-                    var r = new Rectangle
-                    {
-                        Fill = new SolidColorBrush(color),
-                        Width = 24,
-                        Height = 24,
-                        ToolTip = _vm.Get12BitRgbFromPalette1(i)
-                    };
-                    var btn = new Button {Content = r, Tag = i};
-                    btn.Click += (sender, args) =>
-                    {
-                        var b = (Button) sender;
-                        var index = (int) b.Tag;
-                        var pc = ColorPickerWindow.PickColor(_vm.GetRgbFromPalette1(index));
-                        if (pc != null)
-                        {
-                            var stColor = Helpers.ConvertFromRgbTo12Bit(pc.Value, true);
-                            _vm.SetPaletteValue((ushort)Convert.ToInt32(stColor, 16), index);
-                            _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
-                        }
-                    };
-                    ColorsStackPanel1.Children.Add(btn);
+                    HueSlider_OnValueChanged(null, null);
                 }
-                HueSlider_OnValueChanged(null, null);
             };
             _vm.UpdateGradientAction += colors =>
             {
-                GeneratedColorsStackPanel.Children.Clear();
-                foreach (var color in colors)
-                {
-                    var r = new Rectangle
-                    {
-                        Fill = new SolidColorBrush(color),
-                        Width = 24,
-                        Height = 24,
-                        ToolTip = Helpers.ConvertFromRgbTo12Bit(color)
-                    };
-                    GeneratedColorsStackPanel.Children.Add(r);
-                }
+                GeneratedGradientPresenter.Update(colors.ToArray(), null, false);
             };
             _vm.UpdatePreviewFadeAction += colors =>
             {
+                PreviewPanel.Width = _vm.ActivePicture.ActivePalette.Length * 24;
                 PreviewPanel.Children.Clear();
-                for (var y = 0; y < 16; y++)
+                for (var y = 0; y < _vm.FadeSteps; y++)
                 {
-                    for (var x = 0; x < 16; x++)
+                    for (var x = 0; x < _vm.ActivePicture.ActivePalette.Length; x++)
                     {
-                        var ofs = x + y * 16;
-                        var r = new Rectangle { Fill = new SolidColorBrush(colors[ofs]), Width = 24, Height = 24 };
+                        var ofs = x + y * _vm.ActivePicture.ActivePalette.Length;
+                        var r = new Rectangle
+                        {
+                            Fill = new SolidColorBrush(colors[ofs]), 
+                            Width = 24, 
+                            Height = 24,
+                            ToolTip = "$" + Helpers.Globals.ActivePlatform.ColorToString(colors[ofs]) + $"\nIndex: {x}, row: {y}"
+                        };
                         PreviewPanel.Children.Add(r);
                     }
                 }
             };
             _vm.UpdateGradientPreviewAction += () =>
             {
+                const int previewItemHeight = 2;
                 GradientPreviewPanel.Children.Clear();
                 foreach (var item in _vm.GradientItems)
                 {
-                    var sp = new StackPanel();
-                    sp.Width = 48;
-                    sp.Height = 2;
-                    sp.Orientation = Orientation.Horizontal;
+
+                    var sp = new StackPanel {Width = 48, Height = previewItemHeight, Orientation = Orientation.Horizontal, SnapsToDevicePixels = true};
                     var mc = item == _vm.SelectedGradientItem ? Colors.Red : Colors.White;
-                    var marker = new Rectangle { Fill = new SolidColorBrush(mc), Width = 16, Height = 2};
+                    var marker = new Rectangle { Fill = new SolidColorBrush(mc), Width = 16, Height = previewItemHeight};
                     sp.Children.Add(marker);
-                    var r = new Rectangle { Fill = new SolidColorBrush(item.Color), Width = 24, Height = 2 };
+                    var r = new Rectangle
+                    {
+                        Fill = new SolidColorBrush(item.Color), Width = 24, Height = previewItemHeight, SnapsToDevicePixels = true
+                    };
                     sp.Children.Add(r);
                     GradientPreviewPanel.Children.Add(sp);
                 }
@@ -101,27 +96,22 @@ namespace StPalCalc
                 switch (pictureType)
                 {
                     case PictureType.Picture1:
-                        _vm.RenderPi1(_vm.ActiveFilename, Image1, pictureType);
+                        _vm.ActivePicture.Render(Image1);
                         break;
                     case PictureType.PreviewPicture:
-                        _vm.RenderPi1(_vm.PreviewFilename, PreviewImage, pictureType, true);
+                        if (_vm.PreviewPicture == null) return;
+                        _vm.PreviewPicture.RenderWithRasters(PreviewImage, _vm.GradientItems.ToList(), _vm.RasterColorIndex);
+                        (var w, var h) = _vm.PreviewPicture.GetDimensions;
+                        PreviewImage.Width = w;
+                        PreviewImage.Height = h;
                         break;
                 }
             };
             _vm.UpdateHueColorsAction += colors =>
             {
-                HueColorsStackPanel1.Children.Clear();
-                foreach (var color in colors)
-                {
-                    var r = new Rectangle
-                    {
-                        Fill = new SolidColorBrush(color),
-                        Width = 24,
-                        Height = 24,
-                    };
-                    HueColorsStackPanel1.Children.Add(r);
-                }
-                _vm.RenderPi1(_vm.ActiveFilename, Image1, PictureType.Picture1Hue);
+                _vm.ActivePicture?.Render(Image1, _vm.HuePalette);
+                _vm.ActivePaletteString = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
+                RebuildActivePalette();
             };
         }
 
@@ -132,7 +122,7 @@ namespace StPalCalc
             if (item == null) return;
             _vm.SelectedGradientItem = item;
             ColorCanvas.SelectedColor = item.Color;
-            GradientText.Text = Helpers.ConvertFromRgbTo12Bit(item.Color, true);
+            GradientText.Text = Helpers.Globals.ActivePlatform.ColorToString(item.Color);
             var selectedItems = lb.SelectedItems.Cast<GradientItem>().ToList();
             var min = selectedItems.Min(x => x.Index);
             var max = selectedItems.Max(x => x.Index);
@@ -143,7 +133,7 @@ namespace StPalCalc
 
         private void ColorCanvas_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            GradientText.Text = Helpers.ConvertFromRgbTo12Bit(ColorCanvas.SelectedColor.Value);
+            GradientText.Text = Helpers.Globals.ActivePlatform.ColorToString(ColorCanvas.SelectedColor.Value);
             _vm.UpdateSelectedGradientColor(ColorCanvas.SelectedColor.Value);
             _vm.UpdateGradientPreviewAction?.Invoke();
         }
@@ -157,6 +147,16 @@ namespace StPalCalc
         {
             _vm.SelectedDataType = ((ComboBox) sender).SelectedIndex;
         }
+        private void PlatformCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _vm.SelectedPlatform = ((ComboBox) sender).SelectedIndex;
+            Helpers.Globals.ActivePlatform = PlatformFactory.CreatePlatform((PlatformTypes)_vm.SelectedPlatform);
+            if (_vm.ActivePicture != null)
+            {
+                _vm.ReloadActivePicture();
+                _vm.UpdatePaletteCommand.Execute(_vm.ActivePaletteString);
+            }
+        }
 
         private void HueSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -169,6 +169,23 @@ namespace StPalCalc
             SaturationSlider.Value = 0;
             LightnessSlider.Value = 0;
             _vm.ResetPalette();
+        }
+
+        private void NumRastersComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var combo = ((ComboBox) sender);
+            switch (combo.SelectedIndex)
+            {
+                case 0: 
+                    _vm.SetNumberOfRasters(200);
+                    break;
+                case 1:
+                    _vm.SetNumberOfRasters(256);
+                    break;
+                case 2:
+                    _vm.SetNumberOfRasters(312);
+                    break;
+            }
         }
     }
 }

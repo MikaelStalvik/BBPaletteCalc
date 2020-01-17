@@ -6,23 +6,29 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using BBPalCalc.Interfaces;
+using BBPalCalc.Util;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
-namespace StPalCalc
+namespace BBPalCalc.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
-        public Action UpdateUiAction { get; set; }
+        //private const int RASTER_NUM = 256;
+
+        public Action<bool> UpdateUiAction { get; set; }
         public Action<List<Color>> UpdateGradientAction { get; set; }
         public Action<Color[]> UpdatePreviewFadeAction { get; set; }
         public Action UpdateGradientPreviewAction { get; set; }
         public Action RebindAction { get; set; }
         public Action<PictureType> UpdatePictureAction { get; set; }
         public Action<List<Color>> UpdateHueColorsAction { get; set; }
+
+        public IPicture PreviewPicture { get; set; }
+        public IPicture ActivePicture { get; set; }
+        public Color[] HuePalette { get; private set; }
 
         private GradientItem ClipboardItem { get; set; }
         public int StartGradientIndex { get; set; }
@@ -35,7 +41,7 @@ namespace StPalCalc
             {
                 _selectedGradientItem = value;
                 OnPropertyChanged();
-                SelectedGradientColor = _selectedGradientItem != null ? Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color) : string.Empty;
+                SelectedGradientColor = _selectedGradientItem != null ? Helpers.Globals.ActivePlatform.ColorToString(SelectedGradientItem.Color) : string.Empty;
             }
         }
         public List<GradientItem> SelectedGradientItems { get; set; }
@@ -45,7 +51,7 @@ namespace StPalCalc
             if (SelectedGradientItem != null)
             {
                 SelectedGradientItem.Color = color;
-                SelectedGradientColor = Helpers.ConvertFromRgbTo12Bit(SelectedGradientItem.Color);
+                SelectedGradientColor = Helpers.Globals.ActivePlatform.ColorToString(SelectedGradientItem.Color);
                 GradientItems[SelectedGradientItem.Index].Color = SelectedGradientItem.Color;
                 UpdateGradientPreviewAction?.Invoke();
                 RebindAction?.Invoke();
@@ -56,7 +62,7 @@ namespace StPalCalc
         {
             if (SelectedGradientItem == null) return;
             var inp = data.Replace("$", string.Empty);
-            UpdateSelectedGradientColor(Helpers.FromStString(inp));
+            UpdateSelectedGradientColor(Helpers.Globals.ActivePlatform.ToRgb(inp.ToHex()));
         }
 
         public ObservableCollection<GradientItem> GradientItems { get; private set; }
@@ -72,13 +78,19 @@ namespace StPalCalc
             }
         }
 
-        public ObservableCollection<string> DataTypes = new ObservableCollection<string>
+        public readonly ObservableCollection<string> DataTypes = new ObservableCollection<string>
         {
             "Byte (dc.b)",
             "Word (dc.w)",
             "Long (dc.l)"
         };
 
+        private bool _pictureLoaded;
+        public bool PictureLoaded
+        {
+            get => _pictureLoaded;
+            set { _pictureLoaded = value; OnPropertyChanged(); }
+        }
         private int _selectedDataType;
         public int SelectedDataType
         {
@@ -89,6 +101,49 @@ namespace StPalCalc
                 OnPropertyChanged();
             }
         }
+
+        public readonly ObservableCollection<string> Platforms = new ObservableCollection<string>
+        {
+            "Atari Ste",
+            "Amiga",
+            "Atari St"
+        };
+        private int _selectedPlatform;
+        public int SelectedPlatform
+        {
+            get => _selectedPlatform;
+            set
+            {
+                _selectedPlatform = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public readonly ObservableCollection<string> NumberOfRasters = new ObservableCollection<string>
+        {
+            "200",
+            "256",
+            "312"
+        };
+        private int _numRasters;
+        public int NumRasters
+        {
+            get => _numRasters;
+            set { _numRasters = value; OnPropertyChanged(); }
+        }
+
+        private int _fadeSteps;
+        public int FadeSteps
+        {
+            get => _fadeSteps;
+            set
+            {
+                _fadeSteps = value;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         private string _previewText;
         public string PreviewText
@@ -126,24 +181,13 @@ namespace StPalCalc
         }
 
 
-        private string _rawPaletteString;
-        public string RawPalette
+        private string _activePaletteString;
+        public string ActivePaletteString
         {
-            get => _rawPaletteString;
+            get => _activePaletteString;
             set
             {
-                _rawPaletteString = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _orgPaletteRgb;
-        public string OrgPaletteRgb
-        {
-            get => _orgPaletteRgb;
-            set
-            {
-                _orgPaletteRgb = value;
+                _activePaletteString = value;
                 OnPropertyChanged();
             }
         }
@@ -160,7 +204,6 @@ namespace StPalCalc
         }
 
         private int _rasterIndexColor;
-
         public int RasterColorIndex
         {
             get => _rasterIndexColor;
@@ -168,25 +211,27 @@ namespace StPalCalc
             {
                 _rasterIndexColor = value;
                 OnPropertyChanged();
-                RefreshPreviewImageCommand.Execute("");
+                RefreshRasterPreviewImageCommand.Execute("");
             }
         }
 
-        public string PreviewFilename { get; set; }
-        public ushort[] PreviewPalette = new ushort[16];
-        private ushort[] _rawPaletteOrg = new ushort[16];
-        private ushort[] _rawPalette = new ushort[16];
-        private ushort[] _rawPaletteHue = new ushort[16];
+        private string _pictureProperties;
+        public string PictureProperties
+        {
+            get => _pictureProperties;
+            set { _pictureProperties = value; OnPropertyChanged(); }
+        }
 
         public DelegateCommand<string> OpenPictureCommand { get; set; }
-        public DelegateCommand<string> GenerateCommand { get; set; }
+        public DelegateCommand<string> GenerateGradientCommand { get; set; }
         public DelegateCommand<string> FadeToColorCommand { get; set; }
         public DelegateCommand<string> FadeToBlackCommand { get; set; }
+        public DelegateCommand<string> FadeFromPaletteToHueCommand { get; set; }
         public DelegateCommand<string> FadeToWhiteCommand { get; set; }
         public DelegateCommand<string> ChangeGradientColorCommand { get; set; }
         public DelegateCommand<string> CopyPreviousCommand { get; set; }
         public DelegateCommand<string> CopyNextCommand { get; set; }
-        public DelegateCommand<string> GenerateGradientCommand { get; set; }
+        public DelegateCommand<string> GenerateGradientRasterCommand { get; set; }
         public DelegateCommand<string> LoadGradientCommand { get; set; }
         public DelegateCommand<string> SaveGradientCommand { get; set; }
         public DelegateCommand<string> CopyItemCommand { get; set; }
@@ -195,15 +240,14 @@ namespace StPalCalc
         public DelegateCommand<string> ParseAsmGradientCommand { get; set; }
         public DelegateCommand<int> PickColorCommand { get; set; }
         public DelegateCommand<string> LoadPreviewImageCommand { get; set; }
-        public DelegateCommand<string> RefreshPreviewImageCommand { get; set; }
+        public DelegateCommand<string> RefreshRasterPreviewImageCommand { get; set; }
         public DelegateCommand<string> GenerateRastersCommand { get; set; }
         public DelegateCommand<HslSliderPayload> AdjustHueCommand { get; set; }
-        public DelegateCommand<string> FadeFromPaletteToHueCommand { get; set; }
-        public DelegateCommand<string> UpdatePalette1Command { get; set; }
+        public DelegateCommand<string> UpdatePaletteCommand { get; set; }
 
-        private (bool, string) SelectPi1File()
+        private (bool, string) SelectPictureFile()
         {
-            var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "PI1 files|*.pi1;" };
+            var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "All files|*.iff;*.pi1|PI1 files|*.pi1|IFF files|*.iff" };
             if (dlg.ShowDialog() == true)
             {
                 return (true, dlg.FileName);
@@ -214,53 +258,53 @@ namespace StPalCalc
         public MainViewModel()
         {
             GradientItems = new ObservableCollection<GradientItem>();
-            for (var i = 0; i < 200; i++)
+            _numRasters = 200;
+            for (var i = 0; i < _numRasters; i++)
             {
                 GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
             }
             SelectedDataType = 1;
+            FadeSteps = 16;
 
-            UpdatePalette1Command = new DelegateCommand<string>(s =>
+            UpdatePaletteCommand = new DelegateCommand<string>(s =>
             {
+                if (ActivePicture == null) return;
                 var cleaned = s.Replace("$", "");
                 var list = cleaned.Split(",");
                 var i = 0;
-                foreach (var color in list)
+                foreach (var item in list)
                 {
-                    var us = (ushort) Convert.ToInt32(color, 16);
-                    _rawPalette[i] = us;
-                    i++;
+                    ActivePicture.ActivePalette[i++] = Helpers.Globals.ActivePlatform.ToRgb(item.ToHex());// ColorFromString(item);
                 }
-                UpdateUiAction?.Invoke();
+                UpdateUiAction?.Invoke(false);
                 UpdatePictureAction?.Invoke(PictureType.Picture1);
             });
             AdjustHueCommand = new DelegateCommand<HslSliderPayload>(payload =>
             {
+                if (ActivePicture == null) return;
                 var newColors = new List<Color>();
-                var index = 0;
-                foreach (var uc in _rawPalette)
+                foreach (var color in ActivePicture.OriginalPalette)
                 {
-                    var col = Helpers.FromStString(uc.ToString("X2"));
-                    var hsl = new HSLColor(col.R, col.G, col.B);
+                    var hsl = new HSLColor(color.R, color.G, color.B);
                     hsl.Hue += payload.Hue;
                     hsl.Saturation += payload.Saturation;
                     hsl.Luminosity += payload.Lightness;
                     hsl.RgbParts(out var r, out var g, out var b);
                     var nc = Color.FromRgb(r, g, b);
                     newColors.Add(nc);
-                    _rawPaletteHue[index] = (ushort)Convert.ToInt32(Helpers.ConvertFromRgbTo12Bit(nc, true), 16);
-                    index++;
                 }
+                HuePalette = newColors.ToArray();
+                ActivePicture.ActivePalette = newColors.ToArray();
                 UpdateHueColorsAction?.Invoke(newColors);
             });
             GenerateRastersCommand = new DelegateCommand<string>(_ =>
             {
                 var sb = new StringBuilder();
-                var lineb = new StringBuilder();
-                sb.AppendLine("; 200 items");
+                var lineBuilder = new StringBuilder();
+                sb.AppendLine($"; {GradientItems.Count} items");
                 sb.AppendLine("raster_data:");
 
-                lineb.Append("\t" + SelectedDataTypePrefix + " ");
+                lineBuilder.Append("\t" + SelectedDataTypePrefix + " ");
 
                 var index = 0;
                 foreach (var item in GradientItems)
@@ -268,18 +312,19 @@ namespace StPalCalc
                     var isNewLine = ((index % 9) == 0) && index != 0;
                     if (isNewLine)
                     {
-                        var line = lineb.ToString();
+                        var line = lineBuilder.ToString();
                         sb.AppendLine(line.Remove(line.Length - 1));
-                        lineb.Clear();
-                        lineb.Append("\t" + SelectedDataTypePrefix + " ");
+                        lineBuilder.Clear();
+                        lineBuilder.Append("\t" + SelectedDataTypePrefix + " ");
                     }
 
-                    lineb.Append(Helpers.ConvertFromRgbTo12Bit(item.Color));
-                    lineb.Append(",");
+                    lineBuilder.Append("$");
+                    lineBuilder.Append(Helpers.Globals.ActivePlatform.ColorToString(item.Color));
+                    lineBuilder.Append(",");
                     index++;
                 }
 
-                var line2 = lineb.ToString();
+                var line2 = lineBuilder.ToString();
                 sb.AppendLine(line2.Remove(line2.Length - 1));
 
                 PreviewText = sb.ToString();
@@ -293,21 +338,16 @@ namespace StPalCalc
                     SelectedGradientItem = null;
                 }
             });
-            RefreshPreviewImageCommand = new DelegateCommand<string>(_ =>
+            RefreshRasterPreviewImageCommand = new DelegateCommand<string>(_ =>
             {
-                if (File.Exists(PreviewFilename))
-                {
-                    ReadPalette(PreviewFilename, ref PreviewPalette);
-                    UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
-                }
+                UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
             });
             LoadPreviewImageCommand = new DelegateCommand<string>(_ =>
             {
-                var (res, filename) = SelectPi1File();
+                var (res, filename) = SelectPictureFile();
                 if (res)
-                { 
-                    PreviewFilename = filename;
-                    ReadPalette(PreviewFilename, ref PreviewPalette);
+                {
+                    PreviewPicture = PictureFactory.GetPicture(filename);
                     UpdatePictureAction?.Invoke(PictureType.PreviewPicture);
                 }
             });
@@ -317,19 +357,19 @@ namespace StPalCalc
                 switch (index)
                 {
                     case 0: 
-                        startColor = Helpers.FromStString(StartColor);
+                        startColor = Helpers.Globals.ActivePlatform.ToRgb(StartColor.ToHex());
                         break;
                     case 1:
-                        startColor = Helpers.FromStString(EndColor);
+                        startColor = Helpers.Globals.ActivePlatform.ToRgb(EndColor.ToHex());
                         break;
                     case 2:
-                        startColor = Helpers.FromStString(FadeToColor);
+                        startColor = Helpers.Globals.ActivePlatform.ToRgb(FadeToColor.ToHex());
                         break;
                 }
                 var c = ColorPickerWindow.PickColor(startColor);
                 if (c != null)
                 {
-                    var stColor = Helpers.ConvertFromRgbTo12Bit(c.Value, true);
+                    var stColor = Helpers.Globals.ActivePlatform.ColorToString(c.Value);
                     switch (index)
                     {
                         case 0: 
@@ -379,6 +419,16 @@ namespace StPalCalc
                     {
                         GradientItems.Add(new GradientItem { Color = item.Color, Index = i });
                         i++;
+                        if (i == _numRasters) break;
+                    }
+
+                    if (GradientItems.Count < _numRasters)
+                    {
+                        var diff = _numRasters - GradientItems.Count;
+                        for (i = 0; i < diff; i++)
+                        {
+                            GradientItems.Add(new GradientItem { Color = Colors.Black, Index = GradientItems.Count});
+                        }
                     }
                     UpdateGradientPreviewAction?.Invoke();
                     RebindAction?.Invoke();
@@ -394,7 +444,7 @@ namespace StPalCalc
                     File.WriteAllText(dlg.FileName, json);
                 }
             });
-            GenerateGradientCommand = new DelegateCommand<string>(s =>
+            GenerateGradientRasterCommand = new DelegateCommand<string>(s =>
             {
                 var startColor = GradientItems[StartGradientIndex].Color;
                 var endColor = GradientItems[EndGradientIndex].Color;
@@ -418,27 +468,33 @@ namespace StPalCalc
 
             OpenPictureCommand = new DelegateCommand<string>(_ =>
             {
-                var (res, filename) = SelectPi1File();
+                var (res, filename) = SelectPictureFile();
                 if (res)
                 {
+                    ActivePicture = PictureFactory.GetPicture(filename);
+                    if (ActivePicture == null) return;
                     ActiveFilename = filename;
-                    RawPalette = ReadPalette(ActiveFilename, ref _rawPaletteOrg);
-                    ReadPalette(ActiveFilename, ref _rawPalette);
-                    UpdateUiAction?.Invoke();
+                    ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
                     UpdatePictureAction?.Invoke(PictureType.Picture1);
+                    UpdateUiAction?.Invoke(true);
+                    (var w, var h) = ActivePicture.GetDimensions;
+                    PictureProperties = $"{w}*{h} pixels, {ActivePicture.ActivePalette.Length} colors";
+                    PictureLoaded = true;
                 }
             });
-            GenerateCommand = new DelegateCommand<string>(s =>
+            GenerateGradientCommand = new DelegateCommand<string>(s =>
             {
-                var startColor = Helpers.FromStString(_startColor);
-                var endColor = Helpers.FromStString(_endColor);
-                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+                var startColor = Helpers.Globals.ActivePlatform.ToRgb(_startColor.ToHex());
+                var endColor = Helpers.Globals.ActivePlatform.ToRgb(_endColor.ToHex());
+                var data = Helpers.GetGradients(startColor, endColor, FadeSteps).ToList();
 
                 var sb = new StringBuilder();
+                var iterator = 0;
                 foreach (var color in data)
                 {
-                    sb.Append(Helpers.ConvertFromRgbTo12Bit(color));
-                    sb.Append(",");
+                    sb.Append("$" + Helpers.Globals.ActivePlatform.ColorToString(color));
+                    if (iterator < data.Count-1) sb.Append(",");
+                    iterator++;
                 }
 
                 GeneratedPalette = sb.ToString();
@@ -446,19 +502,23 @@ namespace StPalCalc
             });
             FadeToColorCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(_rawPalette, FadeToColor);
+                if (ActivePicture?.ActivePalette == null) return;
+                GenerateFade(ActivePicture.ActivePalette, FadeToColor);
             });
             FadeToBlackCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(_rawPalette, "0");
+                if (ActivePicture?.ActivePalette == null) return;
+                GenerateFade(ActivePicture.ActivePalette, "0");
             });
             FadeToWhiteCommand = new DelegateCommand<string>(b =>
             {
-                GenerateFade(_rawPalette, "FFF");
+                if (ActivePicture?.ActivePalette == null) return;
+                GenerateFade(ActivePicture.ActivePalette, "FFF");
             });
             FadeFromPaletteToHueCommand = new DelegateCommand<string>(_ =>
             {
-                GenerateFade(_rawPalette,_rawPaletteHue);
+                if (ActivePicture?.OriginalPalette == null || HuePalette == null) return;
+                GenerateFade(ActivePicture.OriginalPalette, ActivePicture.ActivePalette);
             });
             ChangeGradientColorCommand = new DelegateCommand<string>(s =>
             {
@@ -471,8 +531,8 @@ namespace StPalCalc
                 {
                     var errors = false;
                     var colorData = new List<Color>();
-                    var ctext = Clipboard.GetText();
-                    var lines = ctext.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+                    var clipboardText = Clipboard.GetText();
+                    var lines = clipboardText.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
                     foreach (var line in lines)
                     {
                         var line2 = line.Replace("dc.w", string.Empty, StringComparison.CurrentCultureIgnoreCase).Trim();
@@ -482,8 +542,7 @@ namespace StPalCalc
                             var cleanedItem = item.Replace("$", "");
                             try
                             {
-                                var converted = Convert.ToInt32(cleanedItem, 16);
-                                colorData.Add(Helpers.StColorFromInt(converted));
+                                colorData.Add(Helpers.Globals.ActivePlatform.ToRgb(cleanedItem.ToHex()));
                             }
                             catch
                             {
@@ -495,7 +554,7 @@ namespace StPalCalc
 
                     for (var i = 0; i < colorData.Count; i++)
                     {
-                        if (i == 200) break;
+                        if (i == GradientItems.Count) break;
                         GradientItems[i].Color = colorData[i];
                     }
                     UpdateGradientPreviewAction?.Invoke();
@@ -531,33 +590,33 @@ namespace StPalCalc
                 }
             }
         }
-        private void GenerateFade(ushort[] palette, string endColorStr)
+        private void GenerateFade(Color[] fromPalette, string endColorStr)
         {
-            var generatedColors = new Color[16 * 16];
-            var stColors = new string[16 * 16];
-            for (var i = 0; i < 16; i++)
+            var generatedColors = new Color[fromPalette.Length * _fadeSteps];
+            var stColors = new string[fromPalette.Length * _fadeSteps];
+            for (var i = 0; i < fromPalette.Length; i++)
             {
-                var c = palette[i].ToString("X2");
-                var startColor = Helpers.FromStString(c);
-                var endColor = Helpers.FromStString(endColorStr);
-                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+                var startColor = fromPalette[i];
+                var endColor = Helpers.Globals.ActivePlatform.ToRgb(endColorStr.ToHex());
+                var data = Helpers.GetGradients(startColor, endColor, _fadeSteps).ToList();
 
-                for (var j = 0; j < 16; j++)
+                for (var j = 0; j < _fadeSteps; j++)
                 {
-                    var ofs = i + j * 16;
+                    var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
-                    stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
+                    stColors[ofs] = Helpers.Globals.ActivePlatform.ColorToString(data[j]);
                 }
             }
             var sb = new StringBuilder();
-            for (var y = 0; y < 16; y++)
+            for (var y = 0; y < _fadeSteps; y++)
             {
                 sb.Append("\t" + SelectedDataTypePrefix);
-                for (var x = 0; x < 16; x++)
+                for (var x = 0; x < fromPalette.Length; x++)
                 {
-                    var ofs = x + y * 16;
+                    var ofs = x + y * fromPalette.Length;
+                    sb.Append("$");
                     sb.Append(stColors[ofs]);
-                    if (x < 15) sb.Append(",");
+                    if (x < fromPalette.Length-1) sb.Append(",");
                 }
                 sb.AppendLine(string.Empty);
             }
@@ -565,34 +624,33 @@ namespace StPalCalc
             PreviewText = sb.ToString();
             UpdatePreviewFadeAction?.Invoke(generatedColors);
         }
-        private void GenerateFade(ushort[] palette, ushort[] endPalette)
+        private void GenerateFade(Color[] fromPalette, Color[] toPalette)
         {
-            var generatedColors = new Color[16 * 16];
-            var stColors = new string[16 * 16];
-            for (var i = 0; i < 16; i++)
+            var generatedColors = new Color[fromPalette.Length * _fadeSteps];
+            var stColors = new string[fromPalette.Length * _fadeSteps];
+            for (var i = 0; i < fromPalette.Length; i++)
             {
-                var c = palette[i].ToString("X2");
-                var startColor = Helpers.FromStString(c);
-                c = endPalette[i].ToString("X2");
-                var endColor = Helpers.FromStString(c);
-                var data = Helpers.GetGradients(startColor, endColor, 16).ToList();
+                var startColor = fromPalette[i];
+                var endColor = toPalette[i];
+                var data = Helpers.GetGradients(startColor, endColor, _fadeSteps).ToList();
 
-                for (var j = 0; j < 16; j++)
+                for (var j = 0; j < _fadeSteps; j++)
                 {
-                    var ofs = i + j * 16;
+                    var ofs = i + j * fromPalette.Length;
                     generatedColors[ofs] = data[j];
-                    stColors[ofs] = Helpers.ConvertFromRgbTo12Bit(data[j]);
+                    stColors[ofs] = Helpers.Globals.ActivePlatform.ColorToString(data[j]);
                 }
             }
             var sb = new StringBuilder();
-            for (var y = 0; y < 16; y++)
+            for (var y = 0; y < _fadeSteps; y++)
             {
                 sb.Append("\t" + SelectedDataTypePrefix);
-                for (var x = 0; x < 16; x++)
+                for (var x = 0; x < fromPalette.Length; x++)
                 {
-                    var ofs = x + y * 16;
+                    var ofs = x + y * fromPalette.Length;
+                    sb.Append("$");
                     sb.Append(stColors[ofs]);
-                    if (x < 15) sb.Append(",");
+                    if (x < fromPalette.Length-1) sb.Append(",");
                 }
                 sb.AppendLine(string.Empty);
             }
@@ -601,127 +659,56 @@ namespace StPalCalc
             UpdatePreviewFadeAction?.Invoke(generatedColors);
         }
 
-        public void SetPaletteValue(ushort stColor, int index)
+        public void SetPaletteValue(Color color, int index)
         {
-            _rawPalette[index] = stColor;
-            RawPalette = UpdateRawPalette(_rawPalette);
-            UpdateUiAction?.Invoke();
-        }
-        public string Get12BitRgbFromPalette1(int index)
-        {
-            return $"${_rawPalette[index]:X2}";
-        }
-        public Color GetRgbFromPalette1(int index)
-        {
-            var data = Helpers.GetBits(_rawPalette[index]);
-            return Helpers.ToColor(Helpers.GetRValue(data), Helpers.GetGValue(data), Helpers.GetBValue(data));
-        }
-
-        private string UpdateRawPalette(ushort[] target)
-        {
-            var sb = new StringBuilder();
-            for (var i = 0; i < 16; i++)
-            {
-                sb.Append("$" + target[i].ToString("X2"));
-                if (i != 15) sb.Append(",");
-            }
-            return sb.ToString();
-        }
-        private string ReadPalette(string filename, ref ushort[] target)
-        {
-            using (var fs = new FileStream(filename, FileMode.Open))
-            {
-                fs.Position = 2; // skip resolution
-                for (var i = 0; i < 16; i++)
-                {
-                    var b1 = fs.ReadByte();
-                    var b2 = fs.ReadByte();
-                    var v = (ushort)(b2 + b1 * 256);
-                    target[i] = v;
-                }
-            }
-            return UpdateRawPalette(target);
-        }
-
-        public void RenderPi1(string filename, Image image, PictureType pictureType, bool useRaster = false)
-        {
-            var wbmp = BitmapFactory.New(320, 200);
-            image.Source = wbmp;
-            using (wbmp.GetBitmapContext())
-            {
-                using var fs = new FileStream(filename, FileMode.Open);
-                fs.Position += 34; // skip res and palette
-                for (var y = 0; y < 200; y++)
-                {
-                    var xo = 0;
-                    for (var x = 0; x < 20; x++)
-                    {
-                        // read 4bpl, 16px in each
-                        var b1 = fs.ReadByte();
-                        var b2 = fs.ReadByte();
-                        var v = (ushort)(b2 + b1 * 256);
-                        var bpl1 = Helpers.GetBits(v, true);
-                        b1 = fs.ReadByte();
-                        b2 = fs.ReadByte();
-                        v = (ushort)(b2 + b1 * 256);
-                        var bpl2 = Helpers.GetBits(v, true);
-                        b1 = fs.ReadByte();
-                        b2 = fs.ReadByte();
-                        v = (ushort)(b2 + b1 * 256);
-                        var bpl3 = Helpers.GetBits(v, true);
-                        b1 = fs.ReadByte();
-                        b2 = fs.ReadByte();
-                        v = (ushort)(b2 + b1 * 256);
-                        var bpl4 = Helpers.GetBits(v, true);
-
-                        // map pixels
-                        for (var p = 0; p < 16; p++)
-                        {
-                            // get the color based on palette
-                            var bv = bpl1[p] + (bpl2[p] * 2) + (bpl3[p] * 3) + (bpl4[p]*8);
-                            ushort stColor = 0;
-                            Color outCol;
-
-                            if (useRaster && bv == _rasterIndexColor)
-                            {
-                                outCol = GradientItems[y].Color;
-                            }
-                            else
-                            {
-                                switch (pictureType)
-                                {
-                                    case PictureType.Picture1:
-                                        stColor = _rawPalette[bv];
-                                        break;
-                                    case PictureType.PreviewPicture:
-                                        stColor = PreviewPalette[bv];
-                                        break;
-                                    case PictureType.Picture1Hue:
-                                        stColor = _rawPaletteHue[bv];
-                                        break;
-                                }
-                                outCol = Helpers.FromStString(stColor.ToString("X2"));
-                            }
-
-                            wbmp.SetPixel((xo + p), y, outCol);
-                        }
-
-                        xo += 16;
-                    }
-                }
-            }
+            ActivePicture.ActivePalette[index] = color;
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            UpdateUiAction?.Invoke(false);
         }
 
         public void ResetPalette()
         {
-            for (var i = 0; i < _rawPaletteOrg.Length; i++)
-            {
-                _rawPalette[i] = _rawPaletteOrg[i];
-                RawPalette = UpdateRawPalette(_rawPalette);
-                UpdateUiAction?.Invoke();
-                UpdatePictureAction?.Invoke(PictureType.Picture1);
-            }
+            if (ActivePicture == null) return;
+            ActivePicture.ActivePalette = ActivePicture.OriginalPalette.ToArray();
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            UpdateUiAction?.Invoke(true);
+            UpdatePictureAction?.Invoke(PictureType.Picture1);
         }
 
+        public void UpdateCurrentPicture()
+        {
+            if (ActivePicture == null) return;
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            UpdatePictureAction?.Invoke(PictureType.Picture1);
+            UpdateUiAction?.Invoke(true);
+        }
+
+        public void ReloadActivePicture()
+        {
+            ActivePicture = PictureFactory.GetPicture(_activeFilename);
+            if (ActivePicture == null) return;
+            ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
+            UpdatePictureAction?.Invoke(PictureType.Picture1);
+            UpdateUiAction?.Invoke(true);
+        }
+        public void SetNumberOfRasters(int newValue)
+        {
+            if (newValue < GradientItems.Count)
+            {
+                while (GradientItems.Count > newValue)
+                {
+                    GradientItems.RemoveAt(GradientItems.Count-1);
+                }
+            }
+            else
+            {
+                while (GradientItems.Count < newValue)
+                {
+                    GradientItems.Add(new GradientItem { Color = Colors.Black, Index = GradientItems.Count });
+                }
+            }
+
+            NumRasters = newValue;
+        }
     }
 }

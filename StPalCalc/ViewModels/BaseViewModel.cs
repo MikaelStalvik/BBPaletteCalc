@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using StPalCalc.Annotations;
+using BBPalCalc.Util;
 
-namespace StPalCalc
+namespace BBPalCalc.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {

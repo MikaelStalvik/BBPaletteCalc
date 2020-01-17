@@ -6,14 +6,16 @@
     <UseWPF>true</UseWPF>
     <Authors>Mikael Stalvik</Authors>
     <Company>Bitbendaz</Company>
-    <Product>Bitbendaz Atari STe palette and raster toolkit</Product>
-    <ApplicationIcon>Atari.ico</ApplicationIcon>
+    <Product>Bitbendaz palette and raster toolkit</Product>
+    <ApplicationIcon>mainicon.ico</ApplicationIcon>
+    <Copyright>Mikael Stalvik</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="3.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="WriteableBitmapEx" Version="1.6.3" />
+    <PackageReference Include="WriteableBitmapEx" Version="1.6.5" />
   </ItemGroup>
 
 </Project>

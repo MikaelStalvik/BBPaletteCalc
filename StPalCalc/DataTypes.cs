@@ -1,6 +1,7 @@
 ﻿using System.Windows.Media;
+using BBPalCalc.ViewModels;
 
-namespace StPalCalc
+namespace BBPalCalc
 {
     public enum PictureType
     {

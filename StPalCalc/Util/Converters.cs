@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace StPalCalc
+namespace BBPalCalc.Util
 {
     public class RadioBoolToIntConverter : IValueConverter
     {
@@ -36,7 +37,22 @@ namespace StPalCalc
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Helpers.ConvertFromRgbTo12Bit((Color) value);
+            return " $" + Helpers.Globals.ActivePlatform.ColorToString((Color)value);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class BoolToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return Visibility.Collapsed;
+            var b = (bool) value;
+            return b ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
