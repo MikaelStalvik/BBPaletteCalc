@@ -95,6 +95,9 @@ namespace BBPalCalc
                         break;
                     case PictureType.PreviewPicture:
                         _vm.PreviewPicture.RenderWithRasters(PreviewImage, _vm.GradientItems.ToList(), _vm.RasterColorIndex);
+                        (var w, var h) = _vm.PreviewPicture.GetDimensions;
+                        PreviewImage.Width = w;
+                        PreviewImage.Height = h;
                         break;
                 }
             };

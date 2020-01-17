@@ -32,8 +32,8 @@
             <TabItem Header="Pictures and Palettes">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
@@ -139,16 +139,16 @@
                             <ColumnDefinition Width="200"/>
                             <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Margin="4" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch">
-                            <TextBlock Text="Picture preview" FontWeight="Bold"/>
-                            <Image Width="Auto" Height="Auto" x:Name="PreviewImage" MinHeight="150"/>
-                            <DockPanel LastChildFill="False" VerticalAlignment="Bottom">
+                        <DockPanel Margin="4" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch">
+                            <TextBlock Text="Picture preview" FontWeight="Bold" DockPanel.Dock="Top"/>
+                            <Image x:Name="PreviewImage" DockPanel.Dock="Top"/>
+                            <DockPanel LastChildFill="False" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                                 <Button Command="{Binding LoadPreviewImageCommand}" Content="Load" MinWidth="72"/>
                                 <Button Command="{Binding RefreshRasterPreviewImageCommand}" Content="Refresh" MinWidth="72" Margin="8,0,0,0"/>
                                 <xctk:IntegerUpDown DockPanel.Dock="Right" Value="{Binding RasterColorIndex}" Margin="4,0,0,0"/>
                                 <TextBlock Text="Mask Color" FontSize="10" DockPanel.Dock="Right" VerticalAlignment="Center"/>
                             </DockPanel>
-                        </StackPanel>
+                        </DockPanel>
 
                         <StackPanel Grid.Column="2" Margin="4">
                             <TextBlock Text="Color picker" FontWeight="Bold"/>
