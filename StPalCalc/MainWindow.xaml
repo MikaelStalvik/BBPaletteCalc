@@ -13,6 +13,7 @@
         <util:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
         <util:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <util:ColorToStColorConverter x:Key="ColorToStColorConverter"/>
+        <util:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
     <Grid x:Name="Root">
         <Grid.RowDefinitions>
@@ -33,77 +34,68 @@
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" MaxHeight="192"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0">
-                        <Grid>
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="Loaded picture" FontWeight="Bold"/>
+                            <DockPanel>
+                                <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                                <TextBlock Text="{Binding ActiveFilename}"/>
+                            </DockPanel>
+                        </StackPanel>
+
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="24"/>
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition MinWidth="384" MaxWidth="424"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Loaded picture" FontWeight="Bold"/>
-                                <DockPanel>
-                                    <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
-                                    <TextBlock Text="{Binding ActiveFilename}"/>
+                            <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0" Grid.Row="0"/>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="1" Grid.Row="0">
+                                <DockPanel VerticalAlignment="Stretch">
+                                    <TextBlock Text="Active palette" DockPanel.Dock="Top" FontWeight="Bold" Visibility="{Binding PictureLoaded,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <userControls:PalettePresenterUserControl x:Name="ColorsPaletteControl" DockPanel.Dock="Top"/>
+                                    <TextBlock Text="Original palette" DockPanel.Dock="Top" FontWeight="Bold" Visibility="{Binding PictureLoaded,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <userControls:PalettePresenterUserControl x:Name="OriginalColorsPaletteControl" DockPanel.Dock="Top"/>
                                 </DockPanel>
-
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="24"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="384"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0" Grid.Row="0"/>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="1" Grid.Row="0">
-                                        <DockPanel VerticalAlignment="Stretch">
-                                            <TextBlock Text="Active palette" DockPanel.Dock="Top"/>
-                                            <userControls:PalettePresenterUserControl x:Name="ColorsPaletteControl" DockPanel.Dock="Top"/>
-                                            <TextBlock Text="Original palette" DockPanel.Dock="Top"/>
-                                            <userControls:PalettePresenterUserControl x:Name="OriginalColorsPaletteControl" DockPanel.Dock="Top"/>
-                                        </DockPanel>
-                                    </ScrollViewer>
-                                    <Button Click="ResetButtonBase_OnClick" Content="Reset" DockPanel.Dock="Right" Width="72" Margin="8,0,0,0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Right"/>
-                                </Grid>
-
-
-                                <DockPanel Margin="0,8,0,0">
-                                    <Button Content="Update" Command="{Binding UpdatePaletteCommand}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
-                                    <TextBox Text="{Binding ActivePaletteString}" x:Name="Palette1TextBox" Margin="4,0,0,0"/>
-                                </DockPanel>
-
-                            </StackPanel>
+                            </ScrollViewer>
+                            <Button Click="ResetButtonBase_OnClick" Content="Reset" DockPanel.Dock="Right" Width="72" Margin="8,0,0,0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Right"/>
                         </Grid>
-                    </StackPanel>
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="384"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <DockPanel Margin="0,8,0,0">
-                                <TextBlock Text="Hue" Width="64"/>
-                                <Slider Minimum="-120" Maximum="120" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                            </DockPanel>
-                            <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                            <DockPanel>
-                                <TextBlock Text="Saturation" Width="64"/>
-                                <Slider Minimum="-120" Maximum="120" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                            </DockPanel>
-                            <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                            <DockPanel>
-                                <TextBlock Text="Lightness" Width="64"/>
-                                <Slider Minimum="-120" Maximum="120" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                            </DockPanel>
-                            <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                        </StackPanel>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="1">
-                            <userControls:PalettePresenterUserControl x:Name="HSLPalettePresenter" Margin="0,8,0,0"/>
-                        </ScrollViewer>
+
+                        <DockPanel Margin="0,8,0,0" Grid.Row="2">
+                            <Button Content="Update" Command="{Binding UpdatePaletteCommand}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
+                            <TextBox Text="{Binding ActivePaletteString}" x:Name="Palette1TextBox" Margin="4,0,0,0"/>
+                        </DockPanel>
+
                     </Grid>
+                    <StackPanel Grid.Row="1">
+                        <DockPanel Margin="0,8,0,0">
+                            <TextBlock Text="Hue" Width="64"/>
+                            <Slider Minimum="-120" Maximum="120" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                        <DockPanel>
+                            <TextBlock Text="Saturation" Width="64"/>
+                            <Slider Minimum="-120" Maximum="120" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                        <DockPanel>
+                            <TextBlock Text="Lightness" Width="64"/>
+                            <Slider Minimum="-120" Maximum="120" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                    </StackPanel>
 
                 </Grid>
             </TabItem>

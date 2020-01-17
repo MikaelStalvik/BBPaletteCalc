@@ -84,6 +84,13 @@ namespace BBPalCalc.ViewModels
             "Word (dc.w)",
             "Long (dc.l)"
         };
+
+        private bool _pictureLoaded;
+        public bool PictureLoaded
+        {
+            get => _pictureLoaded;
+            set { _pictureLoaded = value; OnPropertyChanged(); }
+        }
         private int _selectedDataType;
         public int SelectedDataType
         {
@@ -450,6 +457,7 @@ namespace BBPalCalc.ViewModels
                     ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
                     UpdatePictureAction?.Invoke(PictureType.Picture1);
                     UpdateUiAction?.Invoke(true);
+                    PictureLoaded = true;
                 }
             });
             GenerateGradientCommand = new DelegateCommand<string>(s =>

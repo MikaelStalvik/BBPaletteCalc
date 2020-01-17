@@ -103,7 +103,6 @@ namespace BBPalCalc
             };
             _vm.UpdateHueColorsAction += colors =>
             {
-                HSLPalettePresenter.Update(colors.ToArray(), null, false);
                 _vm.ActivePicture?.Render(Image1, _vm.HuePalette);
                 _vm.ActivePaletteString = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
                 RebuildActivePalette();
