@@ -10,7 +10,6 @@
         mc:Ignorable="d"
         Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="824" Width="824" Height="560">
     <Window.Resources>
-        <util:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
         <util:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <util:ColorToStColorConverter x:Key="ColorToStColorConverter"/>
         <util:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
