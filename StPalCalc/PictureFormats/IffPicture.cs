@@ -75,7 +75,7 @@ namespace BBPalCalc.PictureFormats
                     for (var x = 0; x < _width; x++)
                     {
                         var bv = _pixelData[x + y * _width];
-                        if (bv == maskIndex)
+                        if (bv == maskIndex && y < rasters.Count)
                         {
                             wbmp.SetPixel(x, y, rasters[y].Color);
                         }

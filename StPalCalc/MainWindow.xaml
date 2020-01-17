@@ -8,7 +8,7 @@
         xmlns:userControls="clr-namespace:BBPalCalc.UserControls"
         xmlns:util="clr-namespace:BBPalCalc.Util"
         mc:Ignorable="d"
-        Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="800" Width="800" Height="560">
+        Title="Bitbendaz palette and raster toolkit" MinHeight="560" MinWidth="824" Width="824" Height="560">
     <Window.Resources>
         <util:RadioBoolToIntConverter x:Key="RadioBoolToIntConverter" />
         <util:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
@@ -27,6 +27,8 @@
             <ComboBox x:Name="PlatformCombo" SelectedIndex="0" Margin="4,0,0,0" SelectionChanged="PlatformCombo_OnSelectionChanged"/>
             <TextBlock Text="Fade/gradient steps:" Margin="8,0,0,0"/>
             <xctk:IntegerUpDown x:Name="FadeStepsUpDown" Value="{Binding FadeSteps}" Margin="4,0,0,0"/>
+            <TextBlock Text="Number of rasters" Margin="8,0,0,0"/>
+            <ComboBox x:Name="NumRastersComboBox" SelectedIndex="0" SelectionChanged="NumRastersComboBox_OnSelectionChanged" Width="112" Margin="4,0,0,0"/>
         </DockPanel>
 
         <TabControl Margin="8" Grid.Row="1">
@@ -111,7 +113,7 @@
                         <TextBox Text="{Binding FadeToColor}" Width="64" Margin="4,0,0,0"/>
                         <Button Command="{Binding PickColorCommand}" CommandParameter="2" Content="Pick"/>
                     </DockPanel>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,8,0,0">
                         <WrapPanel x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
                     </ScrollViewer>
                 </StackPanel>
@@ -143,10 +145,10 @@
                             </DockPanel>
                         </DockPanel>
 
-                        <StackPanel Grid.Column="2" Margin="4">
-                            <TextBlock Text="Color picker" FontWeight="Bold"/>
-                            <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256" HorizontalAlignment="Left"/>
-                        </StackPanel>
+                        <DockPanel Grid.Column="2" Margin="4" LastChildFill="False">
+                            <TextBlock Text="Color picker" FontWeight="Bold" DockPanel.Dock="Top"/>
+                            <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256" HorizontalAlignment="Left" DockPanel.Dock="Top"/>
+                        </DockPanel>
                         <Grid Grid.Column="3" Margin="4">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>

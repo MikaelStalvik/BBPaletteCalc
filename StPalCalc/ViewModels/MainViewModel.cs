@@ -16,7 +16,7 @@ namespace BBPalCalc.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
-        private const int RASTER_NUM = 256;
+        //private const int RASTER_NUM = 256;
 
         public Action<bool> UpdateUiAction { get; set; }
         public Action<List<Color>> UpdateGradientAction { get; set; }
@@ -119,8 +119,20 @@ namespace BBPalCalc.ViewModels
             }
         }
 
-        private int _fadeSteps;
+        public readonly ObservableCollection<string> NumberOfRasters = new ObservableCollection<string>
+        {
+            "200",
+            "256",
+            "312"
+        };
+        private int _numRasters;
+        public int NumRasters
+        {
+            get => _numRasters;
+            set { _numRasters = value; OnPropertyChanged(); }
+        }
 
+        private int _fadeSteps;
         public int FadeSteps
         {
             get => _fadeSteps;
@@ -246,7 +258,8 @@ namespace BBPalCalc.ViewModels
         public MainViewModel()
         {
             GradientItems = new ObservableCollection<GradientItem>();
-            for (var i = 0; i < RASTER_NUM; i++)
+            _numRasters = 200;
+            for (var i = 0; i < _numRasters; i++)
             {
                 GradientItems.Add(new GradientItem { Color = Colors.Black, Index = i});
             }
@@ -406,12 +419,12 @@ namespace BBPalCalc.ViewModels
                     {
                         GradientItems.Add(new GradientItem { Color = item.Color, Index = i });
                         i++;
-                        if (i == RASTER_NUM) break;
+                        if (i == _numRasters) break;
                     }
 
-                    if (GradientItems.Count < RASTER_NUM)
+                    if (GradientItems.Count < _numRasters)
                     {
-                        var diff = RASTER_NUM - GradientItems.Count;
+                        var diff = _numRasters - GradientItems.Count;
                         for (i = 0; i < diff; i++)
                         {
                             GradientItems.Add(new GradientItem { Color = Colors.Black, Index = GradientItems.Count});
@@ -678,6 +691,24 @@ namespace BBPalCalc.ViewModels
             UpdatePictureAction?.Invoke(PictureType.Picture1);
             UpdateUiAction?.Invoke(true);
         }
+        public void SetNumberOfRasters(int newValue)
+        {
+            if (newValue < GradientItems.Count)
+            {
+                while (GradientItems.Count > newValue)
+                {
+                    GradientItems.RemoveAt(GradientItems.Count-1);
+                }
+            }
+            else
+            {
+                while (GradientItems.Count < newValue)
+                {
+                    GradientItems.Add(new GradientItem { Color = Colors.Black, Index = GradientItems.Count });
+                }
+            }
 
+            NumRasters = newValue;
+        }
     }
 }

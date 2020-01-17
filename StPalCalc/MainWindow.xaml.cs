@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -14,8 +15,6 @@ namespace BBPalCalc
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    /// TODO: Support more than 200 raster items
-    /// 
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm = new MainViewModel();
@@ -37,6 +36,7 @@ namespace BBPalCalc
 
             DataTypesCombo.ItemsSource = _vm.DataTypes;
             PlatformCombo.ItemsSource = _vm.Platforms;
+            NumRastersComboBox.ItemsSource = _vm.NumberOfRasters;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
             _vm.UpdateUiAction += updateHue =>
@@ -73,14 +73,19 @@ namespace BBPalCalc
             };
             _vm.UpdateGradientPreviewAction += () =>
             {
+                const int previewItemHeight = 2;
                 GradientPreviewPanel.Children.Clear();
                 foreach (var item in _vm.GradientItems)
                 {
-                    var sp = new StackPanel {Width = 48, Height = 2, Orientation = Orientation.Horizontal};
+
+                    var sp = new StackPanel {Width = 48, Height = previewItemHeight, Orientation = Orientation.Horizontal, SnapsToDevicePixels = true};
                     var mc = item == _vm.SelectedGradientItem ? Colors.Red : Colors.White;
-                    var marker = new Rectangle { Fill = new SolidColorBrush(mc), Width = 16, Height = 2};
+                    var marker = new Rectangle { Fill = new SolidColorBrush(mc), Width = 16, Height = previewItemHeight};
                     sp.Children.Add(marker);
-                    var r = new Rectangle { Fill = new SolidColorBrush(item.Color), Width = 24, Height = 2 };
+                    var r = new Rectangle
+                    {
+                        Fill = new SolidColorBrush(item.Color), Width = 24, Height = previewItemHeight, SnapsToDevicePixels = true
+                    };
                     sp.Children.Add(r);
                     GradientPreviewPanel.Children.Add(sp);
                 }
@@ -94,6 +99,7 @@ namespace BBPalCalc
                         _vm.ActivePicture.Render(Image1);
                         break;
                     case PictureType.PreviewPicture:
+                        if (_vm.PreviewPicture == null) return;
                         _vm.PreviewPicture.RenderWithRasters(PreviewImage, _vm.GradientItems.ToList(), _vm.RasterColorIndex);
                         (var w, var h) = _vm.PreviewPicture.GetDimensions;
                         PreviewImage.Width = w;
@@ -163,6 +169,23 @@ namespace BBPalCalc
             SaturationSlider.Value = 0;
             LightnessSlider.Value = 0;
             _vm.ResetPalette();
+        }
+
+        private void NumRastersComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var combo = ((ComboBox) sender);
+            switch (combo.SelectedIndex)
+            {
+                case 0: 
+                    _vm.SetNumberOfRasters(200);
+                    break;
+                case 1:
+                    _vm.SetNumberOfRasters(256);
+                    break;
+                case 2:
+                    _vm.SetNumberOfRasters(312);
+                    break;
+            }
         }
     }
 }
