@@ -164,6 +164,5 @@ namespace BBPalCalc
             LightnessSlider.Value = 0;
             _vm.ResetPalette();
         }
-
     }
 }

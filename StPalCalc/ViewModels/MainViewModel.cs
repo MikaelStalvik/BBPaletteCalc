@@ -203,6 +203,13 @@ namespace BBPalCalc.ViewModels
             }
         }
 
+        private string _pictureProperties;
+        public string PictureProperties
+        {
+            get => _pictureProperties;
+            set { _pictureProperties = value; OnPropertyChanged(); }
+        }
+
         public DelegateCommand<string> OpenPictureCommand { get; set; }
         public DelegateCommand<string> GenerateGradientCommand { get; set; }
         public DelegateCommand<string> FadeToColorCommand { get; set; }
@@ -457,6 +464,8 @@ namespace BBPalCalc.ViewModels
                     ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
                     UpdatePictureAction?.Invoke(PictureType.Picture1);
                     UpdateUiAction?.Invoke(true);
+                    (var w, var h) = ActivePicture.GetDimensions;
+                    PictureProperties = $"{w}*{h} pixels, {ActivePicture.ActivePalette.Length} colors";
                     PictureLoaded = true;
                 }
             });

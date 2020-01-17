@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BBPalCalc": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

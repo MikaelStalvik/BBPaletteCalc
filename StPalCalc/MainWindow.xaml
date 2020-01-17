@@ -50,6 +50,7 @@
                                 <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
                                 <TextBlock Text="{Binding ActiveFilename}"/>
                             </DockPanel>
+                            <TextBlock Text="{Binding PictureProperties}"/>
                         </StackPanel>
 
                         <Grid Grid.Row="1">
@@ -70,7 +71,7 @@
                                     <userControls:PalettePresenterUserControl x:Name="OriginalColorsPaletteControl" DockPanel.Dock="Top"/>
                                 </DockPanel>
                             </ScrollViewer>
-                            <Button Click="ResetButtonBase_OnClick" Content="Reset" DockPanel.Dock="Right" Width="72" Margin="8,0,0,0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Right"/>
+                            <Button Click="ResetButtonBase_OnClick" Content="Reset" DockPanel.Dock="Right" Width="72" Margin="8,0,0,0" Grid.Row="1"  Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right"/>
                         </Grid>
 
                         <DockPanel Margin="0,8,0,0" Grid.Row="2">
