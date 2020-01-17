@@ -15,6 +15,7 @@ namespace BBPalCalc
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// TODO: Support more than 200 raster items
+    /// 
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _vm = new MainViewModel();
@@ -27,6 +28,7 @@ namespace BBPalCalc
                 _vm.SetPaletteValue(color, index);
                 _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
             }, true);
+            OriginalColorsPaletteControl.Update(_vm.ActivePicture.OriginalPalette, null, false);
         }
         public MainWindow()
         {
@@ -74,10 +76,7 @@ namespace BBPalCalc
                 GradientPreviewPanel.Children.Clear();
                 foreach (var item in _vm.GradientItems)
                 {
-                    var sp = new StackPanel();
-                    sp.Width = 48;
-                    sp.Height = 2;
-                    sp.Orientation = Orientation.Horizontal;
+                    var sp = new StackPanel {Width = 48, Height = 2, Orientation = Orientation.Horizontal};
                     var mc = item == _vm.SelectedGradientItem ? Colors.Red : Colors.White;
                     var marker = new Rectangle { Fill = new SolidColorBrush(mc), Width = 16, Height = 2};
                     sp.Children.Add(marker);
