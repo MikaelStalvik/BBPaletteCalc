@@ -10,8 +10,8 @@ Supported target platforms:
 - Atari ST, 512 colors palette (9-bit RGB)
 
 Supported image formats:
--Degas PI1, 16 colors
--IFF, any color range up to 256 colors
+- Degas PI1, 16 colors
+- IFF, any color range up to 256 colors
 
 This is the ultimate tool to tweak palette and raster data to use in demos/games.
 
