@@ -110,6 +110,10 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## License
 [Beerware](https://en.wikipedia.org/wiki/Beerware)
 
+## 3rd party libs
+The IFF-LBM reader is based on Pavel Torgashows implementation:
+https://github.com/PavelTorgashov/IFF-ILBM-Parser
+
 
 Created by [Mikael Stalvik (Stalvik^Bitbendaz)](https://demozoo.org/sceners/27448/)
 
