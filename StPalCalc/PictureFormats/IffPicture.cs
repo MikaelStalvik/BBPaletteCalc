@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using BBPalCalc.iff;
 using BBPalCalc.Interfaces;
+using BBPalCalc.Types;
 
 namespace BBPalCalc.PictureFormats
 {

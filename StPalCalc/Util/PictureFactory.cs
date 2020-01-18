@@ -2,7 +2,7 @@
 using BBPalCalc.Interfaces;
 using BBPalCalc.PictureFormats;
 
-namespace BBPalCalc
+namespace BBPalCalc.Util
 {
     public static class PictureFactory
     {

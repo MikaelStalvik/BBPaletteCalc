@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using BBPalCalc.Interfaces;
+using BBPalCalc.Types;
 using BBPalCalc.Util;
 using Microsoft.Win32;
 using Newtonsoft.Json;

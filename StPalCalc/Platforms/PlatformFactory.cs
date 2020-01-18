@@ -1,4 +1,6 @@
-﻿namespace BBPalCalc.Platforms
+﻿using BBPalCalc.Types;
+
+namespace BBPalCalc.Platforms
 {
     public static class PlatformFactory
     {

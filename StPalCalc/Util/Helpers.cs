@@ -3,14 +3,8 @@ using System.Text;
 using System.Windows.Media;
 using BBPalCalc.Interfaces;
 
-namespace BBPalCalc
+namespace BBPalCalc.Util
 {
-    public enum PlatformTypes
-    {
-        AtariSte,
-        Amiga,
-        AtariSt
-    };
     public static class Helpers
     {
         public static string RgbPaletteTo12BitString(Color[] palette)

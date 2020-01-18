@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace BBPalCalc
+namespace BBPalCalc.Types
 {
     public class HSLColor
     {

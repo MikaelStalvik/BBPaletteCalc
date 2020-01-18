@@ -1,8 +1,14 @@
 ﻿using System.Windows.Media;
 using BBPalCalc.ViewModels;
 
-namespace BBPalCalc
+namespace BBPalCalc.Types
 {
+    public enum PlatformTypes
+    {
+        AtariSte,
+        Amiga,
+        AtariSt
+    };
     public enum PictureType
     {
         Picture1,

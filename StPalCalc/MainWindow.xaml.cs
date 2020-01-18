@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using BBPalCalc.Platforms;
+using BBPalCalc.Types;
+using BBPalCalc.Util;
 using BBPalCalc.ViewModels;
 
 namespace BBPalCalc
