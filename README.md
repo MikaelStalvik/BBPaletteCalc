@@ -44,7 +44,7 @@ Modify a hex-value in the palette textbox and click **Update** to apply the new 
 
 #### Adjusting HSL 
 Adjust Hue, Saturation and Lightness with the sliders.
-The generated palette are shown below the sliders.
+The generated palette will be shown in the **Active Palette**.
 
 ----
 
