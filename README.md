@@ -103,6 +103,10 @@ Generated assembler data from the *Fades* and *Raster list* page is shown here.
 
 ![](screen4.png)
 
+## Sample code
+Sample code for Atari STe available in the *Samples/Atari* folder:
+- **fade_spl.s**: Fade a picture using a generated fade.
+- **rast_spl.s**: Show rasters using TimerB with VBL/HBL.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
