@@ -83,9 +83,13 @@ namespace BBPalCalc
                     var mc = item == _vm.SelectedGradientItem ? Colors.Red : Colors.White;
                     var marker = new Rectangle { Fill = new SolidColorBrush(mc), Width = 16, Height = previewItemHeight};
                     sp.Children.Add(marker);
+
+                    // fake quantization/down sampling
+                    var asString = Helpers.Globals.ActivePlatform.ColorToString(item.Color);
+                    var remappedColor = Helpers.Globals.ActivePlatform.ToRgb(asString.ToHex()); 
                     var r = new Rectangle
                     {
-                        Fill = new SolidColorBrush(item.Color), Width = 24, Height = previewItemHeight, SnapsToDevicePixels = true
+                        Fill = new SolidColorBrush(remappedColor), Width = 24, Height = previewItemHeight, SnapsToDevicePixels = true
                     };
                     sp.Children.Add(r);
                     GradientPreviewPanel.Children.Add(sp);
