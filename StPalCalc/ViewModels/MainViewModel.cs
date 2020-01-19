@@ -609,6 +609,7 @@ namespace BBPalCalc.ViewModels
                 }
             }
             var sb = new StringBuilder();
+            sb.AppendLine("fade_data:");
             for (var y = 0; y < _fadeSteps; y++)
             {
                 sb.Append("\t" + SelectedDataTypePrefix);
