@@ -63,7 +63,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition MinWidth="384" MaxWidth="424"/>
                             </Grid.ColumnDefinitions>
-                            <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0" Grid.Row="0"/>
+                            <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0" Grid.Row="0">
+                                <Image.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Command="{Binding SavePngCommand}" Header="Save PNG"/>
+                                    </ContextMenu>
+                                </Image.ContextMenu>
+                            </Image>
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="1" Grid.Row="0">
                                 <DockPanel VerticalAlignment="Stretch">
                                     <TextBlock Text="Active palette" DockPanel.Dock="Top" FontWeight="Bold" Visibility="{Binding PictureLoaded,Converter={StaticResource BoolToVisibilityConverter}}"/>

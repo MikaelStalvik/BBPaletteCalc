@@ -38,6 +38,7 @@ namespace BBPalCalc
             DataTypesCombo.ItemsSource = _vm.DataTypes;
             PlatformCombo.ItemsSource = _vm.Platforms;
             NumRastersComboBox.ItemsSource = _vm.NumberOfRasters;
+            _vm.PreviewImage = Image1;
             _vm.StartColor = "700";
             _vm.EndColor = "770";
             _vm.UpdateUiAction += updateHue =>

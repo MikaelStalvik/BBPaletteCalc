@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using BBPalCalc.Interfaces;
 using BBPalCalc.Types;
 using BBPalCalc.Util;
@@ -245,7 +247,9 @@ namespace BBPalCalc.ViewModels
         public DelegateCommand<string> GenerateRastersCommand { get; set; }
         public DelegateCommand<HslSliderPayload> AdjustHueCommand { get; set; }
         public DelegateCommand<string> UpdatePaletteCommand { get; set; }
+        public DelegateCommand<string> SavePngCommand { get; set; }
 
+        public Image PreviewImage { get; set; }
         private (bool, string) SelectPictureFile()
         {
             var dlg = new OpenFileDialog { DefaultExt = ".pi1", Filter = "All files|*.iff;*.pi1|PI1 files|*.pi1|IFF files|*.iff" };
@@ -256,6 +260,18 @@ namespace BBPalCalc.ViewModels
             return (false, string.Empty);
         }
 
+        private void SaveUsingEncoder(FrameworkElement visual, string fileName, BitmapEncoder encoder)
+        {
+            RenderTargetBitmap bitmap = new RenderTargetBitmap((int)visual.ActualWidth, (int)visual.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            BitmapFrame frame = BitmapFrame.Create(bitmap);
+            encoder.Frames.Add(frame);
+
+            using (var stream = File.Create(fileName))
+            {
+                encoder.Save(stream);
+            }
+        }
         public MainViewModel()
         {
             GradientItems = new ObservableCollection<GradientItem>();
@@ -267,6 +283,16 @@ namespace BBPalCalc.ViewModels
             SelectedDataType = 1;
             FadeSteps = 16;
 
+            SavePngCommand = new DelegateCommand<string>(s =>
+            {
+                if (PreviewImage == null) return;
+                var dlg = new SaveFileDialog {DefaultExt = ".png"};
+                if (dlg.ShowDialog() == true)
+                {
+                    var encoder = new PngBitmapEncoder();
+                    SaveUsingEncoder(PreviewImage, dlg.FileName, encoder);
+                }
+            });
             UpdatePaletteCommand = new DelegateCommand<string>(s =>
             {
                 if (ActivePicture == null) return;
