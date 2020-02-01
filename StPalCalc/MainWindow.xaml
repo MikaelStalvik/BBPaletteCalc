@@ -145,7 +145,7 @@
                             <DockPanel LastChildFill="False" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                                 <Button Command="{Binding LoadPreviewImageCommand}" Content="Load" MinWidth="72"/>
                                 <Button Command="{Binding RefreshRasterPreviewImageCommand}" Content="Refresh" MinWidth="72" Margin="8,0,0,0"/>
-                                <xctk:IntegerUpDown DockPanel.Dock="Right" Value="{Binding RasterColorIndex}" Margin="4,0,0,0"/>
+                                <xctk:IntegerUpDown DockPanel.Dock="Right" Value="{Binding RasterColorIndex}" Margin="4,0,0,0" Minimum="0"/>
                                 <TextBlock Text="Mask Color" FontSize="10" DockPanel.Dock="Right" VerticalAlignment="Center"/>
                             </DockPanel>
                         </DockPanel>
