@@ -248,6 +248,7 @@ namespace BBPalCalc.ViewModels
         public DelegateCommand<HslSliderPayload> AdjustHueCommand { get; set; }
         public DelegateCommand<string> UpdatePaletteCommand { get; set; }
         public DelegateCommand<string> SavePngCommand { get; set; }
+        public DelegateCommand<string> ImportPaletteToRasterCommand { get; set; }
 
         public Image PreviewImage { get; set; }
         private (bool, string) SelectPictureFile()
@@ -283,6 +284,19 @@ namespace BBPalCalc.ViewModels
             SelectedDataType = 1;
             FadeSteps = 16;
 
+            ImportPaletteToRasterCommand = new DelegateCommand<string>(s =>
+            {
+                var (res, filename) = SelectPictureFile();
+                if (res)
+                {
+                    var pic = PictureFactory.GetPicture(filename);
+                    for (var i = 0; i < pic.ActivePalette.Length; i++)
+                    {
+                        GradientItems[i].Color = pic.ActivePalette[i];
+                    }
+                    UpdateGradientPreviewAction?.Invoke();
+                }
+            });
             SavePngCommand = new DelegateCommand<string>(s =>
             {
                 if (PreviewImage == null) return;
@@ -459,6 +473,10 @@ namespace BBPalCalc.ViewModels
                     }
                     UpdateGradientPreviewAction?.Invoke();
                     RebindAction?.Invoke();
+                    if (PreviewImage != null)
+                    {
+                        RefreshRasterPreviewImageCommand.Execute(null);
+                    }
                 }
             });
             SaveGradientCommand = new DelegateCommand<string>(s =>

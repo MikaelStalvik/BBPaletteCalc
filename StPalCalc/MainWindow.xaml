@@ -184,7 +184,14 @@
                                     <TextBlock Text="Selected"/>
                                     <TextBox x:Name="GradientText"  MinWidth="64" TextChanged="TextBoxBase_OnTextChanged" Margin="4,0,0,0"/>
                                 </DockPanel>
-                                <Button Command="{Binding GenerateGradientRasterCommand}" Content="Make gradient" MinWidth="72" Height="24"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Command="{Binding GenerateGradientRasterCommand}" Content="Make gradient" MinWidth="72" Height="24" Grid.Column="0" Margin="0,0,2,0"/>
+                                    <Button Command="{Binding ImportPaletteToRasterCommand}" Content="Load from pic" Grid.Column="1" Margin="2,0,0,0"/>
+                                </Grid>
                             </StackPanel>
                         </Grid>
                         <Grid Grid.Column="4" Margin="0,4">
