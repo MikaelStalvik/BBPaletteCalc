@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="ColorPickerWindow" Height="384" Width="640" WindowStyle="ToolWindow" ShowInTaskbar="False" ResizeMode="NoResize">
+        Title="Color picker" Height="384" Width="640" WindowStyle="ToolWindow" ShowInTaskbar="False" ResizeMode="NoResize">
     <Grid>
         <Grid Margin="8">
             <Grid.RowDefinitions>

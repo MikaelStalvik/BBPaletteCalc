@@ -22,6 +22,10 @@ namespace BBPalCalc.PictureFormats
         public int Colors => 16;
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
+        public byte[] Pixels => _pixelData;
+
+        public ushort[] PlatformPalette => _original12BitPalette;
+
         public bool Load(string filename)
         {
             _width = 320;
@@ -45,6 +49,7 @@ namespace BBPalCalc.PictureFormats
                 OriginalPalette[i] = atariPlatform.ToRgb(stColor);
             }
         }
+
         public void Render(Image target, Color[] specialPalette = null)
         {
             var palette = specialPalette ?? ActivePalette;
@@ -110,7 +115,7 @@ namespace BBPalCalc.PictureFormats
                         for (var p = 0; p < 16; p++)
                         {
                             // get the color based on palette
-                            var bv = bpl1[p] + (bpl2[p] * 2) + (bpl3[p] * 3) + (bpl4[p] * 8);
+                            var bv = bpl1[p] + (bpl2[p] * 2) + (bpl3[p] * 4) + (bpl4[p] * 8);
                             var xp = xo + p;
                             _pixelData[xp + y * _width] = (byte)bv;
                         }
@@ -148,6 +153,82 @@ namespace BBPalCalc.PictureFormats
             }
         }
 
+        public void SwapColors(byte source, byte dest)
+        {
+            throw new System.NotImplementedException();
+        }
 
+        public static void Save(string filename, ushort[] palette, byte[] pixels, int width, int height)
+        {
+            using (var fs = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                // Resolution
+                fs.WriteByte(0);
+                fs.WriteByte(0);
+                // palette
+                foreach (var col in palette)
+                {
+                    byte upper = (byte)(col >> 8);
+                    byte lower = (byte)(col & 0xff);
+                    fs.WriteByte(upper);
+                    fs.WriteByte(lower);
+                }
+
+                //FreeImage.NET
+
+                // chunk of 16px
+                var ofs = 0;
+                for (var y = 0; y < height; y++)
+                {
+                    var chunks = width / 16;
+                    for (var x = 0; x < chunks; x++)
+                    {
+                        var bpl1 = new byte[16];
+                        var bpl2 = new byte[16];
+                        var bpl3 = new byte[16];
+                        var bpl4 = new byte[16];
+                        for (var i = 0; i < 16; i++)
+                        {
+                            // each px has 4 relevant bits which should be remapped to bpls
+                            var px = pixels[ofs + i];
+                            var bits = px.GetBits();
+                            bpl1[i] = bits[0];
+                            bpl2[i] = bits[1];
+                            bpl3[i] = bits[2];
+                            bpl4[i] = bits[3];
+                        }
+                        // repack and save bytes per bpl
+                        var bppBits1 = new byte[8];
+                        for (int i = 0; i < 8; i++) bppBits1[i] = bpl1[i];
+                        var bppBits2 = new byte[8];
+                        for (int i = 0; i < 8; i++) bppBits2[i] = bpl1[i + 8];
+                        var b1 = Helpers.GetByte(bppBits1);
+                        var b2 = Helpers.GetByte(bppBits2);
+                        fs.WriteByte(b1);
+                        fs.WriteByte(b2);
+                        for (int i = 0; i < 8; i++) bppBits1[i] = bpl2[i];
+                        for (int i = 0; i < 8; i++) bppBits2[i] = bpl2[i + 8];
+                        b1 = Helpers.GetByte(bppBits1);
+                        b2 = Helpers.GetByte(bppBits2);
+                        fs.WriteByte(b1);
+                        fs.WriteByte(b2);
+                        for (int i = 0; i < 8; i++) bppBits1[i] = bpl3[i];
+                        for (int i = 0; i < 8; i++) bppBits2[i] = bpl3[i + 8];
+                        b1 = Helpers.GetByte(bppBits1);
+                        b2 = Helpers.GetByte(bppBits2);
+                        fs.WriteByte(b1);
+                        fs.WriteByte(b2);
+                        for (int i = 0; i < 8; i++) bppBits1[i] = bpl4[i];
+                        for (int i = 0; i < 8; i++) bppBits2[i] = bpl4[i + 8];
+                        b1 = Helpers.GetByte(bppBits1);
+                        b2 = Helpers.GetByte(bppBits2);
+                        fs.WriteByte(b1);
+                        fs.WriteByte(b2);
+
+                        ofs += 16;
+                    }
+                }
+            }
+        }
     }
 }

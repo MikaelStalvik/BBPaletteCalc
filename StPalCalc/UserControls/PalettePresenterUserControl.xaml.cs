@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -49,6 +50,7 @@ namespace BBPalCalc.UserControls
                     ColorsWrapPanel.Children.Add(r);
                 }
             }
+            Debug.WriteLine("\n");
         }
     }
 }

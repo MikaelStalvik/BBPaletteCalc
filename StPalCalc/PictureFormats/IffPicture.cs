@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,30 @@ namespace BBPalCalc.PictureFormats
         public string Filename { get; private set; }
         public (int, int) GetDimensions => (_width, _height);
         public int Colors { get; private set; }
+        public byte[] Pixels
+        {
+            get
+            {
+                var res = new byte[_width*_height*3];
+                var ofs = 0;
+                for (var y = 0; y < _height; y++)
+                {
+                    for (var x = 0; x < _width; x++)
+                    {
+                        var bv = _pixelData[x + y * _width];
+                        var color = ActivePalette[bv];
+                        res[ofs + 0] = color.R;
+                        res[ofs + 1] = color.G;
+                        res[ofs + 2] = color.B;
+                        ofs += 3;
+                    }
+                }
+                return res;
+            }
+        }
+
+        public ushort[] PlatformPalette => throw new System.NotImplementedException();
+
         public bool Load(string filename)
         {
             Filename = filename;
@@ -88,5 +113,53 @@ namespace BBPalCalc.PictureFormats
                 }
             }
         }
+
+        public void SwapColors(byte source, byte dest)
+        {
+            // Three pass lazy code
+
+            // First switch source to temp value
+            for (var y = 0; y < _height; y++)
+            {
+                for (var x = 0; x < _width; x++)
+                {
+                    var bv = _pixelData[x + y * _width];
+                    if (bv == source)
+                    {
+                        _pixelData[x+ y * _width] = 255;
+                    }
+                }
+            }
+            // Swap dest with source
+            for (var y = 0; y < _height; y++)
+            {
+                for (var x = 0; x < _width; x++)
+                {
+                    var bv = _pixelData[x + y * _width];
+                    if (bv == dest)
+                    {
+                        _pixelData[x + y * _width] = source;
+                    }
+                }
+            }
+            // Swap temp with dest 
+            for (var y = 0; y < _height; y++)
+            {
+                for (var x = 0; x < _width; x++)
+                {
+                    var bv = _pixelData[x + y * _width];
+                    if (bv == 255)
+                    {
+                        _pixelData[x + y * _width] = dest;
+                    }
+                }
+            }
+            // Swap in palette
+            var sourceCol = ActivePalette[source];
+            var destCol = ActivePalette[dest];
+            ActivePalette[source] = ActivePalette[dest];
+            ActivePalette[dest] = sourceCol;
+        }
+
     }
 }

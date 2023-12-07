@@ -5,13 +5,18 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using BBPalCalc.Interfaces;
+using BBPalCalc.PictureFormats;
 using BBPalCalc.Types;
 using BBPalCalc.Util;
+using BmpSharp;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
@@ -228,9 +233,12 @@ namespace BBPalCalc.ViewModels
         public DelegateCommand<string> OpenPictureCommand { get; set; }
         public DelegateCommand<string> GenerateGradientCommand { get; set; }
         public DelegateCommand<string> FadeToColorCommand { get; set; }
+        public DelegateCommand<string> FadeFromColorCommand { get; set; }
         public DelegateCommand<string> FadeToBlackCommand { get; set; }
+        public DelegateCommand<string> FadeFromBlackCommand { get; set; }
         public DelegateCommand<string> FadeFromPaletteToHueCommand { get; set; }
         public DelegateCommand<string> FadeToWhiteCommand { get; set; }
+        public DelegateCommand<string> FadeFromWhiteCommand { get; set; }
         public DelegateCommand<string> ChangeGradientColorCommand { get; set; }
         public DelegateCommand<string> CopyPreviousCommand { get; set; }
         public DelegateCommand<string> CopyNextCommand { get; set; }
@@ -248,8 +256,12 @@ namespace BBPalCalc.ViewModels
         public DelegateCommand<HslSliderPayload> AdjustHueCommand { get; set; }
         public DelegateCommand<string> UpdatePaletteCommand { get; set; }
         public DelegateCommand<string> SavePngCommand { get; set; }
+        public DelegateCommand<string> SavePi1Command { get; set; }
         public DelegateCommand<string> ImportPaletteToRasterCommand { get; set; }
+        public DelegateCommand<string> DrawCurveCommand { get; set; }
+        public DelegateCommand<string> SwapColorsCommand { get; set; }
 
+        public Image CurveImage { get; set; }
         public Image PreviewImage { get; set; }
         private (bool, string) SelectPictureFile()
         {
@@ -305,6 +317,16 @@ namespace BBPalCalc.ViewModels
                 {
                     var encoder = new PngBitmapEncoder();
                     SaveUsingEncoder(PreviewImage, dlg.FileName, encoder);
+                }
+            });
+            SavePi1Command = new DelegateCommand<string>(s =>
+            {
+                var dlg = new SaveFileDialog { DefaultExt = ".bmp" };
+                if (dlg.ShowDialog() == true)
+                {
+                    var palette = Helpers.PaletteTo12BitPalette(ActivePicture.OriginalPalette);
+                    var (w, h) = ActivePicture.GetDimensions;
+                    Pi1Picture.Save(dlg.FileName, palette, ActivePicture.Pixels, w, h);
                 }
             });
             UpdatePaletteCommand = new DelegateCommand<string>(s =>
@@ -550,15 +572,37 @@ namespace BBPalCalc.ViewModels
                 if (ActivePicture?.ActivePalette == null) return;
                 GenerateFade(ActivePicture.ActivePalette, FadeToColor);
             });
+            FadeFromColorCommand = new DelegateCommand<string>(b =>
+            {
+                if (ActivePicture?.ActivePalette == null) return;
+                var palette = new List<Color>();
+                var color =  Helpers.Globals.ActivePlatform.ToRgb(FadeToColor.ToHex());
+                for (var i = 0; i < 16; i++) palette.Add(color);
+                GenerateFade(palette.ToArray(), ActivePicture.ActivePalette);
+            });
             FadeToBlackCommand = new DelegateCommand<string>(b =>
             {
                 if (ActivePicture?.ActivePalette == null) return;
                 GenerateFade(ActivePicture.ActivePalette, "0");
             });
+            FadeFromBlackCommand = new DelegateCommand<string>(b =>
+            {
+                if (ActivePicture?.ActivePalette == null) return;
+                var blackPalette = new List<Color>();
+                for (var i = 0; i < 16; i++) blackPalette.Add(Color.FromRgb(0,0,0));
+                GenerateFade(blackPalette.ToArray(), ActivePicture.ActivePalette);
+            });
             FadeToWhiteCommand = new DelegateCommand<string>(b =>
             {
                 if (ActivePicture?.ActivePalette == null) return;
                 GenerateFade(ActivePicture.ActivePalette, "FFF");
+            });
+            FadeFromWhiteCommand = new DelegateCommand<string>(b =>
+            {
+                if (ActivePicture?.ActivePalette == null) return;
+                var whitePalette = new List<Color>();
+                for (var i = 0; i < 16; i++) whitePalette.Add(Color.FromRgb(255, 255, 255));
+                GenerateFade(whitePalette.ToArray(), ActivePicture.ActivePalette);
             });
             FadeFromPaletteToHueCommand = new DelegateCommand<string>(_ =>
             {
@@ -568,6 +612,13 @@ namespace BBPalCalc.ViewModels
             ChangeGradientColorCommand = new DelegateCommand<string>(s =>
             {
                 UpdateGradientPreviewAction?.Invoke();
+            });
+            SwapColorsCommand = new DelegateCommand<string>(s =>
+            {
+                ActivePicture.SwapColors(6, 0);
+                UpdatePictureAction?.Invoke(PictureType.Picture1);
+                //UpdateUiAction?.Invoke(true);
+                ActivePaletteString = Helpers.RgbPaletteTo12BitString(ActivePicture.ActivePalette);
             });
             ParseAsmGradientCommand = new DelegateCommand<string>(s =>
             {
@@ -611,6 +662,92 @@ namespace BBPalCalc.ViewModels
                     MessageBox.Show("Clipboard does not contain any text");
                 }
             });
+            DrawCurveCommand = new DelegateCommand<string>(async p =>
+            {
+                string expression = "23 + 4 * (2 - 1)";
+                expression = "80 + System.Math.Sin(System.Math.PI)* 55";
+                var wbmp = BitmapFactory.New(320, 200);
+                CurveImage.Source = wbmp;
+                const double RAD = Math.PI / 256.0;
+
+                using (wbmp.GetBitmapContext())
+                {
+                    wbmp.Clear(Colors.Black);
+                    for (var i = 0; i < 512; i++)
+                    {
+                        expression = $"80 + System.Math.Sin(i * 0.25 * System.Math.PI) * 55";
+                        var res = await GetExpressionResult(expression, i);
+
+                        var s = 80 + Math.Sin(i * 0.25 * Math.PI * RAD) * 55;
+                        var c = 120 + Math.Cos(i * 0.25 * Math.PI * RAD) * Math.Sin(i * 0.75 * Math.PI * RAD) * 120;
+                        var iSin = (int)s;
+                        var iCos = (int)c;
+                        wbmp.SetPixel(iCos, iSin, Colors.White);
+                    }
+
+
+                    /*
+                    for (var y = 0; y < _height; y++)
+                    {
+                        for (var x = 0; x < _width; x++)
+                        {
+                            var bv = _pixelData[x + y * _width];
+                            Color outColor;
+                            if (bv == maskIndex)
+                            {
+                                outColor = rasters[y].Color;
+                            }
+                            else
+                            {
+                                outColor = ActivePalette[bv];
+                            }
+
+                            wbmp.SetPixel(x, y, outColor);
+                        }
+                    }*/
+                }
+            });
+        }
+
+        private async Task<double> GetExpressionResult(string expression, int iterator)
+        {
+            try
+            {
+                // Parse and evaluate the expression
+                var result = await EvaluateExpressionAsync(expression, iterator);
+                return (double)result;
+                // Display the result
+                //Console.WriteLine($"Result of expression '{expression}': {result}");
+            }
+            catch (CompilationErrorException ex)
+            {
+                // Handle compilation errors
+                Console.WriteLine($"Compilation error: {string.Join(Environment.NewLine, ex.Diagnostics)}");
+                return -1;
+            }
+        }
+        private static async Task<object> EvaluateExpressionAsync(string expression, int iterator)
+        {
+            //Assembly[] assemblies = {
+            //    System.Reflection.Assembly.Load("System.Math"),
+            //    System.Reflection.Assembly.GetExecutingAssembly()
+            //};
+
+            const double RAD256 = Math.PI / 256.0;
+            var globals = new { i = iterator, RAD = RAD256};
+
+            // Options for the script
+            var options = ScriptOptions.Default
+                .AddImports("System.Math")
+                .WithImports("System");
+            //.AddReferences(assemblies);
+            //.WithReferences(AppDomain.CurrentDomain.GetAssemblies())
+            //.WithImports("System");
+
+            // Evaluate the expression
+            var result = await CSharpScript.EvaluateAsync(expression, options, globals);
+
+            return result;
         }
 
         private void ReindexGradientItems()

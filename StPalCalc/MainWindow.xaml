@@ -31,7 +31,7 @@
         </DockPanel>
 
         <TabControl Margin="8" Grid.Row="1">
-            <TabItem Header="Pictures and Palettes">
+            <TabItem Header="Picture and Palettes">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -67,6 +67,7 @@
                                 <Image.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Command="{Binding SavePngCommand}" Header="Save PNG"/>
+                                        <MenuItem Command="{Binding SavePi1Command}" Header="Save PI1"/>
                                     </ContextMenu>
                                 </Image.ContextMenu>
                             </Image>
@@ -95,7 +96,7 @@
                         <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
                         <DockPanel>
                             <TextBlock Text="Saturation" Width="64"/>
-                            <Slider Minimum="-120" Maximum="120" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                            <Slider Minimum="-360" Maximum="360" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
                         </DockPanel>
                         <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
                         <DockPanel>
@@ -108,20 +109,38 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Fades">
-                <StackPanel Margin="8">
-                    <DockPanel LastChildFill="False" Margin="0,8,0,0">
-                        <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black"/>
-                        <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="8,0,0,0"/>
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel LastChildFill="False" Margin="0,8,0,0" Grid.Row="0">
+                        <Button Command="{Binding FadeFromBlackCommand}" Content="Fade from black"/>
+                        <Button Command="{Binding FadeToBlackCommand}" Content="Fade to black" Margin="4,0,0,0"/>
+                        <Button Command="{Binding FadeFromWhiteCommand}" Content="Fade from white" Margin="8,0,0,0"/>
+                        <Button Command="{Binding FadeToWhiteCommand}" Content="Fade to white" Margin="4,0,0,0"/>
                         <Button Command="{Binding FadeFromPaletteToHueCommand}" Content="Hue Fade" Margin="8,0,0,0"/>
+                        <Button Command="{Binding FadeFromColorCommand}" Content="Fade from color" Margin="8,0,0,0"/>
                         <Button Command="{Binding FadeToColorCommand}" Content="Fade to color" Margin="8,0,0,0"/>
                         <TextBlock Text="Color" Margin="32,0,0,0" VerticalAlignment="Center"/>
                         <TextBox Text="{Binding FadeToColor}" Width="64" Margin="4,0,0,0"/>
                         <Button Command="{Binding PickColorCommand}" CommandParameter="2" Content="Pick"/>
                     </DockPanel>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,8,0,0">
+                    <ScrollViewer 
+                        Grid.Row="1"
+                        VerticalScrollBarVisibility="Visible" 
+                        HorizontalScrollBarVisibility="Auto" 
+                        HorizontalAlignment="Stretch" 
+                        VerticalAlignment="Stretch" 
+                        Margin="0,8,0,0">
                         <WrapPanel x:Name="PreviewPanel" ItemWidth="24" ItemHeight="24"/>
                     </ScrollViewer>
-                </StackPanel>
+                </Grid>
+                
+            </TabItem>
+
+            <TabItem Header="Swap">
+                <Button Content="Swap" Command="{Binding SwapColorsCommand}"/>
             </TabItem>
 
             <TabItem Header="Rasters">
@@ -237,6 +256,20 @@
 
             </TabItem>
 
+            <TabItem Header="Curves">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0">
+                        <Button Command="{Binding DrawCurveCommand}">Draw</Button>
+                    </DockPanel>
+                    <Image Grid.Row="1" x:Name="CurvesImage" Width="320" Height="200" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0">
+                    </Image>
+                </Grid>
+            </TabItem>
+            
             <TabItem Header="Output">
                 <DockPanel Margin="4" VerticalAlignment="Stretch">
                     <TextBlock Text="Preview" Margin="0,8,0,0" FontWeight="Bold" DockPanel.Dock="Top"/>

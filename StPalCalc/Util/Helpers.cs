@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.Windows.Media;
 using BBPalCalc.Interfaces;
@@ -7,6 +8,16 @@ namespace BBPalCalc.Util
 {
     public static class Helpers
     {
+        public static ushort[] PaletteTo12BitPalette(Color[] palette)
+        {
+            var res = new ushort[palette.Length];
+            for (var i = 0; i < palette.Length; i++)
+            {
+                res[i] = Globals.ActivePlatform.ToPlatformColor(palette[i]);
+            }
+            return res;
+        }
+
         public static string RgbPaletteTo12BitString(Color[] palette)
         {
             var sb = new StringBuilder();
@@ -74,6 +85,35 @@ namespace BBPalCalc.Util
 
                 yield return Color.FromRgb(nr, ng, nb);
             }
+        }
+
+        public static byte GetByte(byte[] data)
+        {
+            byte res = 0;
+            for (var i = 0; i < 8; i++)
+            {
+                if (data[i] == 1)
+                {
+                    res |= (byte)(1 << (7 - i));
+                }
+            }
+            return (byte)res;
+        }
+
+        public static bool GetBit(this byte b, int bitNumber)
+        {
+            var ba = new BitArray(new byte[] { b });
+            return ba.Get(bitNumber);
+        }
+        public static byte[] GetBits(this byte b)
+        {
+            var res = new byte[8];
+            for (var i = 0; i < 8; i++)
+            {
+                var isSet = b.GetBit(i);
+                res[i] = isSet ? (byte)1 : (byte)0;
+            }
+            return res;
         }
 
         public static IGlobals Globals => App.GetGlobal();

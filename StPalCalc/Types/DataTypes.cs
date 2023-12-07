@@ -16,6 +16,12 @@ namespace BBPalCalc.Types
         Picture1Hue
     }
 
+    public class SwapObject
+    {
+        public byte Source { get; set; }
+        public byte Destination { get; set; }
+    }
+
     public class HslSliderPayload
     {
         public int Hue { get; set; }

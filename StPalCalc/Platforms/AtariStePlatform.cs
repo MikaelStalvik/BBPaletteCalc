@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows.Media;
 using BBPalCalc.Util;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace BBPalCalc.Platforms
 {
@@ -138,6 +140,13 @@ namespace BBPalCalc.Platforms
                 default:
                     return 0;
             }
+        }
+
+        public ushort ToPlatformColor(Color source)
+        {
+            var s = $"0x{ColorToString(source)}";
+            var v = Convert.ToUInt32(s, 16);
+            return (ushort)v;
         }
 
         public int ScaleFactor => 16;
