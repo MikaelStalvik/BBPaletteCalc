@@ -291,7 +291,7 @@
 
             </TabItem>
 
-            <TabItem Header="Curves">
+            <TabItem Header="Curves" Visibility="Collapsed">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="24"/>
