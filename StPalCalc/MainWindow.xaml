@@ -140,7 +140,42 @@
             </TabItem>
 
             <TabItem Header="Swap">
-                <Button Content="Swap" Command="{Binding SwapColorsCommand}"/>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Swap" Grid.Row="0" Grid.Column="0"/>
+                        <TextBlock Text="With" Grid.Row="2" Grid.Column="0"/>
+
+                        <userControls:PalettePresenterUserControl 
+                            x:Name="SwapColorsPalette1"
+                            Grid.Row="0" Grid.Column="1"/>
+                        <Slider 
+                            HorizontalAlignment="Left"
+                            Grid.Row="1" Grid.Column="1"
+                            Minimum="0" Maximum="15" x:Name="SwapColorSlider1" TickFrequency="1" IsSnapToTickEnabled="True" Width="384"/>
+
+                        <userControls:PalettePresenterUserControl 
+                            Grid.Row="2" Grid.Column="1"
+                            x:Name="SwapColorsPalette2"/>
+                        <Slider 
+                            Grid.Row="3" Grid.Column="1"
+                            HorizontalAlignment="Left"
+                            Minimum="0" Maximum="15" x:Name="SwapColorSlider2" TickFrequency="1" IsSnapToTickEnabled="True" Width="384"/>
+                    </Grid>
+
+                    <Button Content="Swap" Command="{Binding SwapColorsCommand}"/>
+
+                </StackPanel>
             </TabItem>
 
             <TabItem Header="Rasters">

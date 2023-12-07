@@ -29,6 +29,8 @@ namespace BBPalCalc
                 _vm.UpdatePictureAction.Invoke(PictureType.Picture1);
             }, true);
             OriginalColorsPaletteControl.Update(_vm.ActivePicture.OriginalPalette, null, false);
+            SwapColorsPalette1.Update(_vm.ActivePicture.OriginalPalette, null, false);
+            SwapColorsPalette2.Update(_vm.ActivePicture.OriginalPalette, null, false);
         }
         public MainWindow()
         {
