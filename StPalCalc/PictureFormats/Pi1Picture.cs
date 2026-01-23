@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -63,6 +64,52 @@ namespace BBPalCalc.PictureFormats
                     {
                         var bv = _pixelData[x + y * _width];
                         wbmp.SetPixel(x, y, palette[bv]);
+                    }
+                }
+            }
+        }
+        public void RenderBitplane(Image target, int bpl)
+        {
+            var palette = ActivePalette;
+            var wbmp = BitmapFactory.New(_width, _height);
+            target.Source = wbmp;
+            using (wbmp.GetBitmapContext())
+            {
+                for (var y = 0; y < _height; y++)
+                {
+                    for (var x = 0; x < _width; x++)
+                    {
+                        var bv = _pixelData[x + y * _width];
+                        Color col = palette[0];
+                        switch(bpl)
+                        {
+                            case 0:
+                                col = palette[bv];
+                                break;
+                            case 1:
+                                //col = bv == 1 ? palette[bv] : palette[0];
+                                col = bv == 1 ? Color.FromRgb(255,255,255) : Color.FromRgb(0,0,0);
+                                break;
+                            case 2:
+                                //var isBpl2 = bv == 2 || bv == 3;
+                                //col = isBpl2  ? palette[bv] : palette[0];
+                                var isBpl2 = bv == 3;
+                                col = isBpl2 ? Color.FromRgb(255, 255, 255) : Color.FromRgb(0, 0, 0);
+                                break;
+                            case 3:
+                                //var isBpl3 = bv >= 4 && bv < 8;
+                                //col = isBpl3 ? palette[bv] : palette[0];
+                                var isBpl3 = bv == 7;
+                                col = isBpl3 ? Color.FromRgb(255, 255, 255) : Color.FromRgb(0, 0, 0);
+                                break;
+                            case 4:
+                                //var isBpl4 = bv >= 8;
+                                //col = isBpl4 ? palette[bv] : palette[0];
+                                var isBpl4 = bv == 15;
+                                col = isBpl4 ? Color.FromRgb(255, 255, 255) : Color.FromRgb(0, 0, 0);
+                                break;
+                        }
+                        wbmp.SetPixel(x, y, col);
                     }
                 }
             }
@@ -158,6 +205,12 @@ namespace BBPalCalc.PictureFormats
             throw new System.NotImplementedException();
         }
 
+        public void Save1bpl()
+        {
+
+        }
+
+
         public static void Save(string filename, ushort[] palette, byte[] pixels, int width, int height)
         {
             using (var fs = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -173,8 +226,6 @@ namespace BBPalCalc.PictureFormats
                     fs.WriteByte(upper);
                     fs.WriteByte(lower);
                 }
-
-                //FreeImage.NET
 
                 // chunk of 16px
                 var ofs = 0;
@@ -228,6 +279,207 @@ namespace BBPalCalc.PictureFormats
                         ofs += 16;
                     }
                 }
+            }
+        }
+        public static void Save1bpl(string filename, ushort[] palette, byte[] pixels, int width, int height)
+        {
+            using (var fs = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                //// Resolution
+                //fs.WriteByte(0);
+                //fs.WriteByte(0);
+                //// palette
+                //foreach (var col in palette)
+                //{
+                //    byte upper = (byte)(col >> 8);
+                //    byte lower = (byte)(col & 0xff);
+                //    fs.WriteByte(upper);
+                //    fs.WriteByte(lower);
+                //}
+
+                // chunk of 16px
+                var ofs = 0;
+                for (var y = 0; y < height; y++)
+                {
+                    var chunks = width / 16;
+                    for (var x = 0; x < chunks; x++)
+                    {
+                        var bpl1 = new byte[16];
+                        var bpl2 = new byte[16];
+                        var bpl3 = new byte[16];
+                        var bpl4 = new byte[16];
+                        for (var i = 0; i < 16; i++)
+                        {
+                            // each px has 4 relevant bits which should be remapped to bpls
+                            var px = pixels[ofs + i];
+                            var bits = px.GetBits();
+                            bpl1[i] = bits[0];
+                            bpl2[i] = bits[1];
+                            bpl3[i] = bits[2];
+                            bpl4[i] = bits[3];
+                        }
+                        // repack and save bytes per bpl
+                        var bppBits1 = new byte[8];
+                        for (int i = 0; i < 8; i++) bppBits1[i] = bpl1[i];
+                        var bppBits2 = new byte[8];
+                        for (int i = 0; i < 8; i++) bppBits2[i] = bpl1[i + 8];
+                        var b1 = Helpers.GetByte(bppBits1);
+                        var b2 = Helpers.GetByte(bppBits2);
+                        fs.WriteByte(b1);
+                        fs.WriteByte(b2);
+
+                        //for (int i = 0; i < 8; i++) bppBits1[i] = bpl2[i];
+                        //for (int i = 0; i < 8; i++) bppBits2[i] = bpl2[i + 8];
+                        //b1 = Helpers.GetByte(bppBits1);
+                        //b2 = Helpers.GetByte(bppBits2);
+                        //fs.WriteByte(b1);
+                        //fs.WriteByte(b2);
+
+                        //for (int i = 0; i < 8; i++) bppBits1[i] = bpl3[i];
+                        //for (int i = 0; i < 8; i++) bppBits2[i] = bpl3[i + 8];
+                        //b1 = Helpers.GetByte(bppBits1);
+                        //b2 = Helpers.GetByte(bppBits2);
+                        //fs.WriteByte(b1);
+                        //fs.WriteByte(b2);
+
+                        //for (int i = 0; i < 8; i++) bppBits1[i] = bpl4[i];
+                        //for (int i = 0; i < 8; i++) bppBits2[i] = bpl4[i + 8];
+                        //b1 = Helpers.GetByte(bppBits1);
+                        //b2 = Helpers.GetByte(bppBits2);
+                        //fs.WriteByte(b1);
+                        //fs.WriteByte(b2);
+
+                        ofs += 16;
+                    }
+                    int k = 12;
+                }
+            }
+        }
+        public static void SaveChunky(string filename, ushort[] palette, byte[] pixels, int width, int height)
+        {
+            using (var fs = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                // chunk of 16px
+                var ofs = 0;
+                for (var y = 0; y < height; y++)
+                {
+                    for (var x = 0; x < width; x++)
+                    {
+                        ofs = x + y * 320;
+                        var px = pixels[ofs];
+                        fs.WriteByte((byte)px);
+                    }
+                }
+            }
+        }
+
+
+        public static void Save4bplCut(string filename, byte[] pixels, int x1, int x2, int y1, int y2, int num, bool join)
+        {
+            var width = x2 - x1;
+            var height = y2 - y1;
+            var gofs = 0;
+            var basePath = Path.GetDirectoryName(filename);
+            // join all to one file
+            if (join)
+            {
+                // fs = main file
+                using (var fs = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    for (var iter = 1; iter <= num; iter++)
+                    {
+                        using (var ss = new MemoryStream())
+                        {
+                            Write4bpToStream(pixels, x1, y1, width, height, gofs, ss);
+                            // append to main stream
+                            ss.Position = 0;
+                            ss.CopyTo(fs);
+                        }
+                        // increase global ofs
+                        gofs += width;
+                    }
+                }
+                // metadata file
+                var sb = new StringBuilder();
+                sb.AppendLine($"Num files: {num}, w:{width}, h:{height} 4bpl");
+                var metaFile = filename;
+                metaFile = Path.ChangeExtension(metaFile, ".4pl.txt");
+                File.WriteAllText(metaFile, sb.ToString());
+            }
+            else
+            {
+                // save separate files
+                for (var iter = 1; iter <= num; iter++)
+                {
+                    var baseFilename = Path.GetFileNameWithoutExtension(filename);
+                    var resolvedFilename = Path.Combine(basePath, $"{baseFilename}-{iter}.4pl");
+                    using (var fs = new FileStream(resolvedFilename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                    {
+                        Write4bpToStream(pixels, x1, y1, width, height, gofs, fs);
+                    }
+                    // increase global ofs
+                    gofs += width;
+                }
+            }
+        }
+
+        private static void Write4bpToStream(byte[] pixels, int x1, int y1, int width, int height, int gofs, Stream fs)
+        {
+            var ofs = 0;
+            ofs = x1 + y1 * 320; // start ofs
+            ofs += gofs;
+            for (var y = 0; y < height; y++)
+            {
+                var chunks = width / 16;
+                for (var x = 0; x < chunks; x++)
+                {
+                    var bpl1 = new byte[16];
+                    var bpl2 = new byte[16];
+                    var bpl3 = new byte[16];
+                    var bpl4 = new byte[16];
+                    for (var i = 0; i < 16; i++)
+                    {
+                        // each px has 4 relevant bits which should be remapped to bpls
+                        var px = pixels[ofs + i];
+                        var bits = px.GetBits();
+                        bpl1[i] = bits[0];
+                        bpl2[i] = bits[1];
+                        bpl3[i] = bits[2];
+                        bpl4[i] = bits[3];
+                    }
+                    // repack and save bytes per bpl
+                    var bppBits1 = new byte[8];
+                    for (int i = 0; i < 8; i++) bppBits1[i] = bpl1[i];
+                    var bppBits2 = new byte[8];
+                    for (int i = 0; i < 8; i++) bppBits2[i] = bpl1[i + 8];
+                    var b1 = Helpers.GetByte(bppBits1);
+                    var b2 = Helpers.GetByte(bppBits2);
+                    fs.WriteByte(b1);
+                    fs.WriteByte(b2);
+                    for (int i = 0; i < 8; i++) bppBits1[i] = bpl2[i];
+                    for (int i = 0; i < 8; i++) bppBits2[i] = bpl2[i + 8];
+                    b1 = Helpers.GetByte(bppBits1);
+                    b2 = Helpers.GetByte(bppBits2);
+                    fs.WriteByte(b1);
+                    fs.WriteByte(b2);
+                    for (int i = 0; i < 8; i++) bppBits1[i] = bpl3[i];
+                    for (int i = 0; i < 8; i++) bppBits2[i] = bpl3[i + 8];
+                    b1 = Helpers.GetByte(bppBits1);
+                    b2 = Helpers.GetByte(bppBits2);
+                    fs.WriteByte(b1);
+                    fs.WriteByte(b2);
+                    for (int i = 0; i < 8; i++) bppBits1[i] = bpl4[i];
+                    for (int i = 0; i < 8; i++) bppBits2[i] = bpl4[i + 8];
+                    b1 = Helpers.GetByte(bppBits1);
+                    b2 = Helpers.GetByte(bppBits2);
+                    fs.WriteByte(b1);
+                    fs.WriteByte(b2);
+
+                    ofs += 16;
+                }
+
+                // for all new lines, increment ofs
+                ofs += 320 - width;
             }
         }
     }

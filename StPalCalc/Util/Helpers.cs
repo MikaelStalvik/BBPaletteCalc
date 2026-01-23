@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Media;
@@ -29,6 +30,25 @@ namespace BBPalCalc.Util
                 if (i < palette.Length-1) sb.Append(",");
             }
             return sb.ToString();
+        }
+
+        public static string RgbPaletteTo12BitStringAmigaAsmFormat(Color[] palette)
+        {
+            var sb = new StringBuilder();
+            for (var i = 0; i < palette.Length; i++)
+            {
+                var stColor = Globals.ActivePlatform.ColorToString(palette[i]);
+                var colorString = "$" + stColor;
+                sb.AppendLine($"\tdc.w\tCOLOR{i},{colorString}");
+            }
+            return sb.ToString();
+        }
+
+        public static Color StringToPalette(string str)
+        {
+            var rawV = str.Replace("$", "").Trim();
+            var v = Convert.ToUInt16(rawV);
+            return Globals.ActivePlatform.ToRgb(v);
         }
 
         public static List<byte> GetBits(ushort v, bool reverse = false)

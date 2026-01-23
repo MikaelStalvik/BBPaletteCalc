@@ -1,12 +1,19 @@
-﻿using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
+﻿using BBPalCalc.PictureFormats;
 using BBPalCalc.Platforms;
 using BBPalCalc.Types;
 using BBPalCalc.Util;
 using BBPalCalc.ViewModels;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace BBPalCalc
 {
@@ -76,6 +83,26 @@ namespace BBPalCalc
                     }
                 }
             };
+            _vm.UpdatePreviewFadeRGBAction += colors =>
+            {
+                PreviewPanel.Width = _vm.ActivePicture.ActivePalette.Length * 24;
+                PreviewPanel.Children.Clear();
+                for (var y = 0; y < _vm.FadeSteps * 3; y++)
+                {
+                    for (var x = 0; x < _vm.ActivePicture.ActivePalette.Length; x++)
+                    {
+                        var ofs = x + y * _vm.ActivePicture.ActivePalette.Length;
+                        var r = new Rectangle
+                        {
+                            Fill = new SolidColorBrush(colors[ofs]),
+                            Width = 24,
+                            Height = 24,
+                            ToolTip = "$" + Helpers.Globals.ActivePlatform.ColorToString(colors[ofs]) + $"\nIndex: {x}, row: {y}"
+                        };
+                        PreviewPanel.Children.Add(r);
+                    }
+                }
+            };
             _vm.UpdateGradientPreviewAction += () =>
             {
                 const int previewItemHeight = 2;
@@ -121,6 +148,10 @@ namespace BBPalCalc
                 _vm.ActivePicture?.Render(Image1, _vm.HuePalette);
                 _vm.ActivePaletteString = Helpers.RgbPaletteTo12BitString(_vm.HuePalette);
                 RebuildActivePalette();
+            };
+            _vm.GenerateOutputPaletteAction += () =>
+            {
+                PreviewTextbox.Text = Helpers.RgbPaletteTo12BitStringAmigaAsmFormat(_vm.ActivePicture.ActivePalette);
             };
         }
 
@@ -197,5 +228,84 @@ namespace BBPalCalc
             }
         }
 
+        private void BitplaneCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var pi1 = _vm.ActivePicture as Pi1Picture;
+            pi1.RenderBitplane(Image1, BitplaneCombo.SelectedIndex);
+        }
+
+        private void Save4bplCutClick(object sender, RoutedEventArgs e)
+        {
+            var x1 = int.Parse(CutX1Tb.Text);
+            var x2 = int.Parse(CutX2Tb.Text);
+            var y1 = int.Parse(CutY1Tb.Text);
+            var y2 = int.Parse(CutY2Tb.Text);
+            var num = int.Parse(CutNumTb.Text);
+            var dlg = new SaveFileDialog { DefaultExt = ".4pl" };
+            if (dlg.ShowDialog() == true)
+            {
+                Pi1Picture.Save4bplCut(dlg.FileName, _vm.ActivePicture.Pixels, x1, x2, y1, y2, num, JoinFilesCb.IsChecked == true);
+                //var palette = Helpers.PaletteTo12BitPalette(ActivePicture.ActivePalette);
+                //var (w, h) = ActivePicture.GetDimensions;
+                //Pi1Picture.Save1bpl(dlg.FileName, palette, ActivePicture.Pixels, w, h);
+            }
+        }
+
+        private void RasterHueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Debug.WriteLine($"Hue: {RasterHueSlider.Value}, Sat:{RasterSaturationSlider.Value}, Lum: {RasterLuminenceSlider.Value}");
+            _vm.HueShiftRasters(RasterHueSlider.Value, RasterSaturationSlider.Value, RasterLuminenceSlider.Value);
+            HueSliderTb.Text = (e.NewValue).ToString();
+        }
+
+        //
+
+        public static List<string> ParseColorValues(string text)
+        {
+            var colors = new List<string>();
+
+            // Pattern matches COLOR followed by digits, then captures the hex value after $
+            var pattern = @"COLOR\d+,\$([0-9A-Fa-f]+)";
+            var matches = Regex.Matches(text, pattern);
+
+            foreach (Match match in matches)
+            {
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    colors.Add(match.Groups[1].Value);
+                }
+            }
+
+            return colors;
+        }
+
+        private void ParseCopperClick(object sender, RoutedEventArgs e)
+        {
+            var clipboardText = Clipboard.GetText();
+            var lines = clipboardText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var data = ParseColorValues(clipboardText);
+            var sb = new StringBuilder();
+            foreach(var c in data)
+            {
+                sb.Append($"${c},");
+            }
+            Palette1TextBox.Text = sb.ToString();
+        }
+
+        private void PushOrgClick(object sender, RoutedEventArgs e)
+        {
+            var active = _vm.ActivePicture;
+            if (active == null) return;
+            var cleaned = Palette1TextBox.Text.Replace("$", "");
+            var list = cleaned.Split(",");
+            var i = 0;
+            foreach (var item in list)
+            {
+                active.OriginalPalette[i++] = Helpers.Globals.ActivePlatform.ToRgb(item.ToHex());
+            }
+            _vm.UpdateUiAction?.Invoke(false);
+            //UpdatePictureAction?.Invoke(PictureType.Picture1);
+            //GenerateOutputPaletteAction?.Invoke();
+        }
     }
 }

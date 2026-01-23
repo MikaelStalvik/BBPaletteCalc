@@ -48,6 +48,15 @@
                         <StackPanel Grid.Row="0">
                             <TextBlock Text="Loaded picture" FontWeight="Bold"/>
                             <DockPanel>
+                                <ComboBox x:Name="BitplaneCombo" Width="80" SelectionChanged="BitplaneCombo_SelectionChanged">
+                                    <ComboBox.Items>
+                                        <ComboBoxItem Content="All"/>
+                                        <ComboBoxItem Content="1"/>
+                                        <ComboBoxItem Content="2"/>
+                                        <ComboBoxItem Content="3"/>
+                                        <ComboBoxItem Content="4"/>
+                                    </ComboBox.Items>
+                                </ComboBox>
                                 <Button Width="72" Command="{Binding OpenPictureCommand}" Content="Browse..." DockPanel.Dock="Right" Margin="8,0,0,0"/>
                                 <TextBlock Text="{Binding ActiveFilename}"/>
                             </DockPanel>
@@ -63,11 +72,14 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition MinWidth="384" MaxWidth="424"/>
                             </Grid.ColumnDefinitions>
-                            <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0" Grid.Row="0">
+                            <Image x:Name="Image1" Width="320" Height="Auto" Margin="0,0,0,8" MinWidth="320" MinHeight="200" Grid.Column="0" Grid.Row="0" SnapsToDevicePixels="True">
                                 <Image.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Command="{Binding SavePngCommand}" Header="Save PNG"/>
                                         <MenuItem Command="{Binding SavePi1Command}" Header="Save PI1"/>
+                                        <MenuItem Command="{Binding SaveBitplane1Command}" Header="Save bitplane 1"/>
+                                        <MenuItem Command="{Binding SaveChunkyCommand}" Header="Save chunky"/>
+                                        <MenuItem Command="{Binding SaveChunky128Command}" Header="Save chunky 128"/>
                                     </ContextMenu>
                                 </Image.ContextMenu>
                             </Image>
@@ -84,33 +96,86 @@
 
                         <DockPanel Margin="0,8,0,0" Grid.Row="2">
                             <Button Content="Update" Command="{Binding UpdatePaletteCommand}" CommandParameter="{Binding ElementName=Palette1TextBox,Path=Text}" DockPanel.Dock="Right" Width="72"/>
+                            <Button Content="Push Org" Click="PushOrgClick" DockPanel.Dock="Right" Width="72"/>
                             <TextBox Text="{Binding ActivePaletteString}" x:Name="Palette1TextBox" Margin="4,0,0,0"/>
                         </DockPanel>
 
                     </Grid>
-                    <StackPanel Grid.Row="1">
-                        <DockPanel Margin="0,8,0,0">
-                            <TextBlock Text="Hue" Width="64"/>
-                            <Slider Minimum="-120" Maximum="120" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                        </DockPanel>
-                        <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                        <DockPanel>
-                            <TextBlock Text="Saturation" Width="64"/>
-                            <Slider Minimum="-360" Maximum="360" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                        </DockPanel>
-                        <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                        <DockPanel>
-                            <TextBlock Text="Lightness" Width="64"/>
-                            <Slider Minimum="-120" Maximum="120" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                        </DockPanel>
-                        <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
-                    </StackPanel>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <DockPanel Margin="0,8,0,0">
+                                <TextBlock Text="Hue" Width="64"/>
+                                <Slider Minimum="-360" Maximum="360" x:Name="HueSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding ElementName=HueSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                            <DockPanel>
+                                <TextBlock Text="Saturation" Width="64"/>
+                                <Slider Minimum="-360" Maximum="360" x:Name="SaturationSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding ElementName=SaturationSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                            <DockPanel>
+                                <TextBlock Text="Lightness" Width="64"/>
+                                <Slider Minimum="-120" Maximum="120" x:Name="LightnessSlider" ValueChanged="HueSlider_OnValueChanged" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding ElementName=LightnessSlider,Path=Value}" FontSize="10" TextAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Cut" FontWeight="Bold"/>
+                            <DockPanel Grid.Row="1" Grid.Column="0">
+                                <TextBlock Width="32" Text="X1:"/>
+                                <TextBox x:Name="CutX1Tb" Text="0"/>
+                            </DockPanel>
+                            <DockPanel Grid.Row="1" Grid.Column="2">
+                                <TextBlock Width="32" Text="X2:"/>
+                                <TextBox x:Name="CutX2Tb" Text="0"/>
+                            </DockPanel>
+                            <DockPanel Grid.Row="2" Grid.Column="0">
+                                <TextBlock Width="32" Text="Y1:"/>
+                                <TextBox x:Name="CutY1Tb" Text="0"/>
+                            </DockPanel>
+                            <DockPanel Grid.Row="2" Grid.Column="2">
+                                <TextBlock Width="32" Text="Y2:"/>
+                                <TextBox x:Name="CutY2Tb" Text="0"/>
+                            </DockPanel>
+                            <DockPanel Grid.Row="3" Grid.Column="0">
+                                <TextBlock Width="32" Text="Join:"/>
+                                <CheckBox x:Name="JoinFilesCb" IsChecked="True"/>
+                            </DockPanel>
+                            <DockPanel Grid.Row="3" Grid.Column="2">
+                                <TextBlock Width="32" Text="Num:"/>
+                                <TextBox x:Name="CutNumTb" Text="1"/>
+                            </DockPanel>
+                            <DockPanel Grid.Row="4" Grid.ColumnSpan="2" LastChildFill="False">
+                                <Button Content="Save 4bpl" Click="Save4bplCutClick"/>
+                                <Button Content="Parse Copper" Click="ParseCopperClick"/>
+                            </DockPanel>
+                        </Grid>
+                    </Grid>
 
                 </Grid>
             </TabItem>
             <TabItem Header="Fades">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -122,12 +187,18 @@
                         <Button Command="{Binding FadeFromPaletteToHueCommand}" Content="Hue Fade" Margin="8,0,0,0"/>
                         <Button Command="{Binding FadeFromColorCommand}" Content="Fade from color" Margin="8,0,0,0"/>
                         <Button Command="{Binding FadeToColorCommand}" Content="Fade to color" Margin="8,0,0,0"/>
+                        <Button Command="{Binding FadeFromPaletteToPaletteCommand}" Content="Fade from pal to pal" Margin="8,0,0,0"/>
+                        <Button Command="{Binding RgbFadeCommand}" Content="RGB fade" Margin="8,0,0,0"/>
+                        <!--<Button Command="{Binding FadeOrgToNewCommand}" Content="Fade from Org to New" Margin="8,0,0,0"/>-->
                         <TextBlock Text="Color" Margin="32,0,0,0" VerticalAlignment="Center"/>
                         <TextBox Text="{Binding FadeToColor}" Width="64" Margin="4,0,0,0"/>
                         <Button Command="{Binding PickColorCommand}" CommandParameter="2" Content="Pick"/>
                     </DockPanel>
+
+                    <TextBox x:Name="FromPaletteTb" Grid.Row="1" Text="{Binding FadePaletteString}"/>
+
                     <ScrollViewer 
-                        Grid.Row="1"
+                        Grid.Row="2"
                         VerticalScrollBarVisibility="Visible" 
                         HorizontalScrollBarVisibility="Auto" 
                         HorizontalAlignment="Stretch" 
@@ -207,6 +278,16 @@
                         <DockPanel Grid.Column="2" Margin="4" LastChildFill="False">
                             <TextBlock Text="Color picker" FontWeight="Bold" DockPanel.Dock="Top"/>
                             <xctk:ColorCanvas x:Name="ColorCanvas" SelectedColorChanged="ColorCanvas_OnSelectedColorChanged" Width="256" HorizontalAlignment="Left" DockPanel.Dock="Top"/>
+
+                            <StackPanel>
+
+                                <Slider x:Name="RasterHueSlider" Minimum="0" Maximum="1" Width="256" ValueChanged="RasterHueSlider_ValueChanged" TickFrequency="0.01" IsSnapToTickEnabled="True"/>
+                                <Slider x:Name="RasterSaturationSlider" Minimum="0" Maximum="1" Width="256" ValueChanged="RasterHueSlider_ValueChanged" TickFrequency="0.01" IsSnapToTickEnabled="True"/>
+                                <Slider x:Name="RasterLuminenceSlider" Minimum="0" Maximum="1" Width="256" ValueChanged="RasterHueSlider_ValueChanged" TickFrequency="0.01" IsSnapToTickEnabled="True"/>
+
+                                <TextBlock x:Name="HueSliderTb" Visibility="Visible"/>
+                            </StackPanel>
+
                         </DockPanel>
                         <Grid Grid.Column="3" Margin="4">
                             <Grid.RowDefinitions>
@@ -262,6 +343,10 @@
                         <Button Command="{Binding CopyItemCommand}" Content="Copy" MinWidth="72"/>
                         <Button Command="{Binding PasteItemCommand}" Content="Paste" Margin="4,0,0,0" MinWidth="72"/>
                         <Button Command="{Binding ParseAsmGradientCommand}" Content="Paste Asm" MinWidth="72" Margin="8,0,0,0"/>
+                        <Button Command="{Binding ParseAsm2GradientCommand}" Content="Paste Asm2" MinWidth="72" Margin="8,0,0,0"/>
+                        <Button Command="{Binding ParseListCommand}" Content="Paste List" MinWidth="72" Margin="8,0,0,0"/>
+                        <Button Command="{Binding GenCopperCommand}" Content="Copper" MinWidth="72" Margin="8,0,0,0"/>
+                        <CheckBox x:Name="ReverseCb" Content="Reverse" IsChecked="{Binding Reverse}" VerticalAlignment="Center"/>
                         <Button Command="{Binding GenerateRastersCommand}" Content="Generate" MinWidth="72" Margin="4,0,0,0" DockPanel.Dock="Right"/>
                         <Button Command="{Binding SaveGradientCommand}" DockPanel.Dock="Right" Content="Save" Margin="4,0,0,0" MinWidth="64"/>
                         <Button Command="{Binding LoadGradientCommand}" DockPanel.Dock="Right" Content="Load" MinWidth="64"/>
@@ -308,7 +393,7 @@
             <TabItem Header="Output">
                 <DockPanel Margin="4" VerticalAlignment="Stretch">
                     <TextBlock Text="Preview" Margin="0,8,0,0" FontWeight="Bold" DockPanel.Dock="Top"/>
-                    <TextBox FontFamily="Courier New" Text="{Binding PreviewText}" TextWrapping="Wrap" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto"/>
+                    <TextBox FontFamily="Courier New" Text="{Binding PreviewText}" TextWrapping="Wrap" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" x:Name="PreviewTextbox"/>
                 </DockPanel>
             </TabItem>
         </TabControl>
